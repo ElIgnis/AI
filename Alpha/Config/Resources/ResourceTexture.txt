@@ -1,0 +1,25 @@
+# Scenesetup #
+# Init all the textures#
+{
+	[NAME] TextureConfig
+	{
+		[NAME] AlbaFont
+		[Directory] Config\\Resources\\Texture\\albaFont.tga
+	}
+	{
+		[NAME] CURSOR
+		[Directory] Config\\Resources\\Texture\\cursorDefault.tga
+	}
+	{
+		[NAME] SKYPLANE_TOP
+		[Directory] Config\\Resources\\Texture\\top.tga
+	}
+	{
+		[NAME] MENU_BG
+		[Directory] Config\\Resources\\Texture\\menuBG.tga
+	}
+	{
+		[NAME] GRASS
+		[Directory] Config\\Resources\\Texture\\grass.tga
+	}
+}

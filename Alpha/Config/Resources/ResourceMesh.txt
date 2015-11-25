@@ -1,0 +1,53 @@
+# Scenesetup #
+# Init all the meshes #
+{
+	[NAME] MeshConfig
+	{
+		[NAME] FONT
+		[Type] Text
+		[TextRow] 16
+		[TextCol] 16
+	}
+	{
+		[NAME] CURSOR
+		[Type] Quad
+	}
+	{
+		[NAME] MENU_BG
+		[Type] Quad
+	}	
+	{
+		# InnerRadius = PlanetRadius, OuterRadius = AtmosphereRadius
+		# TileRow = hTile, TileCol = vTile	
+		[NAME] SKYPLANE
+		[Type] Skyplane
+		[Slices] 128
+		[InnerRadius] 2000
+		[OuterRadius] 4000
+		[TileRow] 1
+		[TileCol] 1
+	}
+	{
+		[NAME] FLOOR
+		[Type] Quad
+	}
+	{
+		#[NAME] TERRAIN
+		#[Type] Terrain
+		#[Directory] Config\\Resources\\Texture\\heightmap.raw
+	}
+}
+
+# Types available
+# Quad
+# Cube
+# Circle
+# DebugQuad
+# DebugCircle
+# Skyplane
+# Sphere
+# Obj
+# Text
+# 2D
+# SpriteAnimation
+# TileSheet
