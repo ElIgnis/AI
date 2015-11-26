@@ -24,6 +24,14 @@ public:
 	void RenderBG();
 	void RenderStaticObject();
 	void RenderMobileObject();
+
+private:
+	const float m_fBGpos_MAX_y = 730.f;
+	const float m_fBGpos_MIN_y = 310.f;
+	const float m_fBGscroll_speed = 350.f;
+	float m_fBGpos_y;
+
+	bool m_bDisplay_shop;
 };
 
 #endif

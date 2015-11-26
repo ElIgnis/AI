@@ -14,6 +14,7 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 
 	this->InitShader();
 
+	fpCamera.Init(Vector3(0, 0, -10), Vector3(0, 0, 0), Vector3(0, 1, 0));
 	tpCamera.Init(Vector3(0, 0, -10), Vector3(0, 0, 0), Vector3(0, 1, 0));
 
 	// Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 1000 units
@@ -23,6 +24,12 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	projectionStack.LoadMatrix(perspective);
 
 	lightEnabled = true;
+
+	//Background variable
+	m_fBGpos_y = m_fBGpos_MAX_y;
+
+	//Shop variables
+	m_bDisplay_shop = false;
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -32,8 +39,40 @@ void SceneManagerCMPlay::Update(double dt)
 	//Uncomment the following line to play sound
 	//resourceManager.retrieveSound("MenuFeedback");
 	
-	tpCamera.UpdatePosition(Vector3(0, 0, 0), Vector3(0, 0, 0));
+	//tpCamera.UpdatePosition(Vector3(0, 0, 0), Vector3(0, 0, 0));
+	fpCamera.Update(dt, 0);
 	//tpCamera.Update(dt);
+
+	if (inputManager->getKey("BG_DOWN"))
+	{
+		if (m_fBGpos_y < m_fBGpos_MAX_y)
+		{
+			m_fBGpos_y += m_fBGscroll_speed * (float)dt;
+			if (m_fBGpos_y > m_fBGpos_MAX_y){
+				m_fBGpos_y = m_fBGpos_MAX_y;
+			}
+		}
+	}
+	if (inputManager->getKey("BG_UP"))
+	{
+		if (m_fBGpos_y > m_fBGpos_MIN_y)
+		{
+			m_fBGpos_y -= m_fBGscroll_speed * (float)dt;
+			if (m_fBGpos_y < m_fBGpos_MIN_y){
+				m_fBGpos_y = m_fBGpos_MIN_y;
+			}
+		}
+	}
+
+	if (inputManager->getKey("SHOP_DISPLAY"))
+	{
+		if (m_bDisplay_shop == false){
+			m_bDisplay_shop = true;
+		}
+		else if (m_bDisplay_shop == true){
+			m_bDisplay_shop = false;
+		}
+	}
 }
 
 void SceneManagerCMPlay::Render()
@@ -156,24 +195,22 @@ void SceneManagerCMPlay::RenderBG()
 
 void SceneManagerCMPlay::RenderStaticObject()
 {
-	Mesh* drawMesh = resourceManager.retrieveMesh("SKYPLANE");
-	drawMesh->textureID = resourceManager.retrieveTexture("SKYPLANE_TOP");
+	//Temp mesh used to draw
+	Mesh* drawMesh;
 
-	modelStack.PushMatrix();
-	modelStack.Translate(0, 2000, 0);
-	Render3DMesh(drawMesh, false);
-	modelStack.PopMatrix();
+	if (m_bDisplay_shop)
+	{
+		drawMesh = resourceManager.retrieveMesh("GAME_SHOP");
+		drawMesh->textureID = resourceManager.retrieveTexture("GAME_SHOP");
+		Render2DMesh(drawMesh, false, Vector2(736, 800), Vector2(960, 550));
+	}
+	else
+	{
+		drawMesh = resourceManager.retrieveMesh("GAME_BG");
+		drawMesh->textureID = resourceManager.retrieveTexture("GAME_BG");
 
-	drawMesh = resourceManager.retrieveMesh("FLOOR");
-	drawMesh->textureID = resourceManager.retrieveTexture("GRASS");
-
-	modelStack.PushMatrix();
-	modelStack.Rotate(-90, 1, 0, 0);
-	modelStack.Translate(0, 0, -10);
-	modelStack.Rotate(-90, 0, 0, 1);
-	modelStack.Scale(100.0f, 100.0f, 100.0f);
-	Render3DMesh(drawMesh, false);
-	modelStack.PopMatrix();
+		Render2DMesh(drawMesh, false, Vector2(1920, 1545), Vector2(960, m_fBGpos_y));
+	}
 }
 
 void SceneManagerCMPlay::RenderMobileObject()

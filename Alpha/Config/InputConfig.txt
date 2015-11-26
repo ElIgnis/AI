@@ -46,5 +46,20 @@
 		[Key] 0x0D
 		# [Key] VK_RETURN
 	}
+	{
+		[NAME] BG_UP
+		[Key] 0x26
+		# [Key] VK_UP
+	}
+	{
+		[NAME] BG_DOWN
+		[Key] 0x28
+		# [Key] VK_DOWN
+	}
+	{
+		[NAME] SHOP_DISPLAY
+		[Key] 0x31
+		# [Key] NUM 1
+	}
 }
 # https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx
