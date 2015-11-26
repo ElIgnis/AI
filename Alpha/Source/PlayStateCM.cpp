@@ -65,6 +65,7 @@ void PlayStateCM::HandleEvents(GameStateManager* gameStateManager)
 		gameStateManager->SetOverrideRender(true);
 		//gameStateManager->PopState(this);
 	}
+
 	/*this->scene->interactiveButtons[i].Update(this->scene->inputManager->getKey("Select"), Application::getMouse()->getCurrentPosX(), Application::getMouse()->getCurrentPosY());*/
 }
 

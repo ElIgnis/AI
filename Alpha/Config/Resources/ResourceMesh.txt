@@ -36,6 +36,14 @@
 		#[Type] Terrain
 		#[Directory] Config\\Resources\\Texture\\heightmap.raw
 	}
+	{
+		[NAME] GAME_BG
+		[Type] Quad
+	}
+	{
+		[NAME] GAME_SHOP
+		[Type] Quad
+	}
 }
 
 # Types available

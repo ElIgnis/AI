@@ -22,4 +22,12 @@
 		[NAME] GRASS
 		[Directory] Config\\Resources\\Texture\\grass.tga
 	}
+	{
+		[NAME] GAME_BG
+		[Directory] Config\\Resources\\Texture\\Background.tga
+	}
+	{
+		[NAME] GAME_SHOP
+		[Directory] Config\\Resources\\Texture\\Shop.tga
+	}
 }
