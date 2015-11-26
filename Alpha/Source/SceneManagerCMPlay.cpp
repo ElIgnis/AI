@@ -202,7 +202,7 @@ void SceneManagerCMPlay::RenderStaticObject()
 	{
 		drawMesh = resourceManager.retrieveMesh("GAME_SHOP");
 		drawMesh->textureID = resourceManager.retrieveTexture("GAME_SHOP");
-		Render2DMesh(drawMesh, false, Vector2(736, 800), Vector2(960, 550));
+		Render2DMesh(drawMesh, false, Vector2(906, 796), Vector2(960, 550));
 	}
 	else
 	{
