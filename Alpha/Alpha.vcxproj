@@ -90,6 +90,7 @@
     <ClCompile Include="Source\Button2D.cpp" />
     <ClCompile Include="Source\Button3D.cpp" />
     <ClCompile Include="Source\Camera.cpp" />
+    <ClCompile Include="Source\DeliveryMan.cpp" />
     <ClCompile Include="Source\FPCamera.cpp" />
     <ClCompile Include="Source\GameObject.cpp" />
     <ClCompile Include="Source\GameObject2D.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="Source\Button2D.h" />
     <ClInclude Include="Source\Button3D.h" />
     <ClInclude Include="Source\Camera.h" />
+    <ClInclude Include="Source\DeliveryMan.h" />
     <ClInclude Include="Source\Fog.h" />
     <ClInclude Include="Source\FPCamera.h" />
     <ClInclude Include="Source\GameObject.h" />

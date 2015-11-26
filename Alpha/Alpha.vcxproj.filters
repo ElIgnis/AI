@@ -76,6 +76,9 @@
     <Filter Include="Config\State">
       <UniqueIdentifier>{4ff9688e-f6cf-4a9f-a0f0-bb3550d19669}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AIs">
+      <UniqueIdentifier>{88ad9c34-2ae1-448f-9820-911423dafa11}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Utility.cpp">
@@ -201,6 +204,7 @@
     <ClCompile Include="Source\SceneManagerCMPause.cpp">
       <Filter>Managers\SceneManagers\SceneCM</Filter>
     </ClCompile>
+    <ClCompile Include="Source\DeliveryMan.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility.h">
@@ -350,6 +354,7 @@
     <ClInclude Include="Source\SceneManagerCMPause.h">
       <Filter>Managers\SceneManagers\SceneCM</Filter>
     </ClInclude>
+    <ClInclude Include="Source\DeliveryMan.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="Config\AppConfig.txt">
