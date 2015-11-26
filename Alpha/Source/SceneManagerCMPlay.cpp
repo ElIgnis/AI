@@ -1,6 +1,11 @@
 #include "SceneManagerCMPlay.h"
 
 SceneManagerCMPlay::SceneManagerCMPlay()
+	: m_iWorldTime(0)
+	, m_fMinutes(0.f)
+	, m_iWeather(1)
+	, m_dmDeliveryGuy(NULL)
+	, order(false)
 {
 }
 
@@ -30,11 +35,37 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 
 	//Shop variables
 	m_bDisplay_shop = false;
+
+	m_dmDeliveryGuy = new DeliveryMan();
 }
 
 void SceneManagerCMPlay::Update(double dt)
 {
 	SceneManagerGameplay::Update(dt);
+
+	if (inputManager->getKey("START_DELIVERY"))
+	{
+		order = true;
+	}
+	else
+	{
+		order = false;
+	}
+
+	//Increase time based on dt
+	m_fMinutes += (float)100 * dt;
+
+	if (m_fMinutes > 60){
+		m_iWorldTime += 100;
+		m_fMinutes = 0;
+	}
+		
+	if (m_iWorldTime == 2400){
+		m_iWorldTime = 0;
+	}
+
+	m_dmDeliveryGuy->Update((float)dt, m_iWorldTime, m_iWeather, order);
+	order = false;
 
 	//Uncomment the following line to play sound
 	//resourceManager.retrieveSound("MenuFeedback");
@@ -101,6 +132,11 @@ void SceneManagerCMPlay::Render()
 
 void SceneManagerCMPlay::Exit()
 {
+	if (m_dmDeliveryGuy)
+	{
+		delete m_dmDeliveryGuy;
+		m_dmDeliveryGuy = NULL;
+	}
 	SceneManagerGameplay::Exit();
 }
 
@@ -215,4 +251,39 @@ void SceneManagerCMPlay::RenderStaticObject()
 
 void SceneManagerCMPlay::RenderMobileObject()
 {
+	Mesh* drawMesh;
+
+	switch (m_dmDeliveryGuy->getCurrentState())
+	{
+	case DeliveryMan::S_IDLE:
+		drawMesh = resourceManager.retrieveMesh("FONT");
+		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+		RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+		break;
+	case DeliveryMan::S_SLEEPING:
+		drawMesh = resourceManager.retrieveMesh("FONT");
+		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+		RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+		break;
+	case DeliveryMan::S_EATING:
+		drawMesh = resourceManager.retrieveMesh("FONT");
+		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+		RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+		break;
+	case DeliveryMan::S_DELIVERING:
+		drawMesh = resourceManager.retrieveMesh("FONT");
+		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+		RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+		break;
+	case DeliveryMan::S_RETURNING:
+		drawMesh = resourceManager.retrieveMesh("FONT");
+		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+		RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+		break;
+	}
+
+
+	drawMesh = resourceManager.retrieveMesh("FONT");
+	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+	RenderTextOnScreen(drawMesh, std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, 400, 500, 0);
 }

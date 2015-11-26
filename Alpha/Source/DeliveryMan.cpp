@@ -1,7 +1,13 @@
 #include "DeliveryMan.h"
 
 
-DeliveryMan::DeliveryMan() : taskFinish(true), currentState(S_IDLE)
+DeliveryMan::DeliveryMan() 
+	: taskFinish(true)
+	, currentState(S_IDLE)
+	, m_iHoursNeeded(2)
+	, m_iResult(0)
+	, m_fJourneyTime(0.f)
+	, m_fTotalTime(0.f)
 {
 }
 
@@ -10,15 +16,56 @@ DeliveryMan::~DeliveryMan()
 {
 }
 
-void DeliveryMan::Update(double dt, int worldTime, bool order)
+void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
 {
+	switch (currentState)
+	{
+	case S_IDLE:
+		taskFinish = true;
+		break;
+	case S_DELIVERING:
+		if (m_fJourneyTime <= m_fTotalTime * 0.5f)
+		{
+			currentState = S_RETURNING;
+		}
+		break;
+	case S_RETURNING:
+		if (m_fJourneyTime <= 0)
+		{
+			currentState = S_IDLE;
+			taskFinish = true;
+		}
+		break;
+	case S_SLEEPING:
+		if (worldTime >= 600)
+		{
+			currentState = S_IDLE;
+			taskFinish = true;
+		}
+		break;
+	case S_EATING:
+		if (worldTime > 1200 || worldTime > 1800)
+		{
+			currentState = S_IDLE;
+			taskFinish = true;
+		}
+	default:
+		break;
+	}
+
 	if (taskFinish)
 	{
-		UpdateFSM(worldTime, order);
+		UpdateFSM(worldTime, weather, order);
 	}
+	
+	if (m_fJourneyTime > 0)
+	{
+		m_fJourneyTime -= (float)dt;
+	}
+	
 }
 
-void DeliveryMan::UpdateFSM(int worldTime, bool order)
+void DeliveryMan::UpdateFSM(int worldTime, int weather, bool order)
 {
 	bool Day = false;
 	
@@ -29,14 +76,14 @@ void DeliveryMan::UpdateFSM(int worldTime, bool order)
 
 	if (Day)
 	{
-		if (worldTime <= 600)
+		if (worldTime < 600)
 		{
-			currentState = S_Sleeping;
+			currentState = S_SLEEPING;
 		}
 
-		else if (worldTime <= 1300 && worldTime >= 1200)
+		else if (worldTime == 1200)
 		{
-			currentState = S_Eating;
+			currentState = S_EATING;
 		}
 
 		/*
@@ -50,20 +97,20 @@ void DeliveryMan::UpdateFSM(int worldTime, bool order)
 
 		else if (order)
 		{
-			currentState = S_Delivering;
+			currentState = S_DELIVERING;
 		}
 	}
 
 	else
 	{
-		if (worldTime >= 2300)
+		if (worldTime > 2300)
 		{
-			currentState = S_Sleeping;
+			currentState = S_SLEEPING;
 		}
 
-		else if ((worldTime <= 1300 && worldTime >= 1200) || (worldTime >= 1800 && worldTime <= 1900))
+		else if (worldTime == 1800)
 		{
-			currentState = S_Eating;
+			currentState = S_EATING;
 		}
 
 		/*
@@ -77,8 +124,24 @@ void DeliveryMan::UpdateFSM(int worldTime, bool order)
 
 		else if (order)
 		{
-			currentState = S_Delivering;
+			currentState = S_DELIVERING;
 		}
+	}
+
+	//Generate time
+	if (order)
+	{
+		if (worldTime > 600 && worldTime < 900 || worldTime > 1700 && worldTime < 2000)
+		{
+			m_iHoursNeeded = 2;
+		}
+		else
+		{
+			m_iHoursNeeded = 1;
+		}
+
+		m_fJourneyTime = weather * m_iHoursNeeded;
+		m_fTotalTime = m_fJourneyTime;
 	}
 
 	taskFinish = false;
@@ -87,4 +150,9 @@ void DeliveryMan::UpdateFSM(int worldTime, bool order)
 void DeliveryMan::Draw(SceneManager* sceneManager)
 {
 	sceneManager->Render2DMesh(this->getMesh(), true, Vector2(1, 1), Vector2(this->getPosition().x, this->getPosition().y), 0);
+}
+
+DeliveryMan::STATES DeliveryMan::getCurrentState(void)
+{
+	return currentState;
 }
