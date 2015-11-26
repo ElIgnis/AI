@@ -61,5 +61,10 @@
 		[Key] 0x31
 		# [Key] NUM 1
 	}
+	{
+		[NAME] START_DELIVERY
+		[Key] 0x20
+		# [Key] SPACEBAR
+	}
 }
 # https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx

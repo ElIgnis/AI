@@ -204,7 +204,9 @@
     <ClCompile Include="Source\SceneManagerCMPause.cpp">
       <Filter>Managers\SceneManagers\SceneCM</Filter>
     </ClCompile>
-    <ClCompile Include="Source\DeliveryMan.cpp" />
+    <ClCompile Include="Source\DeliveryMan.cpp">
+      <Filter>AIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility.h">
@@ -354,7 +356,9 @@
     <ClInclude Include="Source\SceneManagerCMPause.h">
       <Filter>Managers\SceneManagers\SceneCM</Filter>
     </ClInclude>
-    <ClInclude Include="Source\DeliveryMan.h" />
+    <ClInclude Include="Source\DeliveryMan.h">
+      <Filter>AIs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Config\AppConfig.txt">
