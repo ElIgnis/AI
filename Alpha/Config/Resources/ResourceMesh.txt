@@ -44,6 +44,14 @@
 		[NAME] GAME_SHOP
 		[Type] Quad
 	}
+	{
+		[NAME] CUSTOMER_WAYPOINT
+		[Type] Quad
+	}
+	{
+		[NAME] CUSTOMER
+		[Type] Quad
+	}
 }
 
 # Types available

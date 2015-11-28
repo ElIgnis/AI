@@ -207,6 +207,9 @@
     <ClCompile Include="Source\DeliveryMan.cpp">
       <Filter>AIs</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Customer.cpp">
+      <Filter>AIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility.h">
@@ -357,6 +360,9 @@
       <Filter>Managers\SceneManagers\SceneCM</Filter>
     </ClInclude>
     <ClInclude Include="Source\DeliveryMan.h">
+      <Filter>AIs</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Customer.h">
       <Filter>AIs</Filter>
     </ClInclude>
   </ItemGroup>

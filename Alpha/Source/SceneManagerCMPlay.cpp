@@ -37,20 +37,63 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	m_bDisplay_shop = false;
 
 	m_dmDeliveryGuy = new DeliveryMan();
+
+	//Storing waypoints for outdoor customer
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(965, 1050));
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(965, 700));
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(650, 700));
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(650, 280));
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(1080, 280));
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(965, 220));
+	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(965, 20));
+	//Storing waypointss for indoor customer
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 280));
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 600));
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(800, 500));
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1000, 600));
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 280));
+
+
+	//20 customers in list
+	for (unsigned i = 0; i < 20; ++i)
+	{
+		m_cCustomerList.push_back(new Customer(m_v2CustomerWaypointsOUTDOOR.at(0)));
+	}
 }
 
 void SceneManagerCMPlay::Update(double dt)
 {
 	SceneManagerGameplay::Update(dt);
 
-	if (inputManager->getKey("START_DELIVERY"))
+	if (inputManager->getKey("START_DELIVERY") && m_fInputDelay > m_fMAX_DELAY)
 	{
 		order = true;
+		m_fInputDelay = 0.f;
 	}
 	else
 	{
 		order = false;
 	}
+
+	if (inputManager->getKey("NEW_CUSTOMER") && m_fInputDelay > m_fMAX_DELAY)
+	{
+		FetchCustomer();
+		m_fInputDelay = 0.f;
+	}
+
+
+	if (inputManager->getKey("SHOP_DISPLAY") && m_fInputDelay > m_fMAX_DELAY)
+	{
+		if (m_bDisplay_shop == false){
+			m_bDisplay_shop = true;
+		}
+		else if (m_bDisplay_shop == true){
+			m_bDisplay_shop = false;
+		}
+		m_fInputDelay = 0.f;
+	}
+
+	m_fInputDelay += (float)dt;
 
 	//Increase time based on dt
 	m_fMinutes += (float)100 * dt;
@@ -67,14 +110,69 @@ void SceneManagerCMPlay::Update(double dt)
 	m_dmDeliveryGuy->Update((float)dt, m_iWorldTime, m_iWeather, order);
 	order = false;
 
+	for (unsigned a = 0; a < m_cCustomerList.size(); ++a)
+	{
+		//Only update if customer is active
+		if (m_cCustomerList[a]->getActive())
+		{
+			//Update outdoor waypoints
+			if (m_cCustomerList[a]->getOutdoorStatus())
+			{
+				for (unsigned i = 0; i < m_v2CustomerWaypointsOUTDOOR.size(); ++i)
+				{
+					if (m_v2CustomerWaypointsOUTDOOR[i] == m_cCustomerList[a]->getCurrentPos())
+					{
+						if (i != (m_v2CustomerWaypointsOUTDOOR.size() - 1))
+						{
+							m_cCustomerList[a]->setNextPoint(m_v2CustomerWaypointsOUTDOOR[i + 1]);
+							break;
+						}
+						else if (i == (m_v2CustomerWaypointsOUTDOOR.size() - 1))
+						{
+							m_cCustomerList[a]->setActive(false);
+						}
+					}
+				}
+			}
+			//Update indoor waypoints
+			else
+			{
+				for (unsigned i = 0; i < m_v2CustomerWaypointsINDOOR.size(); ++i)
+				{
+					if (m_v2CustomerWaypointsINDOOR[i] == m_cCustomerList[a]->getCurrentPos())
+					{
+						if (i != (m_v2CustomerWaypointsINDOOR.size() - 1))
+						{
+							m_cCustomerList[a]->setNextPoint(m_v2CustomerWaypointsINDOOR[i + 1]);
+							break;
+						}
+						else if (i == (m_v2CustomerWaypointsINDOOR.size() - 1))
+						{
+							m_cCustomerList[a]->setActive(false);
+						}
+					}
+				}
+			}
+		}
+	}
+	//Update all customers
+	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
+	{
+		//Only update if active
+		if (m_cCustomerList[i]->getActive())
+		{
+			m_cCustomerList[i]->Update(dt, m_iWorldTime, m_iWeather);
+		}
+	}
+
 	//Uncomment the following line to play sound
 	//resourceManager.retrieveSound("MenuFeedback");
-	
 	//tpCamera.UpdatePosition(Vector3(0, 0, 0), Vector3(0, 0, 0));
+
 	fpCamera.Update(dt, 0);
 	//tpCamera.Update(dt);
 
-	if (inputManager->getKey("BG_DOWN"))
+	/*if (inputManager->getKey("BG_DOWN"))
 	{
 		if (m_fBGpos_y < m_fBGpos_MAX_y)
 		{
@@ -93,17 +191,7 @@ void SceneManagerCMPlay::Update(double dt)
 				m_fBGpos_y = m_fBGpos_MIN_y;
 			}
 		}
-	}
-
-	if (inputManager->getKey("SHOP_DISPLAY"))
-	{
-		if (m_bDisplay_shop == false){
-			m_bDisplay_shop = true;
-		}
-		else if (m_bDisplay_shop == true){
-			m_bDisplay_shop = false;
-		}
-	}
+	}*/
 }
 
 void SceneManagerCMPlay::Render()
@@ -126,8 +214,9 @@ void SceneManagerCMPlay::Render()
 
 	RenderLight();
 	RenderBG();
-	RenderStaticObject();
 	RenderMobileObject();
+	RenderWaypoints();
+	RenderStaticObject();
 }
 
 void SceneManagerCMPlay::Exit()
@@ -136,6 +225,12 @@ void SceneManagerCMPlay::Exit()
 	{
 		delete m_dmDeliveryGuy;
 		m_dmDeliveryGuy = NULL;
+	}
+	while (m_cCustomerList.size() > 0)
+	{
+		Customer *customer = m_cCustomerList.back();
+		delete customer;
+		m_cCustomerList.pop_back();
 	}
 	SceneManagerGameplay::Exit();
 }
@@ -238,7 +333,7 @@ void SceneManagerCMPlay::RenderStaticObject()
 	{
 		drawMesh = resourceManager.retrieveMesh("GAME_SHOP");
 		drawMesh->textureID = resourceManager.retrieveTexture("GAME_SHOP");
-		Render2DMesh(drawMesh, false, Vector2(906, 796), Vector2(960, 550));
+		Render2DMesh(drawMesh, false, Vector2(906, 796), Vector2(900, 650));
 	}
 	else
 	{
@@ -286,4 +381,67 @@ void SceneManagerCMPlay::RenderMobileObject()
 	drawMesh = resourceManager.retrieveMesh("FONT");
 	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
 	RenderTextOnScreen(drawMesh, std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, 400, 500, 0);
+	
+	//Render all customers from list
+	drawMesh = resourceManager.retrieveMesh("CUSTOMER");
+	drawMesh->textureID = resourceManager.retrieveTexture("SKYPLANE_TOP");
+	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
+	{
+		//Only render if customers are active
+		if (m_cCustomerList[i]->getActive())
+		{
+			//Render indoor customers
+			if (m_bDisplay_shop)
+			{
+				if (m_cCustomerList[i]->getOutdoorStatus() == false)
+				{
+					Render2DMesh(drawMesh, false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+				}
+			}
+			//Render outdoor customers
+			else
+			{
+				if (m_cCustomerList[i]->getOutdoorStatus())
+				{
+					Render2DMesh(drawMesh, false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+				}
+			}
+		}
+	}
+
+}
+
+void SceneManagerCMPlay::RenderWaypoints()
+{
+	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER_WAYPOINT");
+	drawMesh->textureID = resourceManager.retrieveTexture("GRASS");
+	//Rendering of indoor waypoints
+	if (m_bDisplay_shop)
+	{
+		for (unsigned i = 0; i < m_v2CustomerWaypointsINDOOR.size(); ++i)
+		{
+			Render2DMesh(drawMesh, false, Vector2(50, 50), m_v2CustomerWaypointsINDOOR[i]);
+		}
+	}
+	//Rendering of outdoor waypoints
+	else
+	{
+		for (unsigned i = 0; i < m_v2CustomerWaypointsOUTDOOR.size(); ++i)
+		{
+			Render2DMesh(drawMesh, false, Vector2(50, 50), m_v2CustomerWaypointsOUTDOOR[i]);
+		}
+	}
+}
+
+void SceneManagerCMPlay::FetchCustomer()
+{
+	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
+	{
+		if (m_cCustomerList[i]->getActive() == false)
+		{
+			m_cCustomerList[i]->setActive(true);
+			m_cCustomerList[i]->setStartPos(m_v2CustomerWaypointsOUTDOOR.at(0));
+			break;
+		}
+	}
 }

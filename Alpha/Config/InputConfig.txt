@@ -62,6 +62,11 @@
 		# [Key] NUM 1
 	}
 	{
+		[NAME] NEW_CUSTOMER
+		[Key] 0x32
+		# [Key] NUM 2
+	}
+	{
 		[NAME] START_DELIVERY
 		[Key] 0x20
 		# [Key] SPACEBAR
