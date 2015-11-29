@@ -52,7 +52,8 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	m_v2CustomerWaypointsINDOOR.push_back(Vector2(800, 500));
 	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1000, 600));
 	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 280));
-
+	//Starting queue position
+	m_v2CustomerQueueingPosition.push_back(Vector2(1080, 600));
 
 	//20 customers in list
 	for (unsigned i = 0; i < 20; ++i)
@@ -110,6 +111,7 @@ void SceneManagerCMPlay::Update(double dt)
 	m_dmDeliveryGuy->Update((float)dt, m_iWorldTime, m_iWeather, order);
 	order = false;
 
+	//Update customer waypoints
 	for (unsigned a = 0; a < m_cCustomerList.size(); ++a)
 	{
 		//Only update if customer is active
@@ -137,24 +139,60 @@ void SceneManagerCMPlay::Update(double dt)
 			//Update indoor waypoints
 			else
 			{
-				for (unsigned i = 0; i < m_v2CustomerWaypointsINDOOR.size(); ++i)
+				//Default shop positions
+				if (!m_cCustomerList[a]->getQueueStatus())
 				{
-					if (m_v2CustomerWaypointsINDOOR[i] == m_cCustomerList[a]->getCurrentPos())
+					for (unsigned i = 0; i < m_v2CustomerWaypointsINDOOR.size(); ++i)
 					{
-						if (i != (m_v2CustomerWaypointsINDOOR.size() - 1))
+						if (m_v2CustomerWaypointsINDOOR[i] == m_cCustomerList[a]->getCurrentPos())
 						{
-							m_cCustomerList[a]->setNextPoint(m_v2CustomerWaypointsINDOOR[i + 1]);
-							break;
-						}
-						else if (i == (m_v2CustomerWaypointsINDOOR.size() - 1))
-						{
-							m_cCustomerList[a]->setActive(false);
+							if (i != (m_v2CustomerWaypointsINDOOR.size() - 1))
+							{
+								m_cCustomerList[a]->setNextPoint(m_v2CustomerWaypointsINDOOR[i + 1]);
+								break;
+							}
 						}
 					}
 				}
+				//Queuing shop positions
+				else
+				{
+					//Only if they are not inside the queue we add them into the queue
+					if (!m_cCustomerList[a]->getInQueueStatus())
+					{
+						//Add customer to queue list and setting new waypoint
+						m_cCustomerList[a]->setInQueueStatus(true);	//Set the in Queue status to true
+
+						m_cQueueList.push_back(m_cCustomerList[a]);	//Add to vector of queueing customers
+						m_cCustomerList[a]->setNextPoint
+							(m_v2CustomerQueueingPosition.at(m_v2CustomerQueueingPosition.size() - 1));	//Set the next point to a positions in the queue
+						//Generate next position in the queue
+						m_v2CustomerQueueingPosition.push_back(Vector2(m_v2CustomerQueueingPosition.at(m_v2CustomerQueueingPosition.size() - 1).x,
+							m_v2CustomerQueueingPosition.at(m_v2CustomerQueueingPosition.size() - 1).y - 50));
+					}
+				}
+				//Queueing shop positions
 			}
 		}
 	}
+	//Only if there are customers queueing
+	if (m_cQueueList.size() > 0)
+	{
+		//If customer has finished buying, then we remove him
+		if (!m_cQueueList[0]->getQueueStatus())
+		{
+			m_cQueueList[0]->setInQueueStatus(false);	//We set the In queue status to false
+			m_cQueueList.erase(m_cQueueList.begin());	//Remove from vector
+			m_v2CustomerQueueingPosition.pop_back();	//Remove last queuing position
+
+			//Move all customers forward
+			for (unsigned a = 0; a < m_cQueueList.size(); ++a)
+			{
+				m_cQueueList[a]->setNextPoint(m_v2CustomerQueueingPosition[a]);
+			}
+		}
+	}
+
 	//Update all customers
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{

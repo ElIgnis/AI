@@ -4,10 +4,18 @@ Customer::Customer(Vector2 startPos) :
 		currentState(S_WALKING),
 		m_fDistanceSq(0.f),
 		m_bActive(false),
-		m_bOutdoor(true)
+		m_bOutdoor(true),
+		m_fDelay(0.f),
+		m_bDeciding(false),
+		m_bPickedUp(false),
+		m_bQueue(false),
+		m_bInQueue(false)
 {
 	m_v2CurrentPos = startPos;
 	m_v2ShopPos = Vector2(1080, 280);
+	m_v2BuyPos = Vector2(1080, 600);
+	m_v2WaitPos = Vector2(800, 500);
+	m_v2PickupPos = Vector2(1000, 600);
 }
 Customer::~Customer()
 {
@@ -20,13 +28,49 @@ void Customer::Update(double dt, int worldTime, int weather)
 	switch (currentState)
 	{
 	case S_IDLE:
-		if (m_v2CurrentPos == m_v2ShopPos)
+		//No drink bought
+		if (!m_bPickedUp && m_bOutdoor)
 		{
-			currentState = S_DECIDE;
+			if (m_v2CurrentPos == m_v2ShopPos)
+			{
+				currentState = S_DECIDE;
+			}
+			else
+			{
+				currentState = S_WALKING;
+			}
+		}
+		//In shop but no drink bought
+		else if (!m_bPickedUp && !m_bOutdoor)
+		{
+			if (m_v2CurrentPos == m_v2BuyPos)
+			{
+				currentState = S_BUY;
+			}
+			else if (m_v2CurrentPos == m_v2WaitPos)
+			{
+				currentState = S_WAIT;
+			}
+			else if (m_v2CurrentPos == m_v2PickupPos)
+			{
+				currentState = S_PICKUP;
+			}
+			else
+			{
+				currentState = S_QUEUE;
+			}
 		}
 		else
 		{
-			currentState = S_WALKING;
+			if (m_v2CurrentPos == m_v2ShopPos)
+			{
+				m_bOutdoor = true;
+				currentState = S_WALKING;
+			}
+			else
+			{
+				currentState = S_WALKING;
+			}
 		}
 		break;
 	case S_WALKING:
@@ -49,24 +93,62 @@ void Customer::Update(double dt, int worldTime, int weather)
 		}
 		break;
 	case S_DECIDE:
-		if (CalculateProbability(worldTime, weather) > 50)
+		m_bDeciding = true;
+		m_fDelay += dt;
+		if (m_fDelay > 0.3f)
 		{
-			//Enter shop
-			m_bOutdoor = false;
-			currentState = S_WALKING;
-		}
-		else
-		{
-			currentState = S_WALKING;
+			if (CalculateProbability(worldTime, weather) > 50)
+			{
+				//Enter shop
+				m_bOutdoor = false;
+				m_bQueue = true; //Start queuing
+				currentState = S_WALKING;
+				m_bDeciding = false;
+				m_fDelay = 0.f;
+			}
+			else
+			{
+				//Stay outside
+				m_bDeciding = false;
+				currentState = S_WALKING;
+				m_fDelay = 0.f;
+			}
 		}
 		break;
 	case S_QUEUE:
+		if (m_v2CurrentPos != m_v2NextPos)
+		{
+			currentState = S_WALKING;
+		}
 		break;
-	case S_BUY:
+	case S_BUY:	
+		m_fDelay += dt;
+		if (m_fDelay > 0.5f)
+		{
+			//Walk to wait position
+			currentState = S_WALKING;
+			m_bQueue = false;
+			m_fDelay = 0.f;
+		}		
 		break;
 	case S_WAIT:
+		m_fDelay += dt;
+		if (m_fDelay > 1.0f)
+		{
+			//Walk to wait position
+			currentState = S_WALKING;
+			m_fDelay = 0.f;
+		}
 		break;
 	case S_PICKUP:
+		m_fDelay += dt;
+		if (m_fDelay > 0.1f)
+		{
+			m_bPickedUp = true;
+			//Walk to wait position
+			currentState = S_WALKING;
+			m_fDelay = 0.f;
+		}
 		break;
 	case S_STAY:
 		break;
@@ -113,4 +195,17 @@ bool Customer::getActive()
 bool Customer::getOutdoorStatus()
 {
 	return this->m_bOutdoor;
+}
+bool Customer::getQueueStatus()
+{
+	return m_bQueue;
+}
+
+bool Customer::getInQueueStatus()
+{
+	return this->m_bInQueue;
+}
+void Customer::setInQueueStatus(bool inqueue)
+{
+	this->m_bInQueue = inqueue;
 }

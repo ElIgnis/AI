@@ -35,19 +35,33 @@ public:
 	bool getOutdoorStatus();	//Get where customer is (outdoor / indoor)
 	void setActive(bool active);	//Set active status
 	bool getActive();	//Get active status
+	bool getQueueStatus();	//Get queue status
+
+	bool getInQueueStatus();	//Get queue status
+	void setInQueueStatus(bool inqueue);	//Get queue status
 
 	int CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
 
 private:
 	STATES currentState;	//Current state
 
-	const float m_fSpeed = 300.f;	//Speed of movement
+	const float m_fSpeed = 500.f;	//Speed of movement
 	float m_fDistanceSq;	//Distance squared
 	Vector2 m_v2CurrentPos;	//Current position
 	Vector2 m_v2NextPos;	//Next position
+
+	Vector2 m_v2BuyPos;	//Buying position inside shop
+	Vector2 m_v2ShopPos;	//Position of shop
+	Vector2 m_v2WaitPos;	//Waiting position inside shop
+	Vector2 m_v2PickupPos;	//Pick up position inside shop
+
 	bool m_bActive;	//Active
 	bool m_bOutdoor;	//Outdoor / indoor status
-	Vector2 m_v2ShopPos;	//Position of shop
+	bool m_bQueue;	//Start queuing
+	bool m_bInQueue;	//Inside queue
+	bool m_bPickedUp;	//Picked up drink 
+	bool m_bDeciding;	//Deciding boolean for feedback
+	float m_fDelay;	//Timer for delays
 };
 
 #endif
