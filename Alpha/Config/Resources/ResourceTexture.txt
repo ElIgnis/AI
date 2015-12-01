@@ -3,8 +3,8 @@
 {
 	[NAME] TextureConfig
 	{
-		[NAME] AlbaFont
-		[Directory] Config\\Resources\\Texture\\albaFont.tga
+		[NAME] Font
+		[Directory] Config\\Resources\\Texture\\Font.tga
 	}
 	{
 		[NAME] CURSOR
@@ -29,5 +29,56 @@
 	{
 		[NAME] GAME_SHOP
 		[Directory] Config\\Resources\\Texture\\Shop.tga
+	}
+	#Delivery Man Indoors
+	{
+		[NAME] Sprite_Delivery_In_Down
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Down.tga
+	}
+	{
+		[NAME] Sprite_Delivery_In_Up
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Up.tga
+	}
+	{
+		[NAME] Sprite_Delivery_In_Left
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Left.tga
+	}
+	{
+		[NAME] Sprite_Delivery_In_Right
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Right.tga
+	}
+	#Delivery Man Outdoors
+	{
+		[NAME] Sprite_Delivery_Out_Down
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Down.tga
+	}
+	{
+		[NAME] Sprite_Delivery_Out_Up
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Up.tga
+	}
+	{
+		[NAME] Sprite_Delivery_Out_Left
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Left.tga
+	}
+	{
+		[NAME] Sprite_Delivery_Out_Right
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Right.tga
+	}
+	#Barista
+	{
+		[NAME] Sprite_Barista_Down
+		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Down.tga
+	}
+	{
+		[NAME] Sprite_Barista_Up
+		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Up.tga
+	}
+	{
+		[NAME] Sprite_Barista_Left
+		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Left.tga
+	}
+	{
+		[NAME] Sprite_Barista_Right
+		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Right.tga
 	}
 }

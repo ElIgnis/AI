@@ -27,14 +27,19 @@ public:
 	void InitShader();
 	void InitLight();
 	void InitCamera();
+	void InitSprites();
 
 	void RenderLight();
 	void RenderBG();
 	void RenderStaticObject();
 	void RenderMobileObject();
 	void RenderWaypoints();	//Render waypoints for debug purposes
+	void RenderUIInfo();
+	void RenderSprites();
 
 	void FetchCustomer();	//Set new customer at spawn
+	void UpdateDeliveryMan(double dt);
+	void UpdateSprites(double dt);
 
 private:
 	const float m_fBGpos_MAX_y = 730.f;
@@ -51,14 +56,32 @@ private:
 	bool m_bDisplay_shop;
 	int m_iWorldTime;
 	float m_fMinutes;
-	DeliveryMan* m_dmDeliveryGuy;
 
+	vector<DeliveryMan*> m_cDeliveryList;	//List containing all delivery guy
+	vector<Vector2> m_v2DeliveryWaypointsOUTDOOR;
+	vector<Vector2> m_v2DeliveryWaypointsINDOOR;
+	
 	vector<Customer*> m_cCustomerList;	//List containing all customers
 
 	vector<Vector2> m_v2CustomerWaypointsOUTDOOR;	//List containing all Outdoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerWaypointsINDOOR;	//List containing all Indoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerQueueingPosition;	//List containing all Indoor queueing positions for customer in scene
 	vector<Customer*> m_cQueueList;	//List containing queuing customers
+
+	SpriteAnimation* Delivery_Out_Up;
+	SpriteAnimation* Delivery_Out_Down;
+	SpriteAnimation* Delivery_Out_Left;
+	SpriteAnimation* Delivery_Out_Right;
+	
+	SpriteAnimation* Delivery_In_Up;
+	SpriteAnimation* Delivery_In_Down;
+	SpriteAnimation* Delivery_In_Left;
+	SpriteAnimation* Delivery_In_Right;
+	
+	SpriteAnimation* Barista_Up;
+	SpriteAnimation* Barista_Down;
+	SpriteAnimation* Barista_Left;
+	SpriteAnimation* Barista_Right;
 };
 
 #endif

@@ -4,7 +4,6 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	: m_iWorldTime(0)
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
-	, m_dmDeliveryGuy(NULL)
 	, order(false)
 {
 }
@@ -30,13 +29,14 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 
 	lightEnabled = true;
 
+	//Sprite Animation vars
+	InitSprites();
+
 	//Background variable
 	m_fBGpos_y = m_fBGpos_MAX_y;
 
 	//Shop variables
 	m_bDisplay_shop = false;
-
-	m_dmDeliveryGuy = new DeliveryMan();
 
 	//Storing waypoints for outdoor customer
 	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(965, 1050));
@@ -60,6 +60,50 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	{
 		m_cCustomerList.push_back(new Customer(m_v2CustomerWaypointsOUTDOOR.at(0)));
 	}
+}
+
+void SceneManagerCMPlay::InitSprites()
+{
+	//Init all the sprites here
+
+	//Outdoors delivery man
+	Delivery_Out_Up = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_UP");
+	Delivery_Out_Up->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Up");
+
+	Delivery_Out_Down = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_DOWN");
+	Delivery_Out_Down->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Down");
+
+	Delivery_Out_Left = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_LEFT");
+	Delivery_Out_Left->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Left");
+
+	Delivery_Out_Right = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_RIGHT");
+	Delivery_Out_Right->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Right");
+
+	//Indoors delivery man
+	Delivery_In_Up = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_UP");
+	Delivery_In_Up->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Up");
+
+	Delivery_In_Down = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_DOWN");
+	Delivery_In_Down->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Down");
+
+	Delivery_In_Left = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_LEFT");
+	Delivery_In_Left->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Left");
+
+	Delivery_In_Right = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_RIGHT");
+	Delivery_In_Right->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Right");
+
+	//Barista
+	Barista_Up = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_UP");
+	Barista_Up->textureID = resourceManager.retrieveTexture("Sprite_Barista_Up");
+
+	Barista_Down = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_DOWN");
+	Barista_Down->textureID = resourceManager.retrieveTexture("Sprite_Barista_Down");
+
+	Barista_Left = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_LEFT");
+	Barista_Left->textureID = resourceManager.retrieveTexture("Sprite_Barista_Left");
+
+	Barista_Right = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_RIGHT");
+	Barista_Right->textureID = resourceManager.retrieveTexture("Sprite_Barista_Right");
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -97,7 +141,7 @@ void SceneManagerCMPlay::Update(double dt)
 	m_fInputDelay += (float)dt;
 
 	//Increase time based on dt
-	m_fMinutes += (float)100 * dt;
+	m_fMinutes += (float)10 * dt;
 
 	if (m_fMinutes > 60){
 		m_iWorldTime += 100;
@@ -107,8 +151,6 @@ void SceneManagerCMPlay::Update(double dt)
 	if (m_iWorldTime == 2400){
 		m_iWorldTime = 0;
 	}
-
-	m_dmDeliveryGuy->Update((float)dt, m_iWorldTime, m_iWeather, order);
 	order = false;
 
 	//Update customer waypoints
@@ -230,6 +272,31 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}*/
+	UpdateSprites(dt);
+}
+
+void SceneManagerCMPlay::UpdateSprites(double dt)
+{
+	//Update all the sprites here
+	Delivery_Out_Up->Update(dt);
+	Delivery_Out_Down->Update(dt);
+	Delivery_Out_Left->Update(dt);
+	Delivery_Out_Right->Update(dt);
+
+	Delivery_In_Up->Update(dt);
+	Delivery_In_Down->Update(dt);
+	Delivery_In_Left->Update(dt);
+	Delivery_In_Right->Update(dt);
+
+	Barista_Up->Update(dt);
+	Barista_Down->Update(dt);
+	Barista_Left->Update(dt);
+	Barista_Right->Update(dt);
+}
+
+void SceneManagerCMPlay::UpdateDeliveryMan(double dt)
+{
+
 }
 
 void SceneManagerCMPlay::Render()
@@ -252,17 +319,20 @@ void SceneManagerCMPlay::Render()
 
 	RenderLight();
 	RenderBG();
-	RenderMobileObject();
 	RenderWaypoints();
+	RenderMobileObject();
 	RenderStaticObject();
+	RenderUIInfo();
+	RenderSprites();
 }
 
 void SceneManagerCMPlay::Exit()
 {
-	if (m_dmDeliveryGuy)
+	while (m_cDeliveryList.size() > 0)
 	{
-		delete m_dmDeliveryGuy;
-		m_dmDeliveryGuy = NULL;
+		DeliveryMan *DeliveryMan = m_cDeliveryList.back();
+		delete DeliveryMan;
+		m_cDeliveryList.pop_back();
 	}
 	while (m_cCustomerList.size() > 0)
 	{
@@ -359,11 +429,6 @@ void SceneManagerCMPlay::RenderLight()
 
 void SceneManagerCMPlay::RenderBG()
 {
-
-}
-
-void SceneManagerCMPlay::RenderStaticObject()
-{
 	//Temp mesh used to draw
 	Mesh* drawMesh;
 
@@ -377,48 +442,48 @@ void SceneManagerCMPlay::RenderStaticObject()
 	{
 		drawMesh = resourceManager.retrieveMesh("GAME_BG");
 		drawMesh->textureID = resourceManager.retrieveTexture("GAME_BG");
-
 		Render2DMesh(drawMesh, false, Vector2(1920, 1545), Vector2(960, m_fBGpos_y));
 	}
+}
+
+void SceneManagerCMPlay::RenderStaticObject()
+{
+	
 }
 
 void SceneManagerCMPlay::RenderMobileObject()
 {
 	Mesh* drawMesh;
 
-	switch (m_dmDeliveryGuy->getCurrentState())
-	{
-	case DeliveryMan::S_IDLE:
-		drawMesh = resourceManager.retrieveMesh("FONT");
-		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-		RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-		break;
-	case DeliveryMan::S_SLEEPING:
-		drawMesh = resourceManager.retrieveMesh("FONT");
-		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-		RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-		break;
-	case DeliveryMan::S_EATING:
-		drawMesh = resourceManager.retrieveMesh("FONT");
-		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-		RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-		break;
-	case DeliveryMan::S_DELIVERING:
-		drawMesh = resourceManager.retrieveMesh("FONT");
-		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-		RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-		break;
-	case DeliveryMan::S_RETURNING:
-		drawMesh = resourceManager.retrieveMesh("FONT");
-		drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-		RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-		break;
-	}
+	//switch (m_dmDeliveryGuy->getCurrentState())
+	//{
+	//case DeliveryMan::S_IDLE:
+	//	drawMesh = resourceManager.retrieveMesh("FONT");
+	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+	//	RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+	//	break;
+	//case DeliveryMan::S_SLEEPING:
+	//	drawMesh = resourceManager.retrieveMesh("FONT");
+	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+	//	RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+	//	break;
+	//case DeliveryMan::S_EATING:
+	//	drawMesh = resourceManager.retrieveMesh("FONT");
+	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+	//	RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+	//	break;
+	//case DeliveryMan::S_DELIVERING:
+	//	drawMesh = resourceManager.retrieveMesh("FONT");
+	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+	//	RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+	//	break;
+	//case DeliveryMan::S_RETURNING:
+	//	drawMesh = resourceManager.retrieveMesh("FONT");
+	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
+	//	RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
+	//	break;
+	//}
 
-
-	drawMesh = resourceManager.retrieveMesh("FONT");
-	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-	RenderTextOnScreen(drawMesh, std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, 400, 500, 0);
 	
 	//Render all customers from list
 	drawMesh = resourceManager.retrieveMesh("CUSTOMER");
@@ -446,7 +511,6 @@ void SceneManagerCMPlay::RenderMobileObject()
 			}
 		}
 	}
-
 }
 
 void SceneManagerCMPlay::RenderWaypoints()
@@ -470,6 +534,24 @@ void SceneManagerCMPlay::RenderWaypoints()
 		}
 	}
 }
+
+void SceneManagerCMPlay::RenderUIInfo()
+{
+	//Display Weather and time here
+	Mesh* drawMesh;
+
+	drawMesh = resourceManager.retrieveMesh("FONT");
+	drawMesh->textureID = resourceManager.retrieveTexture("Font");
+	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
+}
+
+void SceneManagerCMPlay::RenderSprites()
+{
+	//Render all the sprites here
+	Render2DMesh(Delivery_Out_Left, false, Vector2(100, 50), Vector2(600, 700));
+	Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), Vector2(650, 600));
+}
+
 
 void SceneManagerCMPlay::FetchCustomer()
 {

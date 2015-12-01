@@ -15,6 +15,22 @@ SceneManager::~SceneManager()
 
 void SceneManager::Init(const int width, const int height, ResourcePool* RM, InputManager* controls)
 {
+	count = 0;
+	std::string data = " ";
+
+	//File reading
+	std::ifstream inFile;
+	inFile.open("Source//charWidth.txt");
+	if (inFile.good())
+	{
+		while (getline(inFile, data))
+		{
+			textWidth[count] = std::stoi(data);
+			count++;
+		}
+		inFile.close();
+	}
+
 	this->sceneWidth = (float)width;
 	this->sceneHeight = (float)height;
 	this->resourceManager.Init(RM);
@@ -59,7 +75,7 @@ void SceneManager::Update(double dt)
 
 void SceneManager::Render()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void SceneManager::PreRender(bool enableLight)
@@ -156,13 +172,14 @@ void SceneManager::RenderTextOnScreen(Mesh* mesh, std::string text, Color color,
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mesh->textureID);
 	glUniform1i(parameters[U_COLOR_TEXTURE], 0);
+	float temp = 0;
 	for (unsigned i = 0; i < text.length(); ++i)
 	{
 		Mtx44 characterSpacing;
-		characterSpacing.SetToTranslation(i * 1.0f + 0.5f, 0.5f, 0); //1.0f is the spacing of each character, you may change this value
+		characterSpacing.SetToTranslation(temp * 1.5f, 0, 0); //1.0f is the spacing of each character, you may change this value
 		Mtx44 MVP = projectionStack.Top() * viewStack.Top() * modelStack.Top() * characterSpacing;
 		glUniformMatrix4fv(parameters[U_MVP], 1, GL_FALSE, &MVP.a[0]);
-
+		temp += textWidth[text[i]] * 0.01;
 		mesh->Render((unsigned)text[i] * 6, 6);
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -229,6 +246,8 @@ void SceneManager::Render2DMesh(Mesh *mesh, const bool enableLight, const Vector
 	if (!mesh || mesh->textureID <= 0)
 		return;
 
+	glDisable(GL_DEPTH_TEST);
+
 	Mtx44 ortho;
 	ortho.SetToOrtho(0, double(sceneWidth), 0, double(sceneHeight), -100, 100);
 	projectionStack.PushMatrix();
@@ -268,6 +287,8 @@ void SceneManager::Render2DMesh(Mesh *mesh, const bool enableLight, const Vector
 	modelStack.PopMatrix();
 	viewStack.PopMatrix();
 	projectionStack.PopMatrix();
+
+	glEnable(GL_DEPTH_TEST);
 }
 
 void SceneManager::Exit()

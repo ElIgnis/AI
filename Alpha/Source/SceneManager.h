@@ -88,6 +88,10 @@ protected:
 
 	bool lightEnabled;
 	float fps;
+
+	//Text spacing fix
+	int count;
+	int textWidth[256];
 };
 
 #endif
