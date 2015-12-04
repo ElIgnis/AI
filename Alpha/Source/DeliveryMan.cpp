@@ -10,7 +10,6 @@ DeliveryMan::DeliveryMan()
 , m_bPendingDelivery(false)
 , m_bReturn(false)
 , m_bPathAssigned(false)
-, m_bExiting(false)
 
 , m_iHoursNeeded(2)
 , m_iResult(0)
@@ -370,37 +369,7 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 			UpdatePath(Sleep, true, dt);
 	}
 
-	//Delivery portion
-	if (m_bPendingDelivery)
-	{
-		//Proceed to deliver if not delivering
-		if (!m_bNeedToEat)
-		{
-			//Get out of cafe first
-			if (!m_bOutdoor)
-			{
-				m_bExiting = true;
-				if (UpdatePath(Exiting, false, dt))
-				{
-					m_bOutdoor = true;
-				}
-			}
-			//Randomizes outdoor path
-			if (m_bOutdoor)
-			{
-				//Assign the start of action hour
-				if (m_iStartHour == 0)
-					m_iStartHour = worldTime;
-
-				//Snap new position to outside of cafe
-				m_v2CurrentPos = Vector2(1290, 600);
-
-				currentState = S_DELIVERING;
-				m_iCurrentPath = 0;
-			}
-		}
-	}
-	if (m_bNeedToEat && currentState == S_IDLE && !m_bPendingDelivery)
+	if (m_bNeedToEat)
 	{
 		// Proceed to eat after moving to eating area
 		if (UpdatePath(Eat, false, dt))
@@ -413,8 +382,34 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 		}
 	}
 
+	//Delivery portion
+	else if (m_bPendingDelivery && !m_bNeedToEat)
+	{
+		//Get out of cafe first
+		if (!m_bOutdoor)
+		{
+			if (UpdatePath(Exiting, false, dt))
+			{
+				m_bOutdoor = true;
+			}
+		}
+		//Randomizes outdoor path
+		if (m_bOutdoor)
+		{
+			//Assign the start of action hour
+			if (m_iStartHour == 0)
+				m_iStartHour = worldTime;
+
+			//Snap new position to outside of cafe
+			m_v2CurrentPos = Vector2(1290, 600);
+
+			currentState = S_DELIVERING;
+			m_iCurrentPath = 0;
+		}
+	}
+
 	// Sleeping portion
-	if (m_bNeedToSleep && currentState == S_IDLE)
+	if (m_bNeedToSleep)
 	{
 		// Proceed to sleep after moving to sleeping area
 		if (UpdatePath(Sleep, false, dt))
@@ -549,6 +544,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 		{
 			m_bExiting = false;
 			currentState = S_IDLE;
+			m_iStartHour = 0;
 		}
 	}
 }
