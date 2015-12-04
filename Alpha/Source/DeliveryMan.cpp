@@ -439,6 +439,7 @@ void DeliveryMan::UpdateEating(double dt, int worldTime)
 			m_bNeedToEat = false;
 			currentState = S_IDLE;
 			m_iStartHour = 0;
+			m_v2Direction.SetZero();
 		}
 		
 	}
@@ -458,6 +459,7 @@ void DeliveryMan::UpdateSleeping(double dt, int worldTime)
 		m_bNeedToSleep = false;
 		currentState = S_IDLE;
 		m_iStartHour = 0;
+		m_v2Direction.SetZero();
 	}
 }
 void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order)
@@ -515,7 +517,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 			{
 				m_bOutdoor = false;
 				m_bPendingDelivery = false;
-				m_v2CurrentPos = Vector2(1300, 895);
+				m_v2CurrentPos = Vector2(1350, 895);
 			}
 			break;
 		case 1:
@@ -544,6 +546,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 		{
 			currentState = S_IDLE;
 			m_iStartHour = 0;
+			m_v2Direction.SetZero();
 		}
 	}
 }
@@ -561,6 +564,11 @@ bool DeliveryMan::GenerateOrder(void)
 Vector2 DeliveryMan::GetPos(void)
 {
 	return m_v2CurrentPos;
+}
+
+Vector2 DeliveryMan::GetDir(void)
+{
+	return m_v2Direction;
 }
 
 bool DeliveryMan::getOutdoor(void)
@@ -595,7 +603,7 @@ void DeliveryMan::AddWayPoints_Path3(Vector2 newWayPoint)
 
 bool DeliveryMan::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
 {
-	Vector2 direction;
+	
 
 	//Assign the start point of path
 	if (!m_bPathAssigned)
@@ -617,14 +625,14 @@ bool DeliveryMan::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double 
 	//Continue to update if have not reached next waypoint
 	if (m_v2CurrentPos != PathToUpdate.at(m_iNextPoint))
 	{
-		direction = (m_v2NextPos - m_v2CurrentPos).Normalized();
+		m_v2Direction = (m_v2NextPos - m_v2CurrentPos).Normalized();
 
 		//Getting distance
 		m_fDistSquared = ((m_v2NextPos.x - m_v2CurrentPos.x) * (m_v2NextPos.x - m_v2CurrentPos.x) +
 			(m_v2NextPos.y - m_v2CurrentPos.y) * (m_v2NextPos.y - m_v2CurrentPos.y));
 
 		//Moving to position
-		m_v2CurrentPos += direction * ((float)dt * m_fMoveSpeed);
+		m_v2CurrentPos += m_v2Direction * ((float)dt * m_fMoveSpeed);
 
 		//Comparing if destination has been reached
 		if (m_fDistSquared < ((dt * m_fMoveSpeed) * (dt * m_fMoveSpeed)))

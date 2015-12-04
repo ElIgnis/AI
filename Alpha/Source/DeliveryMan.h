@@ -67,13 +67,14 @@ public:
 	void AddWayPoints_Path3(Vector2 newWayPoint);
 
 	Vector2 GetPos();
+	Vector2 GetDir();
 
 	vector<Vector2> ReturnCurrentPath;
 	bool UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt);
 
 	SpriteAnimation* GetSpriteAnim(void);
 	void SetSpriteAnim(SpriteAnimation* NewSpriteAnim);
-	bool m_bPendingDelivery;
+	
 private:
 	STATES currentState;
 	bool m_bNeedToEat;
@@ -81,6 +82,7 @@ private:
 	bool m_bOutdoor;
 	bool m_bReturn;
 	bool m_bPathAssigned;
+	bool m_bPendingDelivery;
 
 	int m_iHoursNeeded;
 	int m_iResult;
@@ -95,6 +97,7 @@ private:
 	float m_fDistSquared;
 	Vector2 m_v2CurrentPos;
 	Vector2 m_v2NextPos;
+	Vector2 m_v2Direction;
 
 	vector<Vector2> Eat;
 	vector<Vector2> Sleep;

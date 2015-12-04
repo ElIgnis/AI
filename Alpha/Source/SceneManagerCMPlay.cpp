@@ -478,7 +478,7 @@ void SceneManagerCMPlay::RenderBG()
 	{
 		drawMesh = resourceManager.retrieveMesh("GAME_SHOP");
 		drawMesh->textureID = resourceManager.retrieveTexture("GAME_SHOP");
-		Render2DMesh(drawMesh, false, Vector2(906, 796), Vector2(900, 650));
+		Render2DMesh(drawMesh, false, Vector2(1246, 800), Vector2(730, 650));
 	}
 	else
 	{
@@ -590,6 +590,32 @@ void SceneManagerCMPlay::RenderUIInfo()
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
 	RenderTextOnScreen(drawMesh, std::to_string(deliveryMan->getCurrentState()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
+
+	switch (deliveryMan->getCurrentState())
+	{
+	case DeliveryMan::S_IDLE:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x, deliveryMan->GetPos().y + 50, 0);
+		break;
+	case DeliveryMan::S_SLEEPING:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
+		break;
+	case DeliveryMan::S_EATING:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
+		break;
+	case DeliveryMan::S_DELIVERING:
+		if (!m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
+		break;
+	case DeliveryMan::S_RETURNING:
+		if (!m_bDisplay_shop && deliveryMan->getOutdoor() || m_bDisplay_shop && !deliveryMan->getOutdoor())
+			RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
+		break;
+	default:
+		break;
+	}
 }
 
 void SceneManagerCMPlay::RenderSprites()
@@ -600,18 +626,37 @@ void SceneManagerCMPlay::RenderSprites()
 	if (m_bDisplay_shop)
 	{
 		if (!deliveryMan->getOutdoor())
-		Render2DMesh(Delivery_In_Up, false, Vector2(50, 50), deliveryMan->GetPos());
+		{
+			if (deliveryMan->GetDir().x == -1)
+				Render2DMesh(Delivery_In_Left, false, Vector2(50, 50), deliveryMan->GetPos());
+			else if (deliveryMan->GetDir().x == 1)
+				Render2DMesh(Delivery_In_Right, false, Vector2(50, 50), deliveryMan->GetPos());
+			else if (deliveryMan->GetDir().y == 1)
+				Render2DMesh(Delivery_In_Up, false, Vector2(50, 50), deliveryMan->GetPos());
+			else if (deliveryMan->GetDir().y == -1)
+				Render2DMesh(Delivery_In_Down, false, Vector2(50, 50), deliveryMan->GetPos());
+			else
+				Render2DMesh(Delivery_In_Down, false, Vector2(50, 50), deliveryMan->GetPos());
+		}
 	}
 
 	//Outdoor deliveryman
 	else
 	{
 		if (deliveryMan->getOutdoor())
-			Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), deliveryMan->GetPos());
+		{
+			if (deliveryMan->GetDir().x == -1)
+				Render2DMesh(Delivery_Out_Left, false, Vector2(100, 50), deliveryMan->GetPos());
+			else if (deliveryMan->GetDir().x == 1)
+				Render2DMesh(Delivery_Out_Right, false, Vector2(100, 50), deliveryMan->GetPos());
+			else if (deliveryMan->GetDir().y == 1)
+				Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), deliveryMan->GetPos());
+			else if (deliveryMan->GetDir().y == -1)
+				Render2DMesh(Delivery_Out_Down, false, Vector2(50, 100), deliveryMan->GetPos());
+			else
+				Render2DMesh(Delivery_Out_Down, false, Vector2(50, 100), deliveryMan->GetPos());
+		}
 	}
-	std::cout << deliveryMan->m_bPendingDelivery << std::endl;
-	//Render2DMesh(Delivery_Out_Left, false, Vector2(100, 50), Vector2(600, 700));
-	//Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), Vector2(650, 600));
 }
 
 
