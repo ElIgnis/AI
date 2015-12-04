@@ -31,9 +31,6 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 
 	lightEnabled = true;
 
-	//Sprite Animation vars
-	InitSprites();
-
 	//Background variable
 	m_fBGpos_y = m_fBGpos_MAX_y;
 
@@ -69,67 +66,14 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 
 	deliveryMan = new DeliveryMan();
 	deliveryMan->Init();
-}
 
-void SceneManagerCMPlay::InitSprites()
-{
-	//Init all the sprites here
+	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_IN");
+	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In");
+	deliveryMan->SetIndoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 
-	//Outdoors delivery man
-	Delivery_Out_Up = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_UP");
-	Delivery_Out_Up->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Up");
-
-	Delivery_Out_Down = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_DOWN");
-	Delivery_Out_Down->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Down");
-
-	Delivery_Out_Left = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_LEFT");
-	Delivery_Out_Left->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Left");
-
-	Delivery_Out_Right = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_RIGHT");
-	Delivery_Out_Right->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Right");
-
-	//Indoors delivery man
-	Delivery_In_Up = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_UP");
-	Delivery_In_Up->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Up");
-
-	Delivery_In_Down = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_DOWN");
-	Delivery_In_Down->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Down");
-
-	Delivery_In_Left = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_LEFT");
-	Delivery_In_Left->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Left");
-
-	Delivery_In_Right = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_DELIVERY_IN_RIGHT");
-	Delivery_In_Right->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In_Right");
-
-	//Barista
-	Barista_Up = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_UP");
-	Barista_Up->textureID = resourceManager.retrieveTexture("Sprite_Barista_Up");
-
-	Barista_Down = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_DOWN");
-	Barista_Down->textureID = resourceManager.retrieveTexture("Sprite_Barista_Down");
-
-	Barista_Left = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_LEFT");
-	Barista_Left->textureID = resourceManager.retrieveTexture("Sprite_Barista_Left");
-
-	Barista_Right = (SpriteAnimation*)resourceManager.retrieveMesh("SPRITE_BARISTA_RIGHT");
-	Barista_Right->textureID = resourceManager.retrieveTexture("Sprite_Barista_Right");
-}
-
-void SceneManagerCMPlay::InitWayPoints()
-{
-	//Init Indoor waypoints
-	//Eating<->Idle 
-	//deliveryMan->InitWayPoints_Eat(Vector2());
-
-	//Sleeping<->Idle
-
-	//Idle<->Delivering
-
-	//Path One
-
-	//Path Two
-
-	//Path Three
+	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT");
+	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out");
+	deliveryMan->SetOutdoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -189,7 +133,7 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 	
 	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order);
-	//std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
+	std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
 	//Update customer waypoints
 	for (unsigned a = 0; a < m_cCustomerList.size(); ++a)
 	{
@@ -309,26 +253,6 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}*/
-	UpdateSprites(dt);
-}
-
-void SceneManagerCMPlay::UpdateSprites(double dt)
-{
-	//Update all the sprites here
-	Delivery_Out_Up->Update(dt);
-	Delivery_Out_Down->Update(dt);
-	Delivery_Out_Left->Update(dt);
-	Delivery_Out_Right->Update(dt);
-
-	Delivery_In_Up->Update(dt);
-	Delivery_In_Down->Update(dt);
-	Delivery_In_Left->Update(dt);
-	Delivery_In_Right->Update(dt);
-
-	Barista_Up->Update(dt);
-	Barista_Down->Update(dt);
-	Barista_Left->Update(dt);
-	Barista_Right->Update(dt);
 }
 
 void SceneManagerCMPlay::UpdateDeliveryMan(double dt)
@@ -497,36 +421,6 @@ void SceneManagerCMPlay::RenderMobileObject()
 {
 	Mesh* drawMesh;
 
-	//switch (m_dmDeliveryGuy->getCurrentState())
-	//{
-	//case DeliveryMan::S_IDLE:
-	//	drawMesh = resourceManager.retrieveMesh("FONT");
-	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-	//	RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-	//	break;
-	//case DeliveryMan::S_SLEEPING:
-	//	drawMesh = resourceManager.retrieveMesh("FONT");
-	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-	//	RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-	//	break;
-	//case DeliveryMan::S_EATING:
-	//	drawMesh = resourceManager.retrieveMesh("FONT");
-	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-	//	RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-	//	break;
-	//case DeliveryMan::S_DELIVERING:
-	//	drawMesh = resourceManager.retrieveMesh("FONT");
-	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-	//	RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-	//	break;
-	//case DeliveryMan::S_RETURNING:
-	//	drawMesh = resourceManager.retrieveMesh("FONT");
-	//	drawMesh->textureID = resourceManager.retrieveTexture("AlbaFont");
-	//	RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 75, 400, 550, 0);
-	//	break;
-	//}
-
-	
 	//Render all customers from list
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
@@ -621,22 +515,24 @@ void SceneManagerCMPlay::RenderUIInfo()
 void SceneManagerCMPlay::RenderSprites()
 {
 	//Render all the sprites here
+	Mesh* drawMesh;
+
+	drawMesh = resourceManager.retrieveMesh("HORSE");
+	drawMesh->textureID = resourceManager.retrieveTexture("Horse");
 
 	//Indoor deliveryman
 	if (m_bDisplay_shop)
 	{
 		if (!deliveryMan->getOutdoor())
 		{
-			if (deliveryMan->GetDir().x == -1)
-				Render2DMesh(Delivery_In_Left, false, Vector2(50, 50), deliveryMan->GetPos());
-			else if (deliveryMan->GetDir().x == 1)
-				Render2DMesh(Delivery_In_Right, false, Vector2(50, 50), deliveryMan->GetPos());
-			else if (deliveryMan->GetDir().y == 1)
-				Render2DMesh(Delivery_In_Up, false, Vector2(50, 50), deliveryMan->GetPos());
-			else if (deliveryMan->GetDir().y == -1)
-				Render2DMesh(Delivery_In_Down, false, Vector2(50, 50), deliveryMan->GetPos());
+			if (!deliveryMan->getInCarriage())
+			{
+				Render2DMesh(deliveryMan->GetIndoorSpriteAnim(), false, Vector2(50, 50), deliveryMan->GetPos());
+				Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(850, 895));
+			}
+				
 			else
-				Render2DMesh(Delivery_In_Down, false, Vector2(50, 50), deliveryMan->GetPos());
+				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(175, 175), deliveryMan->GetPos());
 		}
 	}
 
@@ -645,16 +541,7 @@ void SceneManagerCMPlay::RenderSprites()
 	{
 		if (deliveryMan->getOutdoor())
 		{
-			if (deliveryMan->GetDir().x == -1)
-				Render2DMesh(Delivery_Out_Left, false, Vector2(100, 50), deliveryMan->GetPos());
-			else if (deliveryMan->GetDir().x == 1)
-				Render2DMesh(Delivery_Out_Right, false, Vector2(100, 50), deliveryMan->GetPos());
-			else if (deliveryMan->GetDir().y == 1)
-				Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), deliveryMan->GetPos());
-			else if (deliveryMan->GetDir().y == -1)
-				Render2DMesh(Delivery_Out_Down, false, Vector2(50, 100), deliveryMan->GetPos());
-			else
-				Render2DMesh(Delivery_Out_Down, false, Vector2(50, 100), deliveryMan->GetPos());
+			Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), deliveryMan->GetPos());
 		}
 	}
 }

@@ -1,5 +1,21 @@
 #include "DeliveryMan.h"
+//Sleeps for 8 hours before going to Idle(Starts based on the timing that went to sleep)
 
+//Idle in store until order arrives
+
+//If need to eat(Lunch, Dinner), finish eating before processing next order
+
+//Else process order and start delivering(Delivery speed based on weather and peak period)
+
+//Order prob randomizes 50% on every hour passed
+
+//Waypoint to go out of shop
+
+//Randomize which path to take and move accordingly
+
+//If reached end of point, traverse back and return.
+
+//After back in shop then idle
 
 DeliveryMan::DeliveryMan()
 : currentState(S_SLEEPING)
@@ -10,6 +26,7 @@ DeliveryMan::DeliveryMan()
 , m_bPendingDelivery(false)
 , m_bReturn(false)
 , m_bPathAssigned(false)
+, m_bInCarriage(false)
 
 , m_iHoursNeeded(2)
 , m_iResult(0)
@@ -35,6 +52,9 @@ DeliveryMan::~DeliveryMan()
 
 void DeliveryMan::Init(void)
 {
+	spriteAnim_Indoor = new SpriteAnimation();
+	spriteAnim_Outdoor = new SpriteAnimation();
+
 	ReadWayPoints_Eat("Config\\Waypoints\\DeliveryMan\\Eat_1.txt");
 	ReadWayPoints_Sleep("Config\\Waypoints\\DeliveryMan\\Sleep_1.txt");
 	ReadWayPoints_Exiting("Config\\Waypoints\\DeliveryMan\\Exiting_1.txt");
@@ -336,25 +356,39 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
 	default:
 		break;
 	}
+
+	// Update sprite based on direction
+	if (!m_bInCarriage)
+	{
+		spriteAnim_Indoor->Update(dt);
+
+		if (m_v2Direction.x == -1)
+			this->spriteAnim_Indoor->currentAni = WALK_LEFT;
+		else if (m_v2Direction.x == 1)
+			this->spriteAnim_Indoor->currentAni = WALK_RIGHT;
+		else if (m_v2Direction.y == 1)
+			this->spriteAnim_Indoor->currentAni = WALK_UP;
+		else if (m_v2Direction.y == -1)
+			this->spriteAnim_Indoor->currentAni = WALK_DOWN;
+		else
+			this->spriteAnim_Indoor->currentAni = WALK_DOWN;
+	}
+	else
+	{
+		spriteAnim_Outdoor->Update(dt);
+
+		if (m_v2Direction.x == -1)
+			this->spriteAnim_Outdoor->currentAni = WALK_LEFT;
+		else if (m_v2Direction.x == 1)
+			this->spriteAnim_Outdoor->currentAni = WALK_RIGHT;
+		else if (m_v2Direction.y == 1)
+			this->spriteAnim_Outdoor->currentAni = WALK_UP;
+		else if (m_v2Direction.y == -1)
+			this->spriteAnim_Outdoor->currentAni = WALK_DOWN;
+		else
+			this->spriteAnim_Outdoor->currentAni = WALK_DOWN;
+	}
 }
-
-//Sleeps for 8 hours before going to Idle(Starts based on the timing that went to sleep)
-
-//Idle in store until order arrives
-
-//If need to eat(Lunch, Dinner), finish eating before processing next order
-
-//Else process order and start delivering(Delivery speed based on weather and peak period)
-
-//Order prob randomizes 50% on every hour passed
-
-//Waypoint to go out of shop
-
-//Randomize which path to take and move accordingly
-
-//If reached end of point, traverse back and return.
-
-//After back in shop then idle
 
 void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 {
@@ -388,6 +422,9 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 		//Get out of cafe first
 		if (!m_bOutdoor)
 		{
+			if (m_v2CurrentPos == Exiting.at(2))
+				m_bInCarriage = true;
+
 			if (UpdatePath(Exiting, false, dt))
 			{
 				m_bOutdoor = true;
@@ -517,7 +554,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 			{
 				m_bOutdoor = false;
 				m_bPendingDelivery = false;
-				m_v2CurrentPos = Vector2(1350, 895);
+				m_v2CurrentPos = Vector2(1350, 930);
 			}
 			break;
 		case 1:
@@ -542,6 +579,9 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 	//Returns to idle post
 	if (!m_bOutdoor)
 	{
+		if (m_v2CurrentPos == Exiting.at(2))
+			m_bInCarriage = false;
+
 		if (UpdatePath(Exiting, true, dt))
 		{
 			currentState = S_IDLE;
@@ -574,6 +614,11 @@ Vector2 DeliveryMan::GetDir(void)
 bool DeliveryMan::getOutdoor(void)
 {
 	return m_bOutdoor;
+}
+
+bool DeliveryMan::getInCarriage(void)
+{
+	return m_bInCarriage;
 }
 
 void DeliveryMan::AddWayPoints_Eat(Vector2 newWayPoint)
@@ -671,4 +716,26 @@ void DeliveryMan::Draw(SceneManager* sceneManager)
 DeliveryMan::STATES DeliveryMan::getCurrentState(void)
 {
 	return currentState;
+}
+
+void DeliveryMan::SetIndoorSpriteAnim(SpriteAnimation* newSprite)
+{
+	*(this->spriteAnim_Indoor) = *newSprite;
+	this->spriteAnim_Indoor->currentAni = WALK_DOWN;
+}
+
+void DeliveryMan::SetOutdoorSpriteAnim(SpriteAnimation* newSprite)
+{
+	*(this->spriteAnim_Outdoor) = *newSprite;
+	this->spriteAnim_Outdoor->currentAni = WALK_DOWN;
+}
+
+SpriteAnimation* DeliveryMan::GetIndoorSpriteAnim(void)
+{
+	return spriteAnim_Indoor;
+}
+
+SpriteAnimation* DeliveryMan::GetOutdoorSpriteAnim(void)
+{
+	return spriteAnim_Outdoor;
 }

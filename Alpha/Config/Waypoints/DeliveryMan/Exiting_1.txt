@@ -2,5 +2,8 @@
 #Format first line = Type of Waypoints
 #Idle
 585,895
+585,930
+#Switch to carriage<->human
+750, 930
 #Exit
-1350,895
+1350,930

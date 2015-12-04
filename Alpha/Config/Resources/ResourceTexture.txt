@@ -34,56 +34,25 @@
 		[NAME] Question_mark
 		[Directory] Config\\Resources\\Texture\\QuestionMark.tga
 	}
+	#Horse
+	{
+		[NAME] Horse
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Horse.tga
+	}
 	#Delivery Man Indoors
 	{
-		[NAME] Sprite_Delivery_In_Down
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Down.tga
-	}
-	{
-		[NAME] Sprite_Delivery_In_Up
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Up.tga
-	}
-	{
-		[NAME] Sprite_Delivery_In_Left
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Left.tga
-	}
-	{
-		[NAME] Sprite_Delivery_In_Right
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In_Right.tga
+		[NAME] Sprite_Delivery_In
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_In.tga
 	}
 	#Delivery Man Outdoors
 	{
-		[NAME] Sprite_Delivery_Out_Down
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Down.tga
-	}
-	{
-		[NAME] Sprite_Delivery_Out_Up
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Up.tga
-	}
-	{
-		[NAME] Sprite_Delivery_Out_Left
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Left.tga
-	}
-	{
-		[NAME] Sprite_Delivery_Out_Right
-		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Right.tga
+		[NAME] Sprite_Delivery_Out
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out.tga
 	}
 	#Barista
 	{
-		[NAME] Sprite_Barista_Down
-		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Down.tga
-	}
-	{
-		[NAME] Sprite_Barista_Up
-		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Up.tga
-	}
-	{
-		[NAME] Sprite_Barista_Left
-		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Left.tga
-	}
-	{
-		[NAME] Sprite_Barista_Right
-		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Right.tga
+		[NAME] Sprite_Barista
+		[Directory] Config\\Resources\\Texture\\Barista\\Barista.tga
 	}
 	{
 		[NAME] CUSTOMER_SPRITE

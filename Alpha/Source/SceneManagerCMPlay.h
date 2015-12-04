@@ -28,8 +28,6 @@ public:
 	void InitShader();
 	void InitLight();
 	void InitCamera();
-	void InitSprites();
-	void InitWayPoints();
 
 	void RenderLight();
 	void RenderBG();
@@ -41,10 +39,8 @@ public:
 
 	void FetchCustomer();	//Set new customer at spawn
 	void UpdateDeliveryMan(double dt);
-	void UpdateSprites(double dt);
 
 private:
-
 	const float m_fBGpos_MAX_y = 730.f;
 	const float m_fBGpos_MIN_y = 310.f;
 	const float m_fBGscroll_speed = 350.f;
@@ -70,21 +66,6 @@ private:
 	vector<Vector2> m_v2CustomerWaypointsINDOOR;	//List containing all Indoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerQueueingPosition;	//List containing all Indoor queueing positions for customer in scene
 	vector<Customer*> m_cQueueList;	//List containing queuing customers
-
-	SpriteAnimation* Delivery_Out_Up;
-	SpriteAnimation* Delivery_Out_Down;
-	SpriteAnimation* Delivery_Out_Left;
-	SpriteAnimation* Delivery_Out_Right;
-	
-	SpriteAnimation* Delivery_In_Up;
-	SpriteAnimation* Delivery_In_Down;
-	SpriteAnimation* Delivery_In_Left;
-	SpriteAnimation* Delivery_In_Right;
-	
-	SpriteAnimation* Barista_Up;
-	SpriteAnimation* Barista_Down;
-	SpriteAnimation* Barista_Left;
-	SpriteAnimation* Barista_Right;
 };
 
 #endif

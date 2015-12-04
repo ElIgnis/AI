@@ -53,6 +53,10 @@
 		[Type] Quad
 	}
 	{
+		[NAME] HORSE
+		[Type] Quad
+	}
+	{
 		[NAME] CUSTOMER
 		[Type] SpriteAnimation
 		[SpriteRow] 4
@@ -96,12 +100,13 @@
 	}
 #Delivery Man Indoors######################################################
 	{
-		[NAME] SPRITE_DELIVERY_IN_UP
+		[NAME] SPRITE_DELIVERY_IN
 		[Type] SpriteAnimation
-		[SpriteRow] 1
+		[SpriteRow] 4
 		[SpriteCol] 3
 		# Init all animations in the sprite 
 		{
+			[NAME] Walk_Up
 			[ID] 0
 			[StartFrame] 0
 			[EndFrame] 2
@@ -109,47 +114,29 @@
 			[Pause] false
 			[AnimationTime] 8
 		}
-	}
-	{
-		[NAME] SPRITE_DELIVERY_IN_DOWN
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 3
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 2
+			[NAME] Walk_Down
+			[ID] 1
+			[StartFrame] 3
+			[EndFrame] 5
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 8
 		}
-	}
-	{
-		[NAME] SPRITE_DELIVERY_IN_LEFT
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 3
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 2
+			[NAME] Walk_Left
+			[ID] 2
+			[StartFrame] 6
+			[EndFrame] 8
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 8
 		}
-	}
-	{
-		[NAME] SPRITE_DELIVERY_IN_RIGHT
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 3
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 2
+			[NAME] Walk_Right
+			[ID] 3
+			[StartFrame] 9
+			[EndFrame] 11
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 8
@@ -157,12 +144,13 @@
 	}
 	#Delivery Man Outdoors######################################################
 	{
-		[NAME] SPRITE_DELIVERY_OUT_UP
+		[NAME] SPRITE_DELIVERY_OUT
 		[Type] SpriteAnimation
-		[SpriteRow] 1
+		[SpriteRow] 4
 		[SpriteCol] 4
 		# Init all animations in the sprite 
 		{
+			[NAME] Walk_Up
 			[ID] 0
 			[StartFrame] 0
 			[EndFrame] 3
@@ -170,47 +158,29 @@
 			[Pause] false
 			[AnimationTime] 4
 		}
-	}
-	{
-		[NAME] SPRITE_DELIVERY_OUT_DOWN
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 4
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 3
+			[NAME] Walk_Down
+			[ID] 1
+			[StartFrame] 4
+			[EndFrame] 7
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 4
 		}
-	}
-	{
-		[NAME] SPRITE_DELIVERY_OUT_LEFT
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 4
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 3
+			[NAME] Walk_Left
+			[ID] 2
+			[StartFrame] 8
+			[EndFrame] 11
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 4
 		}
-	}
-	{
-		[NAME] SPRITE_DELIVERY_OUT_RIGHT
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 4
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 3
+			[NAME] Walk_Right
+			[ID] 3
+			[StartFrame] 12
+			[EndFrame] 15
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 4
@@ -224,6 +194,7 @@
 		[SpriteCol] 3
 		# Init all animations in the sprite 
 		{
+			[NAME] Walk_Up
 			[ID] 0
 			[StartFrame] 0
 			[EndFrame] 2
@@ -231,47 +202,29 @@
 			[Pause] false
 			[AnimationTime] 8
 		}
-	}
-	{
-		[NAME] SPRITE_BARISTA_DOWN
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 3
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 2
+			[NAME] Walk_Down
+			[ID] 1
+			[StartFrame] 3
+			[EndFrame] 5
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 8
 		}
-	}
-	{
-		[NAME] SPRITE_BARISTA_LEFT
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 3
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 2
+			[NAME] Walk_Left
+			[ID] 2
+			[StartFrame] 6
+			[EndFrame] 8
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 8
 		}
-	}
-	{
-		[NAME] SPRITE_BARISTA_RIGHT
-		[Type] SpriteAnimation
-		[SpriteRow] 1
-		[SpriteCol] 3
-		# Init all animations in the sprite 
 		{
-			[ID] 0
-			[StartFrame] 0
-			[EndFrame] 2
+			[NAME] Walk_Right
+			[ID] 3
+			[StartFrame] 9
+			[EndFrame] 11
 			[Repeat] true
 			[Pause] false
 			[AnimationTime] 8

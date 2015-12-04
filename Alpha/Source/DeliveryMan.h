@@ -29,6 +29,15 @@ public:
 		POS_INDEX,
 	};
 
+	enum SPRITES_INDOOR
+	{
+		WALK_DOWN,
+		WALK_LEFT,
+		WALK_RIGHT,
+		WALK_UP,
+		NUM_SPRITES,
+	};
+
 	DeliveryMan();
 	~DeliveryMan();
 
@@ -46,11 +55,12 @@ public:
 
 	//Outdoor controls
 	bool GenerateOrder(void);
-	bool getOutdoor(void);
-
 	int RandomizePath(void);
-	
+
+	bool getOutdoor(void);
 	void setOutdoor(const bool isOutDoor);
+
+	bool getInCarriage(void);
 
 	void ReadWayPoints_Eat(string fileName);
 	void ReadWayPoints_Sleep(string fileName);
@@ -72,10 +82,15 @@ public:
 	vector<Vector2> ReturnCurrentPath;
 	bool UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt);
 
-	SpriteAnimation* GetSpriteAnim(void);
-	void SetSpriteAnim(SpriteAnimation* NewSpriteAnim);
+	SpriteAnimation* GetIndoorSpriteAnim(void);
+	SpriteAnimation* GetOutdoorSpriteAnim(void);
+	void SetIndoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
+	void SetOutdoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	
 private:
+	SpriteAnimation* spriteAnim_Indoor;
+	SpriteAnimation* spriteAnim_Outdoor;
+
 	STATES currentState;
 	bool m_bNeedToEat;
 	bool m_bNeedToSleep;
@@ -83,6 +98,7 @@ private:
 	bool m_bReturn;
 	bool m_bPathAssigned;
 	bool m_bPendingDelivery;
+	bool m_bInCarriage;
 
 	int m_iHoursNeeded;
 	int m_iResult;
