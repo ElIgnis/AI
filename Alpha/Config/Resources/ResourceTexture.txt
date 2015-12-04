@@ -30,6 +30,10 @@
 		[NAME] GAME_SHOP
 		[Directory] Config\\Resources\\Texture\\Shop.tga
 	}
+	{
+		[NAME] Question_mark
+		[Directory] Config\\Resources\\Texture\\QuestionMark.tga
+	}
 	#Delivery Man Indoors
 	{
 		[NAME] Sprite_Delivery_In_Down
@@ -83,6 +87,6 @@
 	}
 	{
 		[NAME] CUSTOMER_SPRITE
-		[Directory] Config\\Resources\\Texture\\Barista\\CustomerSprite.tga
+		[Directory] Config\\Resources\\Texture\\CustomerSprite.tga
 	}
 }

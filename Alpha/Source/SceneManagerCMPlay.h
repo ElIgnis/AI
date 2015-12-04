@@ -64,6 +64,7 @@ private:
 	DeliveryMan* deliveryMan;
 
 	vector<Customer*> m_cCustomerList;	//List containing all customers
+	float m_fCustomerSpawn;
 
 	vector<Vector2> m_v2CustomerWaypointsOUTDOOR;	//List containing all Outdoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerWaypointsINDOOR;	//List containing all Indoor waypoints for customer in scene

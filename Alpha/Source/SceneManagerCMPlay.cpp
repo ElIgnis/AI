@@ -6,6 +6,7 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_iWeather(1)
 	, order(false)
 	, deliveryMan(NULL)
+	, m_fCustomerSpawn(0.f)
 {
 }
 
@@ -61,8 +62,9 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	//20 customers in list
 	for (unsigned i = 0; i < 20; ++i)
 	{
-		m_cCustomerList.push_back(new Customer(m_v2CustomerWaypointsOUTDOOR.at(0)));
-		m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
+		Customer* temp = new Customer(m_v2CustomerWaypointsOUTDOOR.at(0));
+		temp->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
+		m_cCustomerList.push_back(temp);
 	}
 
 	deliveryMan = new DeliveryMan();
@@ -149,8 +151,6 @@ void SceneManagerCMPlay::Update(double dt)
 		FetchCustomer();
 		m_fInputDelay = 0.f;
 	}
-
-
 	if (inputManager->getKey("SHOP_DISPLAY") && m_fInputDelay > m_fMAX_DELAY)
 	{
 		if (m_bDisplay_shop == false){
@@ -162,6 +162,12 @@ void SceneManagerCMPlay::Update(double dt)
 		m_fInputDelay = 0.f;
 	}
 
+	if (m_fCustomerSpawn >= 1.5f)
+	{
+		FetchCustomer();
+		m_fCustomerSpawn = 0.f;
+	}
+	m_fCustomerSpawn += (float)dt;
 	m_fInputDelay += (float)dt;
 
 	//Increase time based on dt
@@ -541,6 +547,12 @@ void SceneManagerCMPlay::RenderMobileObject()
 				if (m_cCustomerList[i]->getOutdoorStatus())
 				{
 					Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					if (m_cCustomerList[i]->getCurrentState() == Customer::S_DECIDE)
+					{
+						drawMesh = resourceManager.retrieveMesh("QUESTION_MARK");
+						drawMesh->textureID = resourceManager.retrieveTexture("Question_mark");
+						Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(m_cCustomerList[i]->getCurrentPos().x, m_cCustomerList[i]->getCurrentPos().y + 50.f));
+					}
 				}
 			}
 		}

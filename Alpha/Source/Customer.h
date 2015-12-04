@@ -55,6 +55,7 @@ public:
 	void setSprite(SpriteAnimation* sprite);	//Set current sprite
 	SpriteAnimation* getSprite(void);	//Get current sprite
 
+	STATES getState(void);	//Get current state
 private:
 	STATES currentState;	//Current state
 

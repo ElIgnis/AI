@@ -222,3 +222,8 @@ SpriteAnimation* Customer::getSprite(void)
 {
 	return this->currentSprite;
 }
+
+Customer::STATES Customer::getState(void)
+{
+	return this->currentState;
+}
