@@ -5,6 +5,7 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, order(false)
+	, deliveryMan(NULL)
 {
 }
 
@@ -60,6 +61,9 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	{
 		m_cCustomerList.push_back(new Customer(m_v2CustomerWaypointsOUTDOOR.at(0)));
 	}
+
+	deliveryMan = new DeliveryMan();
+	deliveryMan->Init();
 }
 
 void SceneManagerCMPlay::InitSprites()
@@ -106,6 +110,23 @@ void SceneManagerCMPlay::InitSprites()
 	Barista_Right->textureID = resourceManager.retrieveTexture("Sprite_Barista_Right");
 }
 
+void SceneManagerCMPlay::InitWayPoints()
+{
+	//Init Indoor waypoints
+	//Eating<->Idle 
+	//deliveryMan->InitWayPoints_Eat(Vector2());
+
+	//Sleeping<->Idle
+
+	//Idle<->Delivering
+
+	//Path One
+
+	//Path Two
+
+	//Path Three
+}
+
 void SceneManagerCMPlay::Update(double dt)
 {
 	SceneManagerGameplay::Update(dt);
@@ -141,18 +162,25 @@ void SceneManagerCMPlay::Update(double dt)
 	m_fInputDelay += (float)dt;
 
 	//Increase time based on dt
-	m_fMinutes += (float)10 * dt;
+	m_fMinutes += (float)20 * dt;
 
+	//Updating world time
 	if (m_fMinutes > 60){
 		m_iWorldTime += 100;
 		m_fMinutes = 0;
+
+		//Generates a probability of getting an order when idle every hour
+		if (deliveryMan->getCurrentState() == DeliveryMan::S_IDLE)
+			order = deliveryMan->GenerateOrder();
 	}
 		
+	//Resetting world time to a new day
 	if (m_iWorldTime == 2400){
 		m_iWorldTime = 0;
 	}
-	order = false;
-
+	
+	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order);
+	//std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
 	//Update customer waypoints
 	for (unsigned a = 0; a < m_cCustomerList.size(); ++a)
 	{
@@ -339,6 +367,11 @@ void SceneManagerCMPlay::Exit()
 		Customer *customer = m_cCustomerList.back();
 		delete customer;
 		m_cCustomerList.pop_back();
+	}
+	if (deliveryMan)
+	{
+		delete deliveryMan;
+		deliveryMan = NULL;
 	}
 	SceneManagerGameplay::Exit();
 }
@@ -543,13 +576,29 @@ void SceneManagerCMPlay::RenderUIInfo()
 	drawMesh = resourceManager.retrieveMesh("FONT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
+	RenderTextOnScreen(drawMesh, std::to_string(deliveryMan->getCurrentState()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
 }
 
 void SceneManagerCMPlay::RenderSprites()
 {
 	//Render all the sprites here
-	Render2DMesh(Delivery_Out_Left, false, Vector2(100, 50), Vector2(600, 700));
-	Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), Vector2(650, 600));
+
+	//Indoor deliveryman
+	if (m_bDisplay_shop)
+	{
+		if (!deliveryMan->getOutdoor())
+		Render2DMesh(Delivery_In_Up, false, Vector2(50, 50), deliveryMan->GetPos());
+	}
+
+	//Outdoor deliveryman
+	else
+	{
+		if (deliveryMan->getOutdoor())
+			Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), deliveryMan->GetPos());
+	}
+	std::cout << deliveryMan->m_bPendingDelivery << std::endl;
+	//Render2DMesh(Delivery_Out_Left, false, Vector2(100, 50), Vector2(600, 700));
+	//Render2DMesh(Delivery_Out_Up, false, Vector2(50, 100), Vector2(650, 600));
 }
 
 

@@ -1,0 +1,4 @@
+#Waypoints for moving between Idle and Sleep
+#Format first line = Type of Waypoints
+585,895
+505,940

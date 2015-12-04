@@ -1,0 +1,8 @@
+#Waypoints for moving between Idle and Eat
+#Format first line = Type of Waypoints
+#Room
+585,895
+#Near table
+585,700
+#Table
+630,700
