@@ -16,6 +16,7 @@ Customer::Customer(Vector2 startPos) :
 	m_v2BuyPos = Vector2(1080, 600);
 	m_v2WaitPos = Vector2(800, 500);
 	m_v2PickupPos = Vector2(1000, 600);
+	currentSprite = new SpriteAnimation();
 }
 Customer::~Customer()
 {
@@ -153,6 +154,8 @@ void Customer::Update(double dt, int worldTime, int weather)
 	case S_STAY:
 		break;
 	}
+
+	currentSprite->Update(dt);
 }
 
 void Customer::UpdateFSM()
@@ -208,4 +211,14 @@ bool Customer::getInQueueStatus()
 void Customer::setInQueueStatus(bool inqueue)
 {
 	this->m_bInQueue = inqueue;
+}
+
+void Customer::setSprite(SpriteAnimation* sprite)
+{
+	*(this->currentSprite) = *sprite;
+	this->currentSprite->currentAni = WALK_DOWN;
+}
+SpriteAnimation* Customer::getSprite(void)
+{
+	return this->currentSprite;
 }

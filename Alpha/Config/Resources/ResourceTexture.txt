@@ -81,4 +81,8 @@
 		[NAME] Sprite_Barista_Right
 		[Directory] Config\\Resources\\Texture\\Barista\\Barista_Right.tga
 	}
+	{
+		[NAME] CUSTOMER_SPRITE
+		[Directory] Config\\Resources\\Texture\\Barista\\CustomerSprite.tga
+	}
 }

@@ -56,10 +56,13 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	//Starting queue position
 	m_v2CustomerQueueingPosition.push_back(Vector2(1080, 600));
 
+	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER");
+	drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE");
 	//20 customers in list
 	for (unsigned i = 0; i < 20; ++i)
 	{
 		m_cCustomerList.push_back(new Customer(m_v2CustomerWaypointsOUTDOOR.at(0)));
+		m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
 	}
 
 	deliveryMan = new DeliveryMan();
@@ -519,8 +522,6 @@ void SceneManagerCMPlay::RenderMobileObject()
 
 	
 	//Render all customers from list
-	drawMesh = resourceManager.retrieveMesh("CUSTOMER");
-	drawMesh->textureID = resourceManager.retrieveTexture("SKYPLANE_TOP");
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
 		//Only render if customers are active
@@ -531,7 +532,7 @@ void SceneManagerCMPlay::RenderMobileObject()
 			{
 				if (m_cCustomerList[i]->getOutdoorStatus() == false)
 				{
-					Render2DMesh(drawMesh, false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					Render2DMesh(m_cCustomerList[i]->getSprite() , false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
 				}
 			}
 			//Render outdoor customers
@@ -539,7 +540,7 @@ void SceneManagerCMPlay::RenderMobileObject()
 			{
 				if (m_cCustomerList[i]->getOutdoorStatus())
 				{
-					Render2DMesh(drawMesh, false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
 				}
 			}
 		}

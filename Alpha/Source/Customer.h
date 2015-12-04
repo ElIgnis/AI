@@ -4,6 +4,7 @@
 #include "GameObject2D.h"
 #include "SceneManager.h"
 #include "Vector2.h"
+#include "SpriteAnimation.h"
 
 class Customer : GameObject2D
 {
@@ -19,6 +20,15 @@ public:
 		S_PICKUP,
 		S_STAY,
 		NUM_STATES
+	};
+
+	enum SPRITES
+	{
+		WALK_DOWN,
+		WALK_LEFT,
+		WALK_RIGHT,
+		WALK_UP,
+		NUM_SPRITES
 	};
 
 	Customer(Vector2 startPos);	//Default constructor
@@ -42,6 +52,9 @@ public:
 
 	int CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
 
+	void setSprite(SpriteAnimation* sprite);	//Set current sprite
+	SpriteAnimation* getSprite(void);	//Get current sprite
+
 private:
 	STATES currentState;	//Current state
 
@@ -62,6 +75,8 @@ private:
 	bool m_bPickedUp;	//Picked up drink 
 	bool m_bDeciding;	//Deciding boolean for feedback
 	float m_fDelay;	//Timer for delays
+
+	SpriteAnimation* currentSprite;
 };
 
 #endif
