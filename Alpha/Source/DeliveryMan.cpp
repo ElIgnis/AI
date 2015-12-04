@@ -542,7 +542,6 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 	{
 		if (UpdatePath(Exiting, true, dt))
 		{
-			m_bExiting = false;
 			currentState = S_IDLE;
 			m_iStartHour = 0;
 		}

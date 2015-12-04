@@ -79,10 +79,8 @@ private:
 	bool m_bNeedToEat;
 	bool m_bNeedToSleep;
 	bool m_bOutdoor;
-	
 	bool m_bReturn;
 	bool m_bPathAssigned;
-	bool m_bExiting;
 
 	int m_iHoursNeeded;
 	int m_iResult;
