@@ -1,0 +1,6 @@
+#Waypoints for moving between Brew and Refill
+#Format first line = Type of Waypoints
+#Counter
+1080,700
+#Refill area
+800,700

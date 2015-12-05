@@ -6,6 +6,7 @@
 #include "DeliveryMan.h"
 #include "Customer.h"
 #include "Application.h"
+#include "Barista.h"
 
 struct CustomerShopWaypoints
 {
@@ -35,7 +36,6 @@ public:
 	void RenderMobileObject();
 	void RenderWaypoints();	//Render waypoints for debug purposes
 	void RenderUIInfo();
-	void RenderSprites();
 
 	void FetchCustomer();	//Set new customer at spawn
 	void UpdateDeliveryMan(double dt);
@@ -52,12 +52,17 @@ private:
 	int m_iWeather;
 	bool order;
 
+	//Order stuff
+	int ingredients;
+	int NumOrders;
+
 	bool m_bDisplay_shop;
 	int m_iWorldTime;
 	float m_fMinutes;
 
 	vector<DeliveryMan*> m_cDeliveryList;	//List containing all delivery guy(GTH)
 	DeliveryMan* deliveryMan;
+	Barista* barista;
 
 	vector<Customer*> m_cCustomerList;	//List containing all customers
 	float m_fCustomerSpawn;

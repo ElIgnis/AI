@@ -22,9 +22,9 @@ DeliveryMan::DeliveryMan()
 
 , m_bNeedToEat(false)
 , m_bOutdoor(false)
+, m_bExiting(false)
 , m_bNeedToSleep(true)
 , m_bPendingDelivery(false)
-, m_bReturn(false)
 , m_bPathAssigned(false)
 , m_bInCarriage(false)
 
@@ -403,7 +403,22 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 			UpdatePath(Sleep, true, dt);
 	}
 
-	if (m_bNeedToEat)
+	// Sleeping portion
+	if (m_bNeedToSleep && !m_bExiting)
+	{
+		// Proceed to sleep after moving to sleeping area
+		if (UpdatePath(Sleep, false, dt))
+		{
+			currentState = S_SLEEPING;
+
+			//Assign the start of action hour
+			if (m_iStartHour == 0)
+				m_iStartHour = worldTime;
+		}
+	}
+
+	//Eating portion
+	else if (m_bNeedToEat && !m_bExiting)
 	{
 		// Proceed to eat after moving to eating area
 		if (UpdatePath(Eat, false, dt))
@@ -416,12 +431,13 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 		}
 	}
 
-	//Delivery portion
-	else if (m_bPendingDelivery && !m_bNeedToEat)
+	//Delivery only when no need to eat/sleep
+	else if (m_bPendingDelivery)
 	{
 		//Get out of cafe first
 		if (!m_bOutdoor)
 		{
+			m_bExiting = true;
 			if (m_v2CurrentPos == Exiting.at(2))
 				m_bInCarriage = true;
 
@@ -442,20 +458,6 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 
 			currentState = S_DELIVERING;
 			m_iCurrentPath = 0;
-		}
-	}
-
-	// Sleeping portion
-	if (m_bNeedToSleep)
-	{
-		// Proceed to sleep after moving to sleeping area
-		if (UpdatePath(Sleep, false, dt))
-		{
-			currentState = S_SLEEPING;
-
-			//Assign the start of action hour
-			if (m_iStartHour == 0)
-				m_iStartHour = worldTime;
 		}
 	}
 }
@@ -493,10 +495,13 @@ void DeliveryMan::UpdateSleeping(double dt, int worldTime)
 	//Finish eating after 1 hour
 	if (tempConversion > 700)
 	{
-		m_bNeedToSleep = false;
-		currentState = S_IDLE;
-		m_iStartHour = 0;
-		m_v2Direction.SetZero();
+		if (UpdatePath(Sleep, true, dt))
+		{
+			m_bNeedToSleep = false;
+			currentState = S_IDLE;
+			m_iStartHour = 0;
+			m_v2Direction.SetZero();
+		}
 	}
 }
 void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order)
@@ -504,7 +509,7 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 	//Generate time
 	if (m_bPendingDelivery)
 	{
-		if (worldTime > 600 && worldTime < 900 || worldTime > 1700 && worldTime < 2000)
+		if (worldTime >= 1700 && worldTime <= 2100)
 		{
 			m_iHoursNeeded = 2;
 		}
@@ -514,7 +519,6 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 		}
 
 		m_fTotalTime = (float)(weather * m_iHoursNeeded);
-		m_fMoveSpeed = 500.f * 1 / m_fTotalTime;
 	}
 
 	//Update and travel according to path and returns after hitting the last waypoint
@@ -580,13 +584,16 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 	if (!m_bOutdoor)
 	{
 		if (m_v2CurrentPos == Exiting.at(2))
+		{
 			m_bInCarriage = false;
+		}
 
 		if (UpdatePath(Exiting, true, dt))
 		{
 			currentState = S_IDLE;
 			m_iStartHour = 0;
 			m_v2Direction.SetZero();
+			m_bExiting = false;
 		}
 	}
 }
@@ -648,8 +655,6 @@ void DeliveryMan::AddWayPoints_Path3(Vector2 newWayPoint)
 
 bool DeliveryMan::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
 {
-	
-
 	//Assign the start point of path
 	if (!m_bPathAssigned)
 	{

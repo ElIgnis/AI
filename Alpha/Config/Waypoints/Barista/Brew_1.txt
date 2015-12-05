@@ -1,0 +1,7 @@
+#Waypoints for moving between Idle and Brew
+#Format first line = Type of Waypoints
+#Idle
+1130,750
+1130,700
+#Counter
+1080,700

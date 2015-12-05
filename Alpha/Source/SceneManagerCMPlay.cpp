@@ -5,7 +5,10 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, order(false)
+	, ingredients(100)
+	, NumOrders(0)
 	, deliveryMan(NULL)
+	, barista(NULL)
 	, m_fCustomerSpawn(0.f)
 {
 }
@@ -74,21 +77,18 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out");
 	deliveryMan->SetOutdoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+
+	barista = new Barista();
+	barista->Init();
+
+	drawMesh = resourceManager.retrieveMesh("SPRITE_BARISTA");
+	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Barista");
+	barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 }
 
 void SceneManagerCMPlay::Update(double dt)
 {
 	SceneManagerGameplay::Update(dt);
-
-	if (inputManager->getKey("START_DELIVERY") && m_fInputDelay > m_fMAX_DELAY)
-	{
-		order = true;
-		m_fInputDelay = 0.f;
-	}
-	else
-	{
-		order = false;
-	}
 
 	if (inputManager->getKey("NEW_CUSTOMER") && m_fInputDelay > m_fMAX_DELAY)
 	{
@@ -133,7 +133,9 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 	
 	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order);
+
 	std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
+
 	//Update customer waypoints
 	for (unsigned a = 0; a < m_cCustomerList.size(); ++a)
 	{
@@ -215,16 +217,23 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}
-
+	NumOrders = 0;
 	//Update all customers
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
 		//Only update if active
 		if (m_cCustomerList[i]->getActive())
 		{
+			//Update number of orders based on buying+queing customers
+			if (m_cCustomerList[i]->getState() == Customer::S_BUY || m_cCustomerList[i]->getState() == Customer::S_QUEUE)
+			{
+				++NumOrders;
+			}
 			m_cCustomerList[i]->Update(dt, m_iWorldTime, m_iWeather);
 		}
 	}
+
+	barista->Update(dt, NumOrders, ingredients);
 
 	//Uncomment the following line to play sound
 	//resourceManager.retrieveSound("MenuFeedback");
@@ -284,7 +293,6 @@ void SceneManagerCMPlay::Render()
 	RenderMobileObject();
 	RenderStaticObject();
 	RenderUIInfo();
-	RenderSprites();
 }
 
 void SceneManagerCMPlay::Exit()
@@ -451,6 +459,35 @@ void SceneManagerCMPlay::RenderMobileObject()
 			}
 		}
 	}
+
+	drawMesh = resourceManager.retrieveMesh("HORSE");
+	drawMesh->textureID = resourceManager.retrieveTexture("Horse");
+
+	//Indoor deliveryman
+	if (m_bDisplay_shop)
+	{
+		if (!deliveryMan->getOutdoor())
+		{
+			if (!deliveryMan->getInCarriage())
+			{
+				Render2DMesh(deliveryMan->GetIndoorSpriteAnim(), false, Vector2(50, 50), deliveryMan->GetPos());
+				Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(850, 895));
+			}
+
+			else
+				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(175, 175), deliveryMan->GetPos());
+		}
+		Render2DMesh(barista->GetSpriteAnim(), false, Vector2(50, 50), barista->GetPos());
+	}
+
+	//Outdoor deliveryman
+	else
+	{
+		if (deliveryMan->getOutdoor())
+		{
+			Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), deliveryMan->GetPos());
+		}
+	}
 }
 
 void SceneManagerCMPlay::RenderWaypoints()
@@ -483,8 +520,8 @@ void SceneManagerCMPlay::RenderUIInfo()
 	drawMesh = resourceManager.retrieveMesh("FONT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
-	RenderTextOnScreen(drawMesh, std::to_string(deliveryMan->getCurrentState()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
-
+	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(ingredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
+	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->m_iNumOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
 	switch (deliveryMan->getCurrentState())
 	{
 	case DeliveryMan::S_IDLE:
@@ -510,42 +547,25 @@ void SceneManagerCMPlay::RenderUIInfo()
 	default:
 		break;
 	}
-}
 
-void SceneManagerCMPlay::RenderSprites()
-{
-	//Render all the sprites here
-	Mesh* drawMesh;
-
-	drawMesh = resourceManager.retrieveMesh("HORSE");
-	drawMesh->textureID = resourceManager.retrieveTexture("Horse");
-
-	//Indoor deliveryman
-	if (m_bDisplay_shop)
+	switch (barista->getCurrentState())
 	{
-		if (!deliveryMan->getOutdoor())
-		{
-			if (!deliveryMan->getInCarriage())
-			{
-				Render2DMesh(deliveryMan->GetIndoorSpriteAnim(), false, Vector2(50, 50), deliveryMan->GetPos());
-				Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(850, 895));
-			}
-				
-			else
-				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(175, 175), deliveryMan->GetPos());
-		}
-	}
-
-	//Outdoor deliveryman
-	else
-	{
-		if (deliveryMan->getOutdoor())
-		{
-			Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), deliveryMan->GetPos());
-		}
+	case Barista::S_IDLE:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, barista->GetPos().x, barista->GetPos().y + 50, 0);
+		break;
+	case Barista::S_BREW:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Brewing", resourceManager.retrieveColor("Red"), 40, barista->GetPos().x - 15, barista->GetPos().y + 50, 0);
+		break;
+	case Barista::S_REFILL:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Refilling", resourceManager.retrieveColor("Red"), 40, barista->GetPos().x - 15, barista->GetPos().y + 50, 0);
+		break;
+	default:
+		break;
 	}
 }
-
 
 void SceneManagerCMPlay::FetchCustomer()
 {

@@ -95,7 +95,7 @@ private:
 	bool m_bNeedToEat;
 	bool m_bNeedToSleep;
 	bool m_bOutdoor;
-	bool m_bReturn;
+	bool m_bExiting;
 	bool m_bPathAssigned;
 	bool m_bPendingDelivery;
 	bool m_bInCarriage;

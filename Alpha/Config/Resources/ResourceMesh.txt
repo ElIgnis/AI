@@ -188,9 +188,9 @@
 	}
 	#Barista##############################################################
 	{
-		[NAME] SPRITE_BARISTA_UP
+		[NAME] SPRITE_BARISTA
 		[Type] SpriteAnimation
-		[SpriteRow] 1
+		[SpriteRow] 4
 		[SpriteCol] 3
 		# Init all animations in the sprite 
 		{
