@@ -10,6 +10,7 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, deliveryMan(NULL)
 	, barista(NULL)
 	, m_fCustomerSpawn(0.f)
+	, m_fCustomerRate(1.f)
 {
 }
 
@@ -106,10 +107,11 @@ void SceneManagerCMPlay::Update(double dt)
 		m_fInputDelay = 0.f;
 	}
 
-	if (m_fCustomerSpawn >= 1.5f)
+	if (m_fCustomerSpawn >= m_fCustomerRate)
 	{
 		FetchCustomer();
 		m_fCustomerSpawn = 0.f;
+		m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
 	}
 	m_fCustomerSpawn += (float)dt;
 	m_fInputDelay += (float)dt;
@@ -573,6 +575,7 @@ void SceneManagerCMPlay::FetchCustomer()
 	{
 		if (m_cCustomerList[i]->getActive() == false)
 		{
+			m_cCustomerList[i]->Reset();
 			m_cCustomerList[i]->setActive(true);
 			m_cCustomerList[i]->setStartPos(m_v2CustomerWaypointsOUTDOOR.at(0));
 			break;

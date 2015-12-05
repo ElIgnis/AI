@@ -65,7 +65,8 @@ private:
 	Barista* barista;
 
 	vector<Customer*> m_cCustomerList;	//List containing all customers
-	float m_fCustomerSpawn;
+	float m_fCustomerSpawn;	//Spawning timer
+	float m_fCustomerRate;	//Rate of spawn
 
 	vector<Vector2> m_v2CustomerWaypointsOUTDOOR;	//List containing all Outdoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerWaypointsINDOOR;	//List containing all Indoor waypoints for customer in scene

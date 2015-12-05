@@ -56,6 +56,8 @@ public:
 	SpriteAnimation* getSprite(void);	//Get current sprite
 
 	STATES getState(void);	//Get current state
+
+	void Reset(void);	//Reset variables
 private:
 	STATES currentState;	//Current state
 

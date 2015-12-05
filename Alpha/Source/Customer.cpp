@@ -91,6 +91,7 @@ void Customer::Update(double dt, int worldTime, int weather)
 				m_v2CurrentPos = m_v2NextPos;
 				currentState = S_IDLE;
 			}
+			currentSprite->Update(dt);
 		}
 		break;
 	case S_DECIDE:
@@ -154,8 +155,6 @@ void Customer::Update(double dt, int worldTime, int weather)
 	case S_STAY:
 		break;
 	}
-
-	currentSprite->Update(dt);
 }
 
 void Customer::UpdateFSM()
@@ -226,4 +225,17 @@ SpriteAnimation* Customer::getSprite(void)
 Customer::STATES Customer::getState(void)
 {
 	return this->currentState;
+}
+
+void Customer::Reset(void)
+{
+	currentState = S_WALKING;
+	m_fDistanceSq = 0.f;
+	m_bActive = false;
+	m_bOutdoor = true;
+	m_fDelay = 0.f;
+	m_bDeciding = false;
+	m_bPickedUp = false;
+	m_bQueue = false;
+	m_bInQueue = false;
 }
