@@ -18,7 +18,6 @@ public:
 		S_BUY,
 		S_WAIT,
 		S_PICKUP,
-		S_STAY,
 		NUM_STATES
 	};
 
@@ -49,6 +48,10 @@ public:
 
 	bool getInQueueStatus();	//Get queue status
 	void setInQueueStatus(bool inqueue);	//Get queue status
+	void setDrinkAvailable(bool available);	//set If drink available status
+
+	void setOrderPlaced(bool placed);	//Get whether customer has placed order
+	bool getOrderPlaced(void);	//Get whether customer has placed order
 
 	int CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
 
@@ -72,11 +75,13 @@ private:
 	Vector2 m_v2PickupPos;	//Pick up position inside shop
 
 	bool m_bActive;	//Active
+	bool m_bDrinkAvailable;	//If drinks availabe to pick up
 	bool m_bOutdoor;	//Outdoor / indoor status
 	bool m_bQueue;	//Start queuing
 	bool m_bInQueue;	//Inside queue
 	bool m_bPickedUp;	//Picked up drink 
 	bool m_bDeciding;	//Deciding boolean for feedback
+	bool m_bOrderPlaced;	//Placed Order status
 	float m_fDelay;	//Timer for delays
 
 	SpriteAnimation* currentSprite;

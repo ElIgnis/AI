@@ -219,27 +219,33 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}
-	NumOrders = 0;
+	
 	//Update all customers
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
 		//Only update if active
 		if (m_cCustomerList[i]->getActive())
 		{
-			//Update number of orders based on buying+queing customers
-			if (m_cCustomerList[i]->getState() == Customer::S_BUY || m_cCustomerList[i]->getState() == Customer::S_QUEUE)
+			//Update number of orders based on orders placed
+			if (m_cCustomerList[i]->getOrderPlaced())
 			{
-				++NumOrders;
+				barista->m_iNumOrders++;
+				m_cCustomerList[i]->setOrderPlaced(false);
+			}
+			else if (m_cCustomerList[i]->getState() == Customer::S_WAIT)
+			{
+				//Only if drinks are available to pick up
+				if (barista->GetDrinkPrepared())
+				{
+					m_cCustomerList[i]->setDrinkAvailable(true);
+					barista->SubtractDrinkPrepared();
+				}
 			}
 			m_cCustomerList[i]->Update(dt, m_iWorldTime, m_iWeather);
 		}
 	}
 
-	barista->Update(dt, NumOrders, ingredients);
-
-	//Uncomment the following line to play sound
-	//resourceManager.retrieveSound("MenuFeedback");
-	//tpCamera.UpdatePosition(Vector3(0, 0, 0), Vector3(0, 0, 0));
+	barista->Update(dt, ingredients);
 
 	fpCamera.Update(dt, 0);
 	//tpCamera.Update(dt);

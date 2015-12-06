@@ -9,7 +9,9 @@ Customer::Customer(Vector2 startPos) :
 		m_bDeciding(false),
 		m_bPickedUp(false),
 		m_bQueue(false),
-		m_bInQueue(false)
+		m_bInQueue(false),
+		m_bDrinkAvailable(false),
+		m_bOrderPlaced(false)
 {
 	m_v2CurrentPos = startPos;
 	m_v2ShopPos = Vector2(1080, 280);
@@ -129,17 +131,16 @@ void Customer::Update(double dt, int worldTime, int weather)
 		{
 			//Walk to wait position
 			currentState = S_WALKING;
+			m_bOrderPlaced = true;
 			m_bQueue = false;
 			m_fDelay = 0.f;
 		}		
 		break;
 	case S_WAIT:
-		m_fDelay += dt;
-		if (m_fDelay > 1.0f)
+		if (m_bDrinkAvailable == true)
 		{
-			//Walk to wait position
+			//Walk to pick up position
 			currentState = S_WALKING;
-			m_fDelay = 0.f;
 		}
 		break;
 	case S_PICKUP:
@@ -147,12 +148,10 @@ void Customer::Update(double dt, int worldTime, int weather)
 		if (m_fDelay > 0.1f)
 		{
 			m_bPickedUp = true;
-			//Walk to wait position
+			//Walk out of shop
 			currentState = S_WALKING;
 			m_fDelay = 0.f;
 		}
-		break;
-	case S_STAY:
 		break;
 	}
 }
@@ -227,6 +226,20 @@ Customer::STATES Customer::getState(void)
 	return this->currentState;
 }
 
+void Customer::setDrinkAvailable(bool available)
+{
+	this->m_bDrinkAvailable = available;
+}
+
+void Customer::setOrderPlaced(bool placed)
+{
+	this->m_bOrderPlaced = placed;
+}
+bool Customer::getOrderPlaced(void)
+{
+	return this->m_bOrderPlaced;
+}
+
 void Customer::Reset(void)
 {
 	currentState = S_WALKING;
@@ -238,4 +251,6 @@ void Customer::Reset(void)
 	m_bPickedUp = false;
 	m_bQueue = false;
 	m_bInQueue = false;
+	m_bDrinkAvailable = false;
+	m_bOrderPlaced = false;
 }

@@ -44,10 +44,10 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt, int numOrder, int& ingredients);
-	void UpdateIdle(double dt, int numOrder, int& ingredients);
-	void UpdateRefill(double dt, int numOrder, int& ingredients);
-	void UpdateBrew(double dt, int numOrder, int& ingredients);
+	void Update(double dt, int& ingredients);
+	void UpdateIdle(double dt, int& ingredients);
+	void UpdateRefill(double dt, int& ingredients);
+	void UpdateBrew(double dt, int& ingredients);
 	void Draw(SceneManager* sceneManager);
 
 	void ReadWayPoints_Refill(string fileName);
