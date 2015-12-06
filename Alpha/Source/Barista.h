@@ -59,6 +59,9 @@ public:
 	bool GetDrinkPrepared(void);
 	void SubtractDrinkPrepared(void);
 
+	void addNumOrders(const int numOrders);
+	int getNumOrders(void);
+
 	Vector2 GetPos();
 	Vector2 GetDir();
 
@@ -67,7 +70,7 @@ public:
 
 	SpriteAnimation* GetSpriteAnim(void);
 	void SetSpriteAnim(SpriteAnimation* NewSpriteAnim);
-	int m_iNumOrders;
+	
 private:
 	SpriteAnimation* spriteAnim;
 
@@ -77,7 +80,7 @@ private:
 	bool m_bPathAssigned;
 
 	int m_iNextPoint;
-	
+	int m_iNumOrders;
 	int m_iBrewBar;
 	int m_iDrinksPrepared;
 

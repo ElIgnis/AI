@@ -38,7 +38,6 @@ public:
 	void RenderUIInfo();
 
 	void FetchCustomer();	//Set new customer at spawn
-	void UpdateDeliveryMan(double dt);
 
 private:
 	const float m_fBGpos_MAX_y = 730.f;

@@ -229,7 +229,7 @@ void SceneManagerCMPlay::Update(double dt)
 			//Update number of orders based on orders placed
 			if (m_cCustomerList[i]->getOrderPlaced())
 			{
-				barista->m_iNumOrders++;
+				barista->addNumOrders(1);
 				m_cCustomerList[i]->setOrderPlaced(false);
 			}
 			else if (m_cCustomerList[i]->getState() == Customer::S_WAIT)
@@ -270,11 +270,6 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}*/
-}
-
-void SceneManagerCMPlay::UpdateDeliveryMan(double dt)
-{
-
 }
 
 void SceneManagerCMPlay::Render()
@@ -529,7 +524,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
 	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(ingredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
-	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->m_iNumOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
+	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
 	switch (deliveryMan->getCurrentState())
 	{
 	case DeliveryMan::S_IDLE:

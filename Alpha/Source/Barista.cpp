@@ -147,9 +147,11 @@ void Barista::Update(double dt, int& ingredients)
 		UpdateIdle(dt, ingredients);
 		break;
 	case S_REFILL:
+		m_v2Direction.Set(0, -1);
 		UpdateRefill(dt, ingredients);
 		break;
 	case S_BREW:
+		m_v2Direction.Set(0, -1);
 		UpdateBrew(dt, ingredients);
 		break;
 	default:
@@ -175,16 +177,6 @@ void Barista::UpdateIdle(double dt, int& ingredients)
 	//Continue to brew as long as there are orders
 	if (m_iNumOrders > 0)
 	{
-		//Refill ingredients if there are no more ingredients
-		if (ingredients == 0)
-		{
-			//Move to refill ingredients
-			if (UpdatePath(Refill, false, dt))
-			{
-				currentState = S_REFILL;
-			}
-		}
-
 		//Move to counter
 		if (UpdatePath(Brew, false, dt))
 		{
@@ -215,15 +207,15 @@ void Barista::UpdateRefill(double dt, int& ingredients)
 		if (m_iNumOrders > 0)
 		{
 			//Move back to counter
-			if (UpdatePath(Brew, true, dt))
+			if (UpdatePath(Refill, true, dt))
 			{
 				currentState = S_BREW;
 			}
 		}
 		else
 		{
-			//Move back to counter
-			if (UpdatePath(Refill, true, dt))
+			//Move back to idle
+			if (UpdatePath(Brew, true, dt))
 			{
 				currentState = S_IDLE;
 			}
@@ -249,11 +241,9 @@ void Barista::UpdateBrew(double dt, int& ingredients)
 	//Return to idle if there are no more orders
 	if (m_iNumOrders == 0)
 	{
+		currentState = S_IDLE;
 		//Move back to idle
-		if (UpdatePath(Brew, true, dt))
-		{
-			currentState = S_IDLE;
-		}
+		UpdatePath(Brew, true, dt);
 	}
 	if (ingredients == 0)
 	{
@@ -285,6 +275,16 @@ Vector2 Barista::GetPos(void)
 Vector2 Barista::GetDir(void)
 {
 	return m_v2Direction;
+}
+
+void Barista::addNumOrders(const int numOrders)
+{
+	this->m_iNumOrders += numOrders;
+}
+
+int Barista::getNumOrders(void)
+{
+	return m_iNumOrders;
 }
 
 void Barista::AddWayPoints_Refill(Vector2 newWayPoint)
