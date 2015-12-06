@@ -1,0 +1,7 @@
+#Waypoints for Ordering goods
+#Format first line = Type of Waypoints
+#Room
+585,725
+645,725
+585,725
+585,665

@@ -67,6 +67,11 @@
 		# [Key] NUM 2
 	}
 	{
+		[NAME] CHANGE_INGREDIENT
+		[Key] 0x33
+		# [Key] NUM 3
+	}
+	{
 		[NAME] START_DELIVERY
 		[Key] 0x20
 		# [Key] SPACEBAR

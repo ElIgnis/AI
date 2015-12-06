@@ -85,6 +85,13 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	drawMesh = resourceManager.retrieveMesh("SPRITE_BARISTA");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Barista");
 	barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+
+	storeMan = new StoreMan();
+	storeMan->Init();
+
+	drawMesh = resourceManager.retrieveMesh("STORE_MAN");
+	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_StoreMan");
+	storeMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*>(drawMesh));
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -104,6 +111,11 @@ void SceneManagerCMPlay::Update(double dt)
 		else if (m_bDisplay_shop == true){
 			m_bDisplay_shop = false;
 		}
+		m_fInputDelay = 0.f;
+	}
+	if (inputManager->getKey("CHANGE_INGREDIENT") && m_fInputDelay > m_fMAX_DELAY)
+	{
+		m_fIngredients = 0.f;
 		m_fInputDelay = 0.f;
 	}
 
@@ -247,6 +259,21 @@ void SceneManagerCMPlay::Update(double dt)
 
 	barista->Update(dt, ingredients);
 
+	storeMan->Update(dt, &m_fIngredients, &m_bOrderArrived, &m_bWaitingOrder);
+
+	if (m_bWaitingOrder)
+	{
+		UpdateGoodsDelivery(dt);
+	}
+
+	if (m_bDisplayCrate)
+	{
+		if (storeMan->GetPosition() == Vector2(500, 850))
+		{
+			m_bDisplayCrate = false;
+		}
+	}
+
 	fpCamera.Update(dt, 0);
 	//tpCamera.Update(dt);
 
@@ -270,6 +297,19 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}*/
+}
+
+void SceneManagerCMPlay::UpdateGoodsDelivery(double dt)
+{
+	//If waiting for order update waiting
+	m_fDeliveryTimeElapsed += dt;
+
+	if (m_fDeliveryTimeElapsed >= m_fMaxDeliveryTimer)
+	{
+		m_bOrderArrived = true;
+		m_bDisplayCrate = true;
+		m_fDeliveryTimeElapsed = 0.f;
+	}
 }
 
 void SceneManagerCMPlay::Render()
@@ -424,8 +464,34 @@ void SceneManagerCMPlay::RenderBG()
 }
 
 void SceneManagerCMPlay::RenderStaticObject()
-{
+{	
+	//Temp mesh used to draw
+	Mesh* drawMesh;
 	
+	if (m_bDisplay_shop)
+	{
+		drawMesh = resourceManager.retrieveMesh("GAME_TELEPHONE");
+		drawMesh->textureID = resourceManager.retrieveTexture("GAME_TELEPHONE");
+		Render2DMesh(drawMesh, false, Vector2(25, 25), Vector2(665, 725));
+
+		drawMesh = resourceManager.retrieveMesh("HORSEFLIP");
+		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
+		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
+
+		if (m_fIngredients >= 20)
+		{
+			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
+			drawMesh->textureID = resourceManager.retrieveTexture("GAME_CRATE");
+			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(825, 650));
+		}
+
+		if (m_bDisplayCrate)
+		{
+			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
+			drawMesh->textureID = resourceManager.retrieveTexture("GAME_CRATE");
+			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(450, 850));
+		}
+	}
 }
 
 void SceneManagerCMPlay::RenderMobileObject()
@@ -461,6 +527,12 @@ void SceneManagerCMPlay::RenderMobileObject()
 				}
 			}
 		}
+	}
+
+	//Render StoreMan
+	if (m_bDisplay_shop)
+	{
+		storeMan->Draw(this);
 	}
 
 	drawMesh = resourceManager.retrieveMesh("HORSE");
@@ -525,6 +597,26 @@ void SceneManagerCMPlay::RenderUIInfo()
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
 	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(ingredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
 	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
+	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 700, sceneHeight - 700, 0);
+
+	switch (storeMan->getCurrentState())
+	{
+	case StoreMan::S_IDLE:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x, storeMan->GetPosition().y + 50, 0);
+		break;
+	case StoreMan::S_NEWORDER:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Make Order", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x - 30, storeMan->GetPosition().y + 50, 0);
+		break;
+	case StoreMan::S_MOVEORDER:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Move Order", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x - 30, storeMan->GetPosition().y + 50, 0);
+		break;
+	default:
+		break;
+	}
+
 	switch (deliveryMan->getCurrentState())
 	{
 	case DeliveryMan::S_IDLE:

@@ -125,6 +125,7 @@
     <ClCompile Include="Source\SoundPool.cpp" />
     <ClCompile Include="Source\SpriteAnimation.cpp" />
     <ClCompile Include="Source\StaticGameObject.cpp" />
+    <ClCompile Include="Source\StoreMan.cpp" />
     <ClCompile Include="Source\TileSheet.cpp" />
     <ClCompile Include="Source\TPCamera.cpp" />
     <ClCompile Include="Source\Utility.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="Source\SoundPool.h" />
     <ClInclude Include="Source\SpriteAnimation.h" />
     <ClInclude Include="Source\StaticGameObject.h" />
+    <ClInclude Include="Source\StoreMan.h" />
     <ClInclude Include="Source\TileSheet.h" />
     <ClInclude Include="Source\TPCamera.h" />
     <ClInclude Include="Source\Utility.h" />

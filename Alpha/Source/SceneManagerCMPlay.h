@@ -7,6 +7,7 @@
 #include "Customer.h"
 #include "Application.h"
 #include "Barista.h"
+#include "StoreMan.h"
 
 struct CustomerShopWaypoints
 {
@@ -39,6 +40,8 @@ public:
 
 	void FetchCustomer();	//Set new customer at spawn
 
+	void UpdateGoodsDelivery(double dt); // Update the goods delivery status
+
 private:
 	const float m_fBGpos_MAX_y = 730.f;
 	const float m_fBGpos_MIN_y = 310.f;
@@ -55,6 +58,16 @@ private:
 	int ingredients;
 	int NumOrders;
 
+	//Shop Resources
+	float m_fIngredients = 100.f;
+
+	//OrderDelivery variables
+	bool m_bOrderArrived = false;
+	bool m_bWaitingOrder = false;
+	bool m_bDisplayCrate = false;
+	const float m_fMaxDeliveryTimer = 10.f;
+	float m_fDeliveryTimeElapsed = 9.f;
+
 	bool m_bDisplay_shop;
 	int m_iWorldTime;
 	float m_fMinutes;
@@ -62,6 +75,8 @@ private:
 	vector<DeliveryMan*> m_cDeliveryList;	//List containing all delivery guy(GTH)
 	DeliveryMan* deliveryMan;
 	Barista* barista;
+
+	StoreMan* storeMan; //Store man handler
 
 	vector<Customer*> m_cCustomerList;	//List containing all customers
 	float m_fCustomerSpawn;	//Spawning timer

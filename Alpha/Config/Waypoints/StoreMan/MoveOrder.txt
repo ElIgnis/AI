@@ -1,0 +1,9 @@
+#Waypoints for Moving goods
+#Format first line = Type of Waypoints
+#Bay
+585,850
+500,850
+585,850
+#Room
+585,665
+785,665

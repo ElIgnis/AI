@@ -213,6 +213,9 @@
     <ClCompile Include="Source\Barista.cpp">
       <Filter>AIs</Filter>
     </ClCompile>
+    <ClCompile Include="Source\StoreMan.cpp">
+      <Filter>AIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility.h">
@@ -369,6 +372,9 @@
       <Filter>AIs</Filter>
     </ClInclude>
     <ClInclude Include="Source\Barista.h">
+      <Filter>AIs</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StoreMan.h">
       <Filter>AIs</Filter>
     </ClInclude>
   </ItemGroup>

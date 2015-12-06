@@ -31,6 +31,14 @@
 		[Directory] Config\\Resources\\Texture\\Shop.tga
 	}
 	{
+		[NAME] GAME_CRATE
+		[Directory] Config\\Resources\\Texture\\Crate.tga
+	}
+	{
+		[NAME] GAME_TELEPHONE
+		[Directory] Config\\Resources\\Texture\\Telephone.tga
+	}
+	{
 		[NAME] Question_mark
 		[Directory] Config\\Resources\\Texture\\QuestionMark.tga
 	}
@@ -38,6 +46,11 @@
 	{
 		[NAME] Horse
 		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Horse.tga
+	}
+	#HorseFlip
+	{
+		[NAME] HorseFlip
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Horseflip.tga
 	}
 	#Delivery Man Indoors
 	{
@@ -53,6 +66,11 @@
 	{
 		[NAME] Sprite_Barista
 		[Directory] Config\\Resources\\Texture\\Barista\\Barista.tga
+	}
+	#Store Man
+	{
+		[NAME] Sprite_StoreMan
+		[Directory] Config\\Resources\\Texture\\StoreMan\\StoreMan.tga
 	}
 	{
 		[NAME] CUSTOMER_SPRITE

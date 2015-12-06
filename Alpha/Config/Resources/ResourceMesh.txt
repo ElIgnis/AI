@@ -45,6 +45,14 @@
 		[Type] Quad
 	}
 	{
+		[NAME] GAME_CRATE
+		[Type] Quad
+	}
+	{
+		[NAME] GAME_TELEPHONE
+		[Type] Quad
+	}
+	{
 		[NAME] CUSTOMER_WAYPOINT
 		[Type] Quad
 	}
@@ -54,6 +62,10 @@
 	}
 	{
 		[NAME] HORSE
+		[Type] Quad
+	}
+	{
+		[NAME] HORSEFLIP
 		[Type] Quad
 	}
 	{
@@ -189,6 +201,50 @@
 	#Barista##############################################################
 	{
 		[NAME] SPRITE_BARISTA
+		[Type] SpriteAnimation
+		[SpriteRow] 4
+		[SpriteCol] 3
+		# Init all animations in the sprite 
+		{
+			[NAME] Walk_Up
+			[ID] 0
+			[StartFrame] 0
+			[EndFrame] 2
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 8
+		}
+		{
+			[NAME] Walk_Down
+			[ID] 1
+			[StartFrame] 3
+			[EndFrame] 5
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 8
+		}
+		{
+			[NAME] Walk_Left
+			[ID] 2
+			[StartFrame] 6
+			[EndFrame] 8
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 8
+		}
+		{
+			[NAME] Walk_Right
+			[ID] 3
+			[StartFrame] 9
+			[EndFrame] 11
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 8
+		}
+	}
+	#Storeman##############################################################
+	{
+		[NAME] STORE_MAN
 		[Type] SpriteAnimation
 		[SpriteRow] 4
 		[SpriteCol] 3
