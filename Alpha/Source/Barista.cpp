@@ -137,14 +137,13 @@ void Barista::ReadWayPoints_Brew(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void Barista::Update(double dt, int& ingredients)
+void Barista::Update(double dt, float& ingredients, float& trash)
 {
-
 	//Need to start brewing if there is a order
 	switch (currentState)
 	{
 	case S_IDLE:
-		UpdateIdle(dt, ingredients);
+		UpdateIdle(dt);
 		break;
 	case S_REFILL:
 		m_v2Direction.Set(0, -1);
@@ -152,7 +151,7 @@ void Barista::Update(double dt, int& ingredients)
 		break;
 	case S_BREW:
 		m_v2Direction.Set(0, -1);
-		UpdateBrew(dt, ingredients);
+		UpdateBrew(dt, ingredients, trash);
 		break;
 	default:
 		break;
@@ -172,7 +171,7 @@ void Barista::Update(double dt, int& ingredients)
 		this->spriteAnim->currentAni = WALK_DOWN;
 }
 
-void Barista::UpdateIdle(double dt, int& ingredients)
+void Barista::UpdateIdle(double dt)
 {
 	//Continue to brew as long as there are orders
 	if (m_iNumOrders > 0)
@@ -190,7 +189,7 @@ void Barista::UpdateIdle(double dt, int& ingredients)
 			UpdatePath(Brew, true, dt);
 	}
 }
-void Barista::UpdateRefill(double dt, int& ingredients)
+void Barista::UpdateRefill(double dt, float& ingredients, float& reserve)
 {
 	m_fRefillProgress += dt;
 
@@ -198,6 +197,7 @@ void Barista::UpdateRefill(double dt, int& ingredients)
 	if (m_fRefillProgress >= m_fRefillTimer)
 	{
 		ingredients += 20;
+		reserve -= 20;
 		m_fRefillProgress = 0;
 	}
 
@@ -221,9 +221,8 @@ void Barista::UpdateRefill(double dt, int& ingredients)
 			}
 		}
 	}
-
 }
-void Barista::UpdateBrew(double dt, int& ingredients)
+void Barista::UpdateBrew(double dt, float& ingredients, float& trash)
 {
 	m_fBrewProgress += dt;
 	++m_iBrewBar;
@@ -233,6 +232,7 @@ void Barista::UpdateBrew(double dt, int& ingredients)
 	{
 		--m_iNumOrders;
 		ingredients -= 5;
+		trash += 5;
 		m_fBrewProgress = 0;
 		m_iBrewBar = 0;
 		++m_iDrinksPrepared;

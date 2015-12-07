@@ -61,7 +61,7 @@ private:
 
 	//Shop Resources
 	float m_fIngredients = 100.f;
-
+	float m_fReserve = 100.f;
 	float m_fTrash = 0.f;
 
 	//OrderDelivery variables
