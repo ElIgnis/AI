@@ -77,6 +77,18 @@
 		[Type] Quad
 	}
 	{
+		[NAME] DRINKS
+		[Type] Quad
+	}
+	{
+		[NAME] DRINKS_2
+		[Type] Quad
+	}
+	{
+		[NAME] FOOD
+		[Type] Quad
+	}
+	{
 		[NAME] CUSTOMER
 		[Type] SpriteAnimation
 		[SpriteRow] 4

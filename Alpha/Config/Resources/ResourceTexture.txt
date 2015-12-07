@@ -50,6 +50,18 @@
 		[NAME] Question_mark
 		[Directory] Config\\Resources\\Texture\\QuestionMark.tga
 	}
+	{
+		[NAME] Food
+		[Directory] Config\\Resources\\Texture\\Food.tga
+	}
+	{
+		[NAME] Drinks
+		[Directory] Config\\Resources\\Texture\\Drinks.tga
+	}
+	{
+		[NAME] Drinks_2
+		[Directory] Config\\Resources\\Texture\\Drinks_2.tga
+	}
 	#Horse
 	{
 		[NAME] Horse

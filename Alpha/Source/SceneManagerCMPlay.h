@@ -56,7 +56,6 @@ private:
 	bool order;
 
 	//Order stuff
-	int ingredients;
 	int NumOrders;
 
 	//Shop Resources

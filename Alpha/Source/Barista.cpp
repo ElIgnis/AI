@@ -196,8 +196,11 @@ void Barista::UpdateRefill(double dt, float& ingredients, float& reserve)
 	//Refill in units of 20 every second
 	if (m_fRefillProgress >= m_fRefillTimer)
 	{
-		ingredients += 20;
-		reserve -= 20;
+		if (reserve > 0)
+		{
+			ingredients += 20;
+			reserve -= 20;
+		}
 		m_fRefillProgress = 0;
 	}
 
@@ -256,10 +259,15 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash)
 
 bool Barista::GetDrinkPrepared(void)
 {
-	if (m_iDrinksPrepared != 0)
+	if (m_iDrinksPrepared > 0)
 		return true;
 	else 
 		return false;
+}
+
+int Barista::GetNumDrinkPrepared(void)
+{
+	return m_iDrinksPrepared;
 }
 
 void Barista::SubtractDrinkPrepared(void)

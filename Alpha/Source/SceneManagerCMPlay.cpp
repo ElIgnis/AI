@@ -5,7 +5,6 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, order(false)
-	, ingredients(100)
 	, NumOrders(0)
 	, deliveryMan(NULL)
 	, barista(NULL)
@@ -156,7 +155,7 @@ void SceneManagerCMPlay::Update(double dt)
 	
 	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order);
 
-	std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
+	//std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
 
 	//Update customer waypoints
 	for (unsigned a = 0; a < m_cCustomerList.size(); ++a)
@@ -525,6 +524,10 @@ void SceneManagerCMPlay::RenderStaticObject()
 		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
 		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
 
+		drawMesh = resourceManager.retrieveMesh("DRINKS");
+		drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
+		Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(1000, 660));
+
 		if (m_fReserve >= 20)
 		{
 			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
@@ -538,12 +541,24 @@ void SceneManagerCMPlay::RenderStaticObject()
 			drawMesh->textureID = resourceManager.retrieveTexture("GAME_RUBBISHBAG");
 			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(515, 725));
 		}
-
 		if (m_bDisplayCrate)
 		{
 			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
 			drawMesh->textureID = resourceManager.retrieveTexture("GAME_CRATE");
 			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(450, 850));
+		}
+		if (barista->getCurrentState() == Barista::S_BREW)
+		{
+			drawMesh = resourceManager.retrieveMesh("DRINKS_2");
+			drawMesh->textureID = resourceManager.retrieveTexture("Drinks_2");
+			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1050, 660));
+			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1100, 660));
+		}
+		//if (deliveryMan->getCurrentState() == DeliveryMan::S_EATING)
+		{
+			drawMesh = resourceManager.retrieveMesh("FOOD");
+			drawMesh->textureID = resourceManager.retrieveTexture("Food");
+			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(670, 690));
 		}
 	}
 }
@@ -650,7 +665,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 	drawMesh = resourceManager.retrieveMesh("FONT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
-	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(ingredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
+	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
 	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
 	RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 700, 0);
 
