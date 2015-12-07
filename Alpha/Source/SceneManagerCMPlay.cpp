@@ -122,7 +122,7 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 	if (inputManager->getKey("CHANGE_INGREDIENT") && m_fInputDelay > m_fMAX_DELAY)
 	{
-		m_fIngredients = 0.f;
+		m_fReserve = 0.f;
 		m_fInputDelay = 0.f;
 		m_fTrash = 100.0f;
 	}
@@ -267,7 +267,7 @@ void SceneManagerCMPlay::Update(double dt)
 
 	barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve);
 
-	storeMan->Update(dt, &m_fIngredients, &m_bOrderArrived, &m_bWaitingOrder);
+	storeMan->Update(dt, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
 
 	if (m_bWaitingOrder)
 	{
@@ -525,7 +525,7 @@ void SceneManagerCMPlay::RenderStaticObject()
 		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
 		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
 
-		if (m_fIngredients >= 20)
+		if (m_fReserve >= 20)
 		{
 			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
 			drawMesh->textureID = resourceManager.retrieveTexture("GAME_CRATE");
