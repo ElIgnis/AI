@@ -265,7 +265,7 @@ void SceneManagerCMPlay::Update(double dt)
 		}
 	}
 
-	barista->Update(dt, ingredients);
+	barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve);
 
 	storeMan->Update(dt, &m_fIngredients, &m_bOrderArrived, &m_bWaitingOrder);
 

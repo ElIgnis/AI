@@ -44,7 +44,7 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt, float& ingredients, float& trash);
+	void Update(double dt, float& ingredients, float& trash, float& reserve);
 	void UpdateIdle(double dt);
 	void UpdateRefill(double dt, float& ingredients, float& reserve);
 	void UpdateBrew(double dt, float& ingredients, float& trash);

@@ -137,7 +137,7 @@ void Barista::ReadWayPoints_Brew(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void Barista::Update(double dt, float& ingredients, float& trash)
+void Barista::Update(double dt, float& ingredients, float& trash, float& reserve)
 {
 	//Need to start brewing if there is a order
 	switch (currentState)
@@ -147,7 +147,7 @@ void Barista::Update(double dt, float& ingredients, float& trash)
 		break;
 	case S_REFILL:
 		m_v2Direction.Set(0, -1);
-		UpdateRefill(dt, ingredients);
+		UpdateRefill(dt, ingredients, reserve);
 		break;
 	case S_BREW:
 		m_v2Direction.Set(0, -1);
