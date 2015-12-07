@@ -8,6 +8,7 @@
 #include "Application.h"
 #include "Barista.h"
 #include "StoreMan.h"
+#include "RubbishMan.h"
 
 struct CustomerShopWaypoints
 {
@@ -61,10 +62,15 @@ private:
 	//Shop Resources
 	float m_fIngredients = 100.f;
 
+	float m_fTrash = 0.f;
+
 	//OrderDelivery variables
 	bool m_bOrderArrived = false;
 	bool m_bWaitingOrder = false;
 	bool m_bDisplayCrate = false;
+	bool m_bDisplayTrash = false;
+	bool m_bCarryingTrash = false;
+
 	const float m_fMaxDeliveryTimer = 10.f;
 	float m_fDeliveryTimeElapsed = 9.f;
 
@@ -77,6 +83,7 @@ private:
 	Barista* barista;
 
 	StoreMan* storeMan; //Store man handler
+	RubbishMan* rubbishMan;
 
 	vector<Customer*> m_cCustomerList;	//List containing all customers
 	float m_fCustomerSpawn;	//Spawning timer

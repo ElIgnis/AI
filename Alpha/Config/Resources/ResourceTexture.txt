@@ -35,6 +35,14 @@
 		[Directory] Config\\Resources\\Texture\\Crate.tga
 	}
 	{
+		[NAME] GAME_RUBBISHBIN
+		[Directory] Config\\Resources\\Texture\\RubbishBin.tga
+	}
+	{
+		[NAME] GAME_RUBBISHBAG
+		[Directory] Config\\Resources\\Texture\\RubbishBag.tga
+	}
+	{
 		[NAME] GAME_TELEPHONE
 		[Directory] Config\\Resources\\Texture\\Telephone.tga
 	}
@@ -71,6 +79,11 @@
 	{
 		[NAME] Sprite_StoreMan
 		[Directory] Config\\Resources\\Texture\\StoreMan\\StoreMan.tga
+	}
+	#Rubbish Man
+	{
+		[NAME] Sprite_RubbishMan
+		[Directory] Config\\Resources\\Texture\\RubbishMan\\RubbishMan.tga
 	}
 	{
 		[NAME] CUSTOMER_SPRITE

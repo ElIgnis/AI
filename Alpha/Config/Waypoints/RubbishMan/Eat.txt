@@ -1,0 +1,7 @@
+#Waypoints for eating
+#Format first line = Type of Waypoints
+#Bay
+585,850
+#Room
+585,725
+640,725

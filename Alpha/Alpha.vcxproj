@@ -116,6 +116,7 @@
     <ClCompile Include="Source\PlayStateCM.cpp" />
     <ClCompile Include="Source\ResourceManager.cpp" />
     <ClCompile Include="Source\ResourcePool.cpp" />
+    <ClCompile Include="Source\RubbishMan.cpp" />
     <ClCompile Include="Source\SceneManager.cpp" />
     <ClCompile Include="Source\SceneManagerCMMenu.cpp" />
     <ClCompile Include="Source\SceneManagerCMPlay.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="Source\PlayStateCM.h" />
     <ClInclude Include="Source\ResourceManager.h" />
     <ClInclude Include="Source\ResourcePool.h" />
+    <ClInclude Include="Source\RubbishMan.h" />
     <ClInclude Include="Source\Scene.h" />
     <ClInclude Include="Source\SceneManager.h" />
     <ClInclude Include="Source\SceneManagerCMMenu.h" />

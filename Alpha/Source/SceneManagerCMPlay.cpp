@@ -92,6 +92,13 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	drawMesh = resourceManager.retrieveMesh("STORE_MAN");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_StoreMan");
 	storeMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*>(drawMesh));
+
+	rubbishMan = new RubbishMan();
+	rubbishMan->Init();
+
+	drawMesh = resourceManager.retrieveMesh("RUBBISH_MAN");
+	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_RubbishMan");
+	rubbishMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*>(drawMesh));
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -117,6 +124,7 @@ void SceneManagerCMPlay::Update(double dt)
 	{
 		m_fIngredients = 0.f;
 		m_fInputDelay = 0.f;
+		m_fTrash = 100.0f;
 	}
 
 	if (m_fCustomerSpawn >= m_fCustomerRate)
@@ -274,6 +282,30 @@ void SceneManagerCMPlay::Update(double dt)
 		}
 	}
 
+	rubbishMan->Update(dt, m_iWorldTime, &m_fTrash);
+
+	if (m_fTrash >= 80 && !m_bCarryingTrash)
+	{
+		m_bDisplayTrash = true;
+	}
+	else if (m_fTrash >= 80 && m_bCarryingTrash)
+	{
+		m_bDisplayTrash = false;
+	}
+	
+	if (m_fTrash == 0)
+	{
+		m_bCarryingTrash = false;
+	}
+
+	if (m_bDisplayTrash)
+	{
+		if (rubbishMan->GetPosition() == Vector2(545, 725))
+		{
+			m_bCarryingTrash = true;
+		}
+	}
+
 	fpCamera.Update(dt, 0);
 	//tpCamera.Update(dt);
 
@@ -357,6 +389,17 @@ void SceneManagerCMPlay::Exit()
 		delete deliveryMan;
 		deliveryMan = NULL;
 	}
+	if (storeMan)
+	{
+		delete storeMan;
+		storeMan = NULL;
+	}
+	if (rubbishMan)
+	{
+		delete rubbishMan;
+		rubbishMan = NULL;
+	}
+
 	SceneManagerGameplay::Exit();
 }
 
@@ -472,7 +515,11 @@ void SceneManagerCMPlay::RenderStaticObject()
 	{
 		drawMesh = resourceManager.retrieveMesh("GAME_TELEPHONE");
 		drawMesh->textureID = resourceManager.retrieveTexture("GAME_TELEPHONE");
-		Render2DMesh(drawMesh, false, Vector2(25, 25), Vector2(665, 725));
+		Render2DMesh(drawMesh, false, Vector2(25, 25), Vector2(700, 725));
+
+		drawMesh = resourceManager.retrieveMesh("GAME_RUBBISHBIN");
+		drawMesh->textureID = resourceManager.retrieveTexture("GAME_RUBBISHBIN");
+		Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(710, 950));
 
 		drawMesh = resourceManager.retrieveMesh("HORSEFLIP");
 		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
@@ -483,6 +530,13 @@ void SceneManagerCMPlay::RenderStaticObject()
 			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
 			drawMesh->textureID = resourceManager.retrieveTexture("GAME_CRATE");
 			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(825, 650));
+		}
+
+		if (m_bDisplayTrash)
+		{
+			drawMesh = resourceManager.retrieveMesh("GAME_RUBBISHBAG");
+			drawMesh->textureID = resourceManager.retrieveTexture("GAME_RUBBISHBAG");
+			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(515, 725));
 		}
 
 		if (m_bDisplayCrate)
@@ -533,6 +587,7 @@ void SceneManagerCMPlay::RenderMobileObject()
 	if (m_bDisplay_shop)
 	{
 		storeMan->Draw(this);
+		rubbishMan->Draw(this);
 	}
 
 	drawMesh = resourceManager.retrieveMesh("HORSE");
@@ -597,7 +652,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
 	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(ingredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
 	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
-	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 700, sceneHeight - 700, 0);
+	RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 700, sceneHeight - 700, 0);
 
 	switch (storeMan->getCurrentState())
 	{
@@ -612,6 +667,24 @@ void SceneManagerCMPlay::RenderUIInfo()
 	case StoreMan::S_MOVEORDER:
 		if (m_bDisplay_shop)
 			RenderTextOnScreen(drawMesh, "Move Order", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x - 30, storeMan->GetPosition().y + 50, 0);
+		break;
+	default:
+		break;
+	}
+
+	switch (rubbishMan->getCurrentState())
+	{
+	case RubbishMan::S_IDLE:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, rubbishMan->GetPosition().x, rubbishMan->GetPosition().y + 50, 0);
+		break;
+	case RubbishMan::S_EAT:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Eat", resourceManager.retrieveColor("Red"), 40, rubbishMan->GetPosition().x, rubbishMan->GetPosition().y + 50, 0);
+		break;
+	case RubbishMan::S_TAKETRASH:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Take Trash", resourceManager.retrieveColor("Red"), 40, rubbishMan->GetPosition().x - 30, rubbishMan->GetPosition().y + 50, 0);
 		break;
 	default:
 		break;

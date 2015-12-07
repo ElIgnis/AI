@@ -1,12 +1,14 @@
-#include "StoreMan.h"
+#include "RubbishMan.h"
 
 
-StoreMan::StoreMan()
+RubbishMan::RubbishMan()
 	: m_bTaskFinish(true)
-	, m_bWaitingOrder(false)
 	, currentState(S_IDLE)
+	, m_bNeedToEat(false)
 	, m_bPathAssigned(false)
+	, m_bSeated(false)
 	, m_fMoveSpeed(150.f)
+	, m_iActionDuration(0)
 	, m_iReadLine(0)
 	, WPData("")
 	, m_cSplit_Char(',')
@@ -14,27 +16,144 @@ StoreMan::StoreMan()
 }
 
 
-StoreMan::~StoreMan()
+RubbishMan::~RubbishMan()
 {
 }
 
-void StoreMan::Init()
+void RubbishMan::Init()
 {
 	spriteAnim = new SpriteAnimation();
 
-	ReadWayPoints_MoveOrder("Config\\Waypoints\\StoreMan\\MoveOrder.txt");
-	ReadWayPoints_NewOrder("Config\\Waypoints\\StoreMan\\MakeOrder.txt");
-	ReadWayPoints_StartPosition("Config\\Waypoints\\StoreMan\\StartPoint.txt");
+	ReadWayPoints_Eat("Config\\Waypoints\\RubbishMan\\Eat.txt");
+	ReadWayPoints_TakeTrash("Config\\Waypoints\\RubbishMan\\TakeTrash.txt");
+	ReadWayPoints_StartPosition("Config\\Waypoints\\RubbishMan\\StartPoint.txt");
 
 	m_v2CurrentPos = Idle;
 }
 
-StoreMan::STATES StoreMan::getCurrentState(void)
+RubbishMan::STATES RubbishMan::getCurrentState(void)
 {
 	return this->currentState;
 }
 
-void StoreMan::ReadWayPoints_NewOrder(string fileName)
+void RubbishMan::Update(double dt, int worldTime, float* trash)
+{
+	// Need to eat at 1200 hours
+	if (worldTime == 1200 || worldTime == 1800)
+	{
+		m_bNeedToEat = true;
+	}
+
+	switch (currentState)
+	{
+	case S_IDLE:
+		UpdateIdle(dt);
+		break;
+	case S_EAT:
+		UpdateEat(dt, worldTime);
+		break;
+	case S_TAKETRASH:
+		UpdateTakeTrash(dt, trash);
+		break;
+	}
+
+	if (m_bTaskFinish)
+	{
+		UpdateFSM(worldTime, *trash);
+	}
+
+	spriteAnim->Update(dt);
+	if (m_v2Direction.x == -1)
+		this->spriteAnim->currentAni = WALK_LEFT;
+	else if (m_v2Direction.x == 1)
+		this->spriteAnim->currentAni = WALK_RIGHT;
+	else if (m_v2Direction.y == 1)
+		this->spriteAnim->currentAni = WALK_UP;
+	else if (m_v2Direction.y == -1)
+		this->spriteAnim->currentAni = WALK_DOWN;
+	else
+		this->spriteAnim->currentAni = WALK_DOWN;
+}
+
+void RubbishMan::UpdateFSM(int worldTime, float trash)
+{
+	if (trash >= 80)
+	{
+		currentState = S_TAKETRASH;
+		m_bTaskFinish = false;
+	}
+	else if (m_bNeedToEat)
+	{
+		currentState = S_EAT;
+		m_bTaskFinish = false;
+	}
+	else
+	{
+		currentState = S_IDLE;
+	}
+}
+
+void RubbishMan::UpdateIdle(double dt)
+{
+	if (UpdatePath(Idle, false, dt))
+	{
+		m_bTaskFinish = true;
+		m_v2Direction.SetZero();
+	}
+}
+
+void RubbishMan::UpdateTakeTrash(double dt, float* trash)
+{
+	if (UpdatePath(TakeTrash, false, dt))
+	{
+		m_bTaskFinish = true;
+		*trash = 0.f;
+		m_v2Direction.SetZero();
+	}
+}
+
+void RubbishMan::UpdateEat(double dt, int worldTime)
+{
+	if (!m_bSeated)
+	{
+		if (UpdatePath(Eat, false, dt))
+		{
+			m_bSeated = true;
+			if (m_iActionDuration == 0)
+				m_iActionDuration = worldTime;
+		}
+	}
+
+	else
+	{
+		int tempConversion = worldTime - m_iActionDuration;
+
+		if (tempConversion < 0)
+		{
+			tempConversion += 2400;
+		}
+
+		//Finish eating after 1 hour
+		if (tempConversion >= 100)
+		{
+			if (UpdatePath(Eat, true, dt))
+			{
+				m_bNeedToEat = false;
+				m_bTaskFinish = true;
+				m_bSeated = false;
+				m_iActionDuration = 0;
+				m_v2Direction.SetZero();
+			}
+		}
+	}
+}
+
+void RubbishMan::Draw(SceneManager* sceneManager)
+{
+	sceneManager->Render2DMesh(spriteAnim, true, Vector2(50, 50), m_v2CurrentPos);
+}
+
+void RubbishMan::ReadWayPoints_Eat(string fileName)
 {
 	//vector to contain elements split
 	vector<string>WPTokens;
@@ -63,7 +182,7 @@ void StoreMan::ReadWayPoints_NewOrder(string fileName)
 			}
 
 			//Load the points in
-			AddWayPoints_NewOrder(Vector2(
+			AddWayPoints_Eat(Vector2(
 				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
 				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
 				));
@@ -77,7 +196,7 @@ void StoreMan::ReadWayPoints_NewOrder(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void StoreMan::ReadWayPoints_MoveOrder(string fileName)
+void RubbishMan::ReadWayPoints_TakeTrash(string fileName)
 {
 	//vector to contain elements split
 	vector<string>WPTokens;
@@ -106,7 +225,7 @@ void StoreMan::ReadWayPoints_MoveOrder(string fileName)
 			}
 
 			//Load the points in
-			AddWayPoints_MoveOrder(Vector2(
+			AddWayPoints_TakeTrash(Vector2(
 				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
 				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
 				));
@@ -120,7 +239,7 @@ void StoreMan::ReadWayPoints_MoveOrder(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void StoreMan::ReadWayPoints_StartPosition(string fileName)
+void RubbishMan::ReadWayPoints_StartPosition(string fileName)
 {
 	//vector to contain elements split
 	vector<string>WPTokens;
@@ -161,83 +280,19 @@ void StoreMan::ReadWayPoints_StartPosition(string fileName)
 	}
 	else
 		std::cout << "Load Waypoint file failed" << std::endl;
-	
 }
 
-void StoreMan::AddWayPoints_NewOrder(Vector2 newWayPoint)
+void RubbishMan::AddWayPoints_Eat(Vector2 newWayPoint)
 {
-	NewOrder.push_back(newWayPoint);
+	Eat.push_back(newWayPoint);
 }
 
-void StoreMan::AddWayPoints_MoveOrder(Vector2 newWayPoint)
+void RubbishMan::AddWayPoints_TakeTrash(Vector2 newWayPoint)
 {
-	MoveOrder.push_back(newWayPoint);
+	TakeTrash.push_back(newWayPoint);
 }
 
-void StoreMan::Update(double dt, float* ingredients, bool* orderarrived, bool* waitOrder)
-{
-	switch (currentState)
-	{
-	case S_IDLE: 
-		UpdateIdle(dt);
-		break;
-	case S_NEWORDER: // Go make new order
-		UpdateMakeOrder(dt, waitOrder);
-		break;
-	case S_MOVEORDER: // Go move order
-		UpdateMoveOrder(dt, ingredients);
-		break;
-	}
-
-	if (m_bTaskFinish)
-	{
-		UpdateFSM(*ingredients, orderarrived, waitOrder);
-	}
-
-	spriteAnim->Update(dt);
-	if (m_v2Direction.x == -1)
-		this->spriteAnim->currentAni = WALK_LEFT;
-	else if (m_v2Direction.x == 1)
-		this->spriteAnim->currentAni = WALK_RIGHT;
-	else if (m_v2Direction.y == 1)
-		this->spriteAnim->currentAni = WALK_UP;
-	else if (m_v2Direction.y == -1)
-		this->spriteAnim->currentAni = WALK_DOWN;
-	else
-		this->spriteAnim->currentAni = WALK_DOWN;
-}
-
-void StoreMan::UpdateIdle(double dt)
-{
-	if (UpdatePath(Idle, false, dt))
-	{
-		m_bTaskFinish = true;
-		m_v2Direction.SetZero();
-	}
-}
-
-void StoreMan::UpdateMakeOrder(double dt, bool* waitOrder)
-{
-	if (UpdatePath(NewOrder, false, dt))
-	{
-		m_bTaskFinish = true;
-		m_bWaitingOrder = true;
-		*waitOrder = m_bWaitingOrder;
-		m_v2Direction.SetZero();
-	}
-}
-
-void StoreMan::UpdateMoveOrder(double dt, float* ingredients)
-{
-	if (UpdatePath(MoveOrder, false, dt))
-	{
-		m_bTaskFinish = true;
-		*ingredients = 100.0f;
-		m_v2Direction.SetZero();
-	}
-}
-
-bool StoreMan::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
+bool RubbishMan::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
 {
 	//Assign the start point of path
 	if (!m_bPathAssigned)
@@ -297,7 +352,7 @@ bool StoreMan::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
 	return false;
 }
 
-bool StoreMan::UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt)
+bool RubbishMan::UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt)
 {
 	m_v2NextPos = PathToUpdate;
 
@@ -323,42 +378,13 @@ bool StoreMan::UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt)
 	return false;
 }
 
-void StoreMan::UpdateFSM(float ingredients, bool* orderarrived, bool* waitOrder)
-{
-	if (m_bWaitingOrder && *orderarrived)
-	{
-		currentState = S_MOVEORDER;
-		m_bTaskFinish = false;
-		*orderarrived = false;
-		m_bWaitingOrder = false;
-		*waitOrder = m_bWaitingOrder;
-	}
-
-	else if (ingredients <= 20 && !m_bWaitingOrder)
-	{
-		currentState = S_NEWORDER;
-		m_bTaskFinish = false;
-	}
-	
-	else
-	{
-		currentState = S_IDLE;
-	}
-}
-
-void StoreMan::Draw(SceneManager* sceneManager)
-{
-	sceneManager->Render2DMesh(spriteAnim, true, Vector2(50, 50), m_v2CurrentPos);
-}
-
-
-void StoreMan::SetSpriteAnim(SpriteAnimation* NewSpriteAnim)
+void RubbishMan::SetSpriteAnim(SpriteAnimation* NewSpriteAnim)
 {
 	*(this->spriteAnim) = *NewSpriteAnim;
 	this->spriteAnim->currentAni = WALK_DOWN;
 }
 
-Vector2 StoreMan::GetPosition()
+Vector2 RubbishMan::GetPosition()
 {
 	return m_v2CurrentPos;
 }
