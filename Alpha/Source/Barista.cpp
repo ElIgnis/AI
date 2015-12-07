@@ -265,11 +265,6 @@ bool Barista::GetDrinkPrepared(void)
 		return false;
 }
 
-int Barista::GetNumDrinkPrepared(void)
-{
-	return m_iDrinksPrepared;
-}
-
 void Barista::SubtractDrinkPrepared(void)
 {
 	--m_iDrinksPrepared;
