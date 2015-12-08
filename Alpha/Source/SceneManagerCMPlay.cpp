@@ -554,7 +554,7 @@ void SceneManagerCMPlay::RenderStaticObject()
 			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1050, 660));
 			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1100, 660));
 		}
-		//if (deliveryMan->getCurrentState() == DeliveryMan::S_EATING)
+		if (deliveryMan->getCurrentState() == DeliveryMan::S_EATING)
 		{
 			drawMesh = resourceManager.retrieveMesh("FOOD");
 			drawMesh->textureID = resourceManager.retrieveTexture("Food");
@@ -662,13 +662,21 @@ void SceneManagerCMPlay::RenderUIInfo()
 	//Display Weather and time here
 	Mesh* drawMesh;
 
+	drawMesh = resourceManager.retrieveMesh("BLACK_QUAD");
+	drawMesh->textureID = resourceManager.retrieveTexture("Black_Quad");
+	Render2DMesh(drawMesh, false, Vector2(425, 80), Vector2(sceneWidth - 330, sceneHeight - 100));
+	
 	drawMesh = resourceManager.retrieveMesh("FONT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
 	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
-	RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
-	RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
-	RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 700, 0);
-
+	
+	if (m_bDisplay_shop)
+	{
+		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
+		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
+		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
+		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
+	}
 	switch (storeMan->getCurrentState())
 	{
 	case StoreMan::S_IDLE:

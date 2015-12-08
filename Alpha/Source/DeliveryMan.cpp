@@ -38,6 +38,7 @@ DeliveryMan::DeliveryMan()
 , m_fTotalTime(0.f)
 , m_fMoveSpeed(500.f)
 , m_fDistSquared(0.f)
+, m_fDelay(0.f)
 
 //Text file reading
 , m_iReadLine(0)
@@ -339,9 +340,11 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
 	switch (currentState)
 	{
 	case S_IDLE:
+		m_fMoveSpeed = 500.f;
 		UpdateIdle(dt, worldTime, order);
 		break;
 	case S_SLEEPING:
+		m_v2Direction.Set(0, -1);
 		UpdateSleeping(dt, worldTime);
 		break;
 	case S_EATING:
@@ -457,7 +460,7 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 			m_v2CurrentPos = Vector2(1290, 600);
 
 			currentState = S_DELIVERING;
-			m_iCurrentPath = 0;
+			m_iCurrentPath = RandomizePath();
 		}
 	}
 }
@@ -519,6 +522,10 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 		}
 
 		m_fTotalTime = (float)(weather * m_iHoursNeeded);
+		if (m_fTotalTime > m_iHoursNeeded)
+		{
+			m_fMoveSpeed = 500.f * (m_fTotalTime / m_iHoursNeeded);
+		}
 	}
 
 	//Update and travel according to path and returns after hitting the last waypoint
@@ -548,8 +555,11 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 }
 void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool order)
 {
+	//Add a delay of 1.5s before returning
+	m_fDelay += dt;
+
 	//Update and travel according to path
-	if (m_bOutdoor)
+	if (m_bOutdoor && m_fDelay > 1.5f)
 	{
 		switch (m_iCurrentPath)
 		{
@@ -559,6 +569,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 				m_bOutdoor = false;
 				m_bPendingDelivery = false;
 				m_v2CurrentPos = Vector2(1350, 930);
+				m_v2Direction = Vector2(-1, 0);
 			}
 			break;
 		case 1:
@@ -566,6 +577,8 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 			{
 				m_bOutdoor = false;
 				m_bPendingDelivery = false;
+				m_v2CurrentPos = Vector2(1350, 930);
+				m_v2Direction = Vector2(-1, 0);
 			}
 			break;
 		case 2:
@@ -573,6 +586,8 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 			{
 				m_bOutdoor = false;
 				m_bPendingDelivery = false;
+				m_v2CurrentPos = Vector2(1350, 930);
+				m_v2Direction = Vector2(-1, 0);
 			}
 			break;
 		default:
@@ -583,6 +598,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 	//Returns to idle post
 	if (!m_bOutdoor)
 	{
+		m_fDelay = 0.f;
 		if (m_v2CurrentPos == Exiting.at(2))
 		{
 			m_bInCarriage = false;

@@ -62,6 +62,10 @@
 		[NAME] Drinks_2
 		[Directory] Config\\Resources\\Texture\\Drinks_2.tga
 	}
+	{
+		[NAME] Black_Quad
+		[Directory] Config\\Resources\\Texture\\Black_Quad.tga
+	}
 	#Horse
 	{
 		[NAME] Horse

@@ -89,6 +89,10 @@
 		[Type] Quad
 	}
 	{
+		[NAME] BLACK_QUAD
+		[Type] Quad
+	}
+	{
 		[NAME] CUSTOMER
 		[Type] SpriteAnimation
 		[SpriteRow] 4

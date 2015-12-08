@@ -108,7 +108,8 @@ private:
 	int m_iNextPoint;
 
 	float m_fTotalTime;
-	float m_fMoveSpeed;			//Speed is decided by time and weather
+	float m_fMoveSpeed;
+	float m_fDelay;
 
 	float m_fDistSquared;
 	Vector2 m_v2CurrentPos;

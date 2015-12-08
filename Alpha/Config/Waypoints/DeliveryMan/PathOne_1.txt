@@ -2,4 +2,4 @@
 #Format first line = Type of Waypoints
 1290,600
 1290,740
-1150,740
+550,740
