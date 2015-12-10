@@ -55,6 +55,7 @@ void DeliveryMan::Init(void)
 {
 	spriteAnim_Indoor = new SpriteAnimation();
 	spriteAnim_Outdoor = new SpriteAnimation();
+	spriteAnim_Outdoor_Night = new SpriteAnimation();
 
 	ReadWayPoints_Eat("Config\\Waypoints\\DeliveryMan\\Eat_1.txt");
 	ReadWayPoints_Sleep("Config\\Waypoints\\DeliveryMan\\Sleep_1.txt");
@@ -379,17 +380,33 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
 	else
 	{
 		spriteAnim_Outdoor->Update(dt);
+		spriteAnim_Outdoor_Night->Update(dt);
 
 		if (m_v2Direction.x == -1)
+		{
 			this->spriteAnim_Outdoor->currentAni = WALK_LEFT;
+			this->spriteAnim_Outdoor_Night->currentAni = WALK_LEFT;
+		}
 		else if (m_v2Direction.x == 1)
+		{
 			this->spriteAnim_Outdoor->currentAni = WALK_RIGHT;
+			this->spriteAnim_Outdoor_Night->currentAni = WALK_RIGHT;
+		}
 		else if (m_v2Direction.y == 1)
+		{
 			this->spriteAnim_Outdoor->currentAni = WALK_UP;
+			this->spriteAnim_Outdoor_Night->currentAni = WALK_UP;
+		}
 		else if (m_v2Direction.y == -1)
+		{
 			this->spriteAnim_Outdoor->currentAni = WALK_DOWN;
+			this->spriteAnim_Outdoor_Night->currentAni = WALK_DOWN;
+		}
 		else
+		{
 			this->spriteAnim_Outdoor->currentAni = WALK_DOWN;
+			this->spriteAnim_Outdoor_Night->currentAni = WALK_DOWN;
+		}	
 	}
 }
 
@@ -751,6 +768,12 @@ void DeliveryMan::SetOutdoorSpriteAnim(SpriteAnimation* newSprite)
 	this->spriteAnim_Outdoor->currentAni = WALK_DOWN;
 }
 
+void DeliveryMan::SetOutdoorSpriteAnim_Night(SpriteAnimation* newSprite)
+{
+	*(this->spriteAnim_Outdoor_Night) = *newSprite;
+	this->spriteAnim_Outdoor_Night->currentAni = WALK_DOWN;
+}
+
 SpriteAnimation* DeliveryMan::GetIndoorSpriteAnim(void)
 {
 	return spriteAnim_Indoor;
@@ -759,4 +782,9 @@ SpriteAnimation* DeliveryMan::GetIndoorSpriteAnim(void)
 SpriteAnimation* DeliveryMan::GetOutdoorSpriteAnim(void)
 {
 	return spriteAnim_Outdoor;
+}
+
+SpriteAnimation* DeliveryMan::GetOutdoorSpriteAnim_Night(void)
+{
+	return spriteAnim_Outdoor_Night;
 }

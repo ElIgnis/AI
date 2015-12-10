@@ -80,6 +80,10 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out");
 	deliveryMan->SetOutdoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 
+	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_NIGHT");
+	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Night");
+	deliveryMan->SetOutdoorSpriteAnim_Night(dynamic_cast<SpriteAnimation*> (drawMesh));
+
 	barista = new Barista();
 	barista->Init();
 
@@ -524,9 +528,19 @@ void SceneManagerCMPlay::RenderBG()
 	}
 	else
 	{
-		drawMesh = resourceManager.retrieveMesh("GAME_BG");
-		drawMesh->textureID = resourceManager.retrieveTexture("GAME_BG");
-		Render2DMesh(drawMesh, false, Vector2(1920, 1545), Vector2(960, m_fBGpos_y));
+		if (m_iWorldTime >= 0 && m_iWorldTime <= 700
+			|| m_iWorldTime >= 1900)
+		{
+			drawMesh = resourceManager.retrieveMesh("GAME_BG_NIGHT");
+			drawMesh->textureID = resourceManager.retrieveTexture("GAME_BG_NIGHT");
+			Render2DMesh(drawMesh, false, Vector2(1920, 1545), Vector2(960, m_fBGpos_y));
+		}
+		else
+		{
+			drawMesh = resourceManager.retrieveMesh("GAME_BG");
+			drawMesh->textureID = resourceManager.retrieveTexture("GAME_BG");
+			Render2DMesh(drawMesh, false, Vector2(1920, 1545), Vector2(960, m_fBGpos_y));
+		}
 	}
 }
 
@@ -645,7 +659,6 @@ void SceneManagerCMPlay::RenderMobileObject()
 				Render2DMesh(deliveryMan->GetIndoorSpriteAnim(), false, Vector2(50, 50), deliveryMan->GetPos());
 				Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(850, 895));
 			}
-
 			else
 				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(175, 175), deliveryMan->GetPos());
 		}
@@ -657,7 +670,17 @@ void SceneManagerCMPlay::RenderMobileObject()
 	{
 		if (deliveryMan->getOutdoor())
 		{
-			Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), deliveryMan->GetPos());
+			//Night time sprite
+			if (m_iWorldTime >= 0 && m_iWorldTime <= 0700
+				|| m_iWorldTime >= 1900)
+			{
+				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim_Night(), false, Vector2(100, 100), deliveryMan->GetPos());
+			}
+			//Day time sprite
+			else
+			{
+				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), deliveryMan->GetPos());
+			}
 		}
 	}
 }

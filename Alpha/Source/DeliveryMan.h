@@ -84,12 +84,15 @@ public:
 
 	SpriteAnimation* GetIndoorSpriteAnim(void);
 	SpriteAnimation* GetOutdoorSpriteAnim(void);
+	SpriteAnimation* GetOutdoorSpriteAnim_Night(void);
 	void SetIndoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	void SetOutdoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
+	void SetOutdoorSpriteAnim_Night(SpriteAnimation* NewSpriteAnim);
 	
 private:
 	SpriteAnimation* spriteAnim_Indoor;
 	SpriteAnimation* spriteAnim_Outdoor;
+	SpriteAnimation* spriteAnim_Outdoor_Night;
 
 	STATES currentState;
 	bool m_bNeedToEat;

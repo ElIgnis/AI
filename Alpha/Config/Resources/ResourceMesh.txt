@@ -41,6 +41,10 @@
 		[Type] Quad
 	}
 	{
+		[NAME] GAME_BG_NIGHT
+		[Type] Quad
+	}
+	{
 		[NAME] GAME_SHOP
 		[Type] Quad
 	}
@@ -223,6 +227,50 @@
 	#Delivery Man Outdoors######################################################
 	{
 		[NAME] SPRITE_DELIVERY_OUT
+		[Type] SpriteAnimation
+		[SpriteRow] 4
+		[SpriteCol] 4
+		# Init all animations in the sprite 
+		{
+			[NAME] Walk_Up
+			[ID] 0
+			[StartFrame] 0
+			[EndFrame] 3
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 4
+		}
+		{
+			[NAME] Walk_Down
+			[ID] 1
+			[StartFrame] 4
+			[EndFrame] 7
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 4
+		}
+		{
+			[NAME] Walk_Left
+			[ID] 2
+			[StartFrame] 8
+			[EndFrame] 11
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 4
+		}
+		{
+			[NAME] Walk_Right
+			[ID] 3
+			[StartFrame] 12
+			[EndFrame] 15
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 4
+		}
+	}
+	#Delivery Man Outdoors NIGHT######################################################
+	{
+		[NAME] SPRITE_DELIVERY_OUT_NIGHT
 		[Type] SpriteAnimation
 		[SpriteRow] 4
 		[SpriteCol] 4

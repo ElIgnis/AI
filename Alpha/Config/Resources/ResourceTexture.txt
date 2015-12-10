@@ -27,6 +27,10 @@
 		[Directory] Config\\Resources\\Texture\\Background.tga
 	}
 	{
+		[NAME] GAME_BG_NIGHT
+		[Directory] Config\\Resources\\Texture\\Background_Night.tga
+	}
+	{
 		[NAME] GAME_SHOP
 		[Directory] Config\\Resources\\Texture\\Shop.tga
 	}
@@ -85,6 +89,11 @@
 	{
 		[NAME] Sprite_Delivery_Out
 		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out.tga
+	}
+	#Delivery Man Outdoors Night
+	{
+		[NAME] Sprite_Delivery_Out_Night
+		[Directory] Config\\Resources\\Texture\\DeliveryMan\\Delivery_Out_Night.tga
 	}
 	#Barista
 	{
