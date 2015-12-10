@@ -267,6 +267,11 @@ bool Customer::getOrderPlaced(void)
 	return this->m_bOrderPlaced;
 }
 
+Vector2 Customer::getPos()
+{
+	return this->m_v2CurrentPos;
+}
+
 void Customer::Reset(void)
 {
 	currentState = S_WALKING;

@@ -783,6 +783,64 @@ void SceneManagerCMPlay::RenderUIInfo()
 	default:
 		break;
 	}
+
+	//Customer
+	for (unsigned i = 0; i < m_cCustomerList.size(); i++)
+	{
+		if (m_cCustomerList[i]->getActive())
+		{
+
+			if (!m_cCustomerList[i]->getOutdoorStatus())
+			{
+				switch (m_cCustomerList[i]->getCurrentState())
+				{
+				case Customer::S_IDLE:
+					if (m_bDisplay_shop)
+						RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_WALKING:
+					if (m_bDisplay_shop)
+						RenderTextOnScreen(drawMesh, "Walking", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_WAIT:
+					if (m_bDisplay_shop)
+						RenderTextOnScreen(drawMesh, "Waiting", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_PICKUP:
+					if (m_bDisplay_shop)
+						RenderTextOnScreen(drawMesh, "Pick up", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_QUEUE:
+					if (m_bDisplay_shop)
+						RenderTextOnScreen(drawMesh, "Queue", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_BUY:
+					if (m_bDisplay_shop)
+						RenderTextOnScreen(drawMesh, "Ordering", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				default:
+					break;
+				}
+			}
+			else if (!m_bDisplay_shop)
+			{
+				switch (m_cCustomerList[i]->getCurrentState())
+				{
+				case Customer::S_IDLE:
+					RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_WALKING:
+					RenderTextOnScreen(drawMesh, "Walking", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				case Customer::S_DECIDE:
+					RenderTextOnScreen(drawMesh, "Deciding", resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 50, 0);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
 }
 
 void SceneManagerCMPlay::FetchCustomer()

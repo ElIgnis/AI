@@ -52,6 +52,8 @@ public:
 	void setInWaitStatus(bool wait);	//Set in wait status
 	void setDrinkAvailable(bool available);	//set If drink available status
 
+	Vector2 getPos();	//Get customer pos
+
 	float getDelay();	//Get delay
 	void setPickedUp(bool pickup);	//Set if drink has been picked up status
 
