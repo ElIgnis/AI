@@ -132,11 +132,20 @@ void SceneManagerCMPlay::Update(double dt)
 		m_fTrash = 100.0f;
 	}
 
-	if (m_fCustomerSpawn >= m_fCustomerRate)
+	if (m_iWorldTime >= 0 && m_iWorldTime <= 700
+		|| m_iWorldTime >= 1900)
 	{
-		FetchCustomer();
-		m_fCustomerSpawn = 0.f;
-		m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
+		//Do nothing if night time
+	}
+	else
+	{
+		//Spawn customer
+		if (m_fCustomerSpawn >= m_fCustomerRate)
+		{
+			FetchCustomer();
+			m_fCustomerSpawn = 0.f;
+			m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
+		}
 	}
 	m_fCustomerSpawn += (float)dt;
 	m_fInputDelay += (float)dt;
@@ -687,24 +696,6 @@ void SceneManagerCMPlay::RenderMobileObject()
 
 void SceneManagerCMPlay::RenderWaypoints()
 {
-	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER_WAYPOINT");
-	drawMesh->textureID = resourceManager.retrieveTexture("GRASS");
-	//Rendering of indoor waypoints
-	if (m_bDisplay_shop)
-	{
-		for (unsigned i = 0; i < m_v2CustomerWaypointsINDOOR.size(); ++i)
-		{
-			Render2DMesh(drawMesh, false, Vector2(50, 50), m_v2CustomerWaypointsINDOOR[i]);
-		}
-	}
-	//Rendering of outdoor waypoints
-	else
-	{
-		for (unsigned i = 0; i < m_v2CustomerWaypointsOUTDOOR.size(); ++i)
-		{
-			Render2DMesh(drawMesh, false, Vector2(50, 50), m_v2CustomerWaypointsOUTDOOR[i]);
-		}
-	}
 }
 
 void SceneManagerCMPlay::RenderUIInfo()

@@ -115,7 +115,15 @@
 		[Directory] Config\\Resources\\Texture\\CustomerSprite.tga
 	}
 	{
+		[NAME] CUSTOMER_SPRITE_NIGHT
+		[Directory] Config\\Resources\\Texture\\CustomerSprite_night.tga
+	}
+	{
 		[NAME] CUSTOMER_SPRITE2
 		[Directory] Config\\Resources\\Texture\\CustomerSprite2.tga
+	}
+	{
+		[NAME] CUSTOMER_SPRITE2_NIGHT
+		[Directory] Config\\Resources\\Texture\\CustomerSprite2_night.tga
 	}
 }
