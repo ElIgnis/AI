@@ -60,7 +60,7 @@ public:
 	void setOrderPlaced(bool placed);	//Get whether customer has placed order
 	bool getOrderPlaced(void);	//Get whether customer has placed order
 
-	int CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
+	bool CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
 
 	void setSprite(SpriteAnimation* sprite);	//Set current sprite
 	SpriteAnimation* getSprite(void);	//Get current sprite

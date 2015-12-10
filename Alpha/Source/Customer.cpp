@@ -103,7 +103,7 @@ void Customer::Update(double dt, int worldTime, int weather)
 		m_fDelay += dt;
 		if (m_fDelay > 0.3f)
 		{
-			if (CalculateProbability(worldTime, weather) > 50)
+			if (CalculateProbability(worldTime, weather))
 			{
 				//Enter shop
 				m_bOutdoor = false;
@@ -202,9 +202,28 @@ void Customer::setInWaitStatus(bool wait)
 	this->m_bInWait = wait;
 }
 
-int Customer::CalculateProbability(int time, int weather)
+bool Customer::CalculateProbability(int time, int weather)
 {
-	return Math::RandIntMinMax(1, 100);
+	int chance = Math::RandIntMinMax(1, 100);
+	//Peak hour
+	if (time >= 1600 && time <= 1900)
+	{
+		if (chance > 35)	{
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	//Normal timing
+	else{
+		if (chance > 50)	{
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 }
 
 void Customer::setActive(bool active)
