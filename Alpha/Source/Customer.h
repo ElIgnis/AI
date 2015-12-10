@@ -33,8 +33,7 @@ public:
 	Customer(Vector2 startPos);	//Default constructor
 	~Customer();	//Default destructor
 
-	void Update(double dt, int worldTime, int weather);	//Update based on state
-	void UpdateFSM();	
+	void Update(double dt, int worldTime, int weather);	//Update based on state	
 
 	STATES getCurrentState(void);	//Get current state 
 	Vector2 getCurrentPos();	//Get current position
@@ -47,8 +46,14 @@ public:
 	bool getQueueStatus();	//Get queue status
 
 	bool getInQueueStatus();	//Get queue status
-	void setInQueueStatus(bool inqueue);	//Get queue status
+	void setInQueueStatus(bool inqueue);	//Set queue status
+	bool getWaitStatus();	//Get wait status
+	bool getInWaitStatus();	//Get in wait status
+	void setInWaitStatus(bool wait);	//Set in wait status
 	void setDrinkAvailable(bool available);	//set If drink available status
+
+	float getDelay();	//Get delay
+	void setPickedUp(bool pickup);	//Set if drink has been picked up status
 
 	void setOrderPlaced(bool placed);	//Get whether customer has placed order
 	bool getOrderPlaced(void);	//Get whether customer has placed order
@@ -81,6 +86,8 @@ private:
 	bool m_bInQueue;	//Inside queue
 	bool m_bPickedUp;	//Picked up drink 
 	bool m_bDeciding;	//Deciding boolean for feedback
+	bool m_bWait;	//Start waiting
+	bool m_bInWait;	//Inside waiting queue
 	bool m_bOrderPlaced;	//Placed Order status
 	float m_fDelay;	//Timer for delays
 

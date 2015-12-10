@@ -91,7 +91,9 @@ private:
 	vector<Vector2> m_v2CustomerWaypointsOUTDOOR;	//List containing all Outdoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerWaypointsINDOOR;	//List containing all Indoor waypoints for customer in scene
 	vector<Vector2> m_v2CustomerQueueingPosition;	//List containing all Indoor queueing positions for customer in scene
+	vector<Vector2> m_v2CustomerWaitingPosition;	//List containing all Indoor waiting positions for customer in scene
 	vector<Customer*> m_cQueueList;	//List containing queuing customers
+	vector<Customer*> m_cWaitList;	//List containing Waiting customers
 };
 
 #endif

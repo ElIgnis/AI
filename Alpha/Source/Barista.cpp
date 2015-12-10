@@ -257,6 +257,11 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash)
 	}
 }
 
+int Barista::GetNumDrinks(void)
+{
+	return m_iDrinksPrepared;
+}
+
 bool Barista::GetDrinkPrepared(void)
 {
 	if (m_iDrinksPrepared > 0)

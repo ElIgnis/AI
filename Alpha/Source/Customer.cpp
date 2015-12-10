@@ -11,12 +11,14 @@ Customer::Customer(Vector2 startPos) :
 		m_bQueue(false),
 		m_bInQueue(false),
 		m_bDrinkAvailable(false),
-		m_bOrderPlaced(false)
+		m_bOrderPlaced(false),
+		m_bWait(false),
+		m_bInWait(false)
 {
 	m_v2CurrentPos = startPos;
 	m_v2ShopPos = Vector2(1080, 280);
-	m_v2BuyPos = Vector2(1080, 600);
-	m_v2WaitPos = Vector2(800, 500);
+	m_v2BuyPos = Vector2(1150, 600);
+	m_v2WaitPos = Vector2(900, 550);
 	m_v2PickupPos = Vector2(1000, 600);
 	currentSprite = new SpriteAnimation();
 }
@@ -50,17 +52,17 @@ void Customer::Update(double dt, int worldTime, int weather)
 			{
 				currentState = S_BUY;
 			}
-			else if (m_v2CurrentPos == m_v2WaitPos)
-			{
-				currentState = S_WAIT;
-			}
 			else if (m_v2CurrentPos == m_v2PickupPos)
 			{
 				currentState = S_PICKUP;
 			}
-			else
+			else if (m_bQueue)
 			{
 				currentState = S_QUEUE;
+			}
+			else
+			{
+				currentState = S_WAIT;
 			}
 		}
 		else
@@ -133,32 +135,34 @@ void Customer::Update(double dt, int worldTime, int weather)
 			currentState = S_WALKING;
 			m_bOrderPlaced = true;
 			m_bQueue = false;
+			m_bWait = true;
 			m_fDelay = 0.f;
 		}		
 		break;
 	case S_WAIT:
-		if (m_bDrinkAvailable == true)
+		if (m_v2CurrentPos == m_v2WaitPos)
 		{
-			//Walk to pick up position
+			m_bWait = false;
+			if (m_bDrinkAvailable == true)
+			{
+				//Walk to pick up position
+				currentState = S_WALKING;
+			}
+		}
+		else if (m_v2CurrentPos != m_v2NextPos)
+		{
 			currentState = S_WALKING;
 		}
 		break;
 	case S_PICKUP:
-		m_fDelay += dt;
-		if (m_fDelay > 0.1f)
+		m_fDelay += (float)dt;
+		if (m_bPickedUp == true)
 		{
-			m_bPickedUp = true;
-			//Walk out of shop
-			currentState = S_WALKING;
 			m_fDelay = 0.f;
+			currentState = S_WALKING;
 		}
 		break;
 	}
-}
-
-void Customer::UpdateFSM()
-{
-	
 }
 
 Vector2 Customer::getCurrentPos()
@@ -177,6 +181,25 @@ void Customer::setNextPoint(Vector2 nextpoint)
 Customer::STATES Customer::getCurrentState(void)
 {
 	return currentState;
+}
+
+float Customer::getDelay()
+{
+	return m_fDelay;
+}
+
+void Customer::setPickedUp(bool pickup)
+{
+	this->m_bPickedUp = pickup;
+}
+
+bool Customer::getInWaitStatus()
+{
+	return this->m_bInWait;
+}
+void Customer::setInWaitStatus(bool wait)
+{
+	this->m_bInWait = wait;
 }
 
 int Customer::CalculateProbability(int time, int weather)
@@ -202,6 +225,10 @@ bool Customer::getQueueStatus()
 	return m_bQueue;
 }
 
+bool Customer::getWaitStatus()
+{
+	return this->m_bWait;
+}
 bool Customer::getInQueueStatus()
 {
 	return this->m_bInQueue;
@@ -253,4 +280,5 @@ void Customer::Reset(void)
 	m_bInQueue = false;
 	m_bDrinkAvailable = false;
 	m_bOrderPlaced = false;
+	m_bInWait = false;
 }

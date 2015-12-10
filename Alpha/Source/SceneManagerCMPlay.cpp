@@ -50,12 +50,14 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	m_v2CustomerWaypointsOUTDOOR.push_back(Vector2(965, 20));
 	//Storing waypointss for indoor customer
 	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 280));
-	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 600));
-	m_v2CustomerWaypointsINDOOR.push_back(Vector2(800, 500));
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1150, 600));
+	m_v2CustomerWaypointsINDOOR.push_back(Vector2(900, 550));
 	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1000, 600));
 	m_v2CustomerWaypointsINDOOR.push_back(Vector2(1080, 280));
 	//Starting queue position
-	m_v2CustomerQueueingPosition.push_back(Vector2(1080, 600));
+	m_v2CustomerQueueingPosition.push_back(Vector2(1150, 600));
+	//Starting wait position
+	m_v2CustomerWaitingPosition.push_back(Vector2(900, 550));
 
 	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER");
 	drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE");
@@ -186,7 +188,8 @@ void SceneManagerCMPlay::Update(double dt)
 			else
 			{
 				//Default shop positions
-				if (!m_cCustomerList[a]->getQueueStatus())
+				//If they are not queuing we update the normal waypoints
+				if (!m_cCustomerList[a]->getQueueStatus() && !m_cCustomerList[a]->getWaitStatus())
 				{
 					for (unsigned i = 0; i < m_v2CustomerWaypointsINDOOR.size(); ++i)
 					{
@@ -201,7 +204,7 @@ void SceneManagerCMPlay::Update(double dt)
 					}
 				}
 				//Queuing shop positions
-				else
+				else if (m_cCustomerList[a]->getQueueStatus() && !m_cCustomerList[a]->getWaitStatus())
 				{
 					//Only if they are not inside the queue we add them into the queue
 					if (!m_cCustomerList[a]->getInQueueStatus())
@@ -217,7 +220,23 @@ void SceneManagerCMPlay::Update(double dt)
 							m_v2CustomerQueueingPosition.at(m_v2CustomerQueueingPosition.size() - 1).y - 50));
 					}
 				}
-				//Queueing shop positions
+				//Waiting shop positions
+				else if (m_cCustomerList[a]->getWaitStatus())
+				{
+					//Only if they are not inside the wait list we add them into the list
+					if (!m_cCustomerList[a]->getInWaitStatus())
+					{
+						//Add customer to wait list and setting new waypoint
+						m_cCustomerList[a]->setInWaitStatus(true);	//Set the in wait status to true
+
+						m_cWaitList.push_back(m_cCustomerList[a]);	//Add to vector of waiting customers
+						m_cCustomerList[a]->setNextPoint
+							(m_v2CustomerWaitingPosition.at(m_v2CustomerWaitingPosition.size() - 1));	//Set the next point to a positions in the queue
+						//Generate next position in the queue
+						m_v2CustomerWaitingPosition.push_back(Vector2(m_v2CustomerWaitingPosition.at(m_v2CustomerWaitingPosition.size() - 1).x,
+							m_v2CustomerWaitingPosition.at(m_v2CustomerWaitingPosition.size() - 1).y - 50));
+					}
+				}
 			}
 		}
 	}
@@ -238,7 +257,6 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 	}
-	
 	//Update all customers
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
@@ -251,13 +269,42 @@ void SceneManagerCMPlay::Update(double dt)
 				barista->addNumOrders(1);
 				m_cCustomerList[i]->setOrderPlaced(false);
 			}
-			else if (m_cCustomerList[i]->getState() == Customer::S_WAIT)
+			else if (m_cCustomerList[i]->getState() == Customer::S_WAIT && !m_cCustomerList[i]->getWaitStatus())
 			{
 				//Only if drinks are available to pick up
 				if (barista->GetDrinkPrepared())
 				{
+					NumOrders++;
 					m_cCustomerList[i]->setDrinkAvailable(true);
 					barista->SubtractDrinkPrepared();
+					//Only if there are customers waiting
+					if (m_cWaitList.size() > 0)
+					{
+						//If customer has finished waiting, then we remove him
+						if (!m_cWaitList[0]->getWaitStatus())
+						{
+							m_cWaitList[0]->setInWaitStatus(false);	//We set the In wait status to false
+							m_cWaitList.erase(m_cWaitList.begin());	//Remove from vector
+							m_v2CustomerWaitingPosition.pop_back();	//Remove last waiting position
+
+							//Move all customers forward
+							for (unsigned a = 0; a < m_cWaitList.size(); ++a)
+							{
+								m_cWaitList[a]->setNextPoint(m_v2CustomerWaitingPosition[a]);
+							}
+						}
+					}
+				}
+			}
+			else if (m_cCustomerList[i]->getState() == Customer::S_PICKUP)
+			{
+				if (m_cCustomerList[i]->getDelay() > 0.1f)
+				{
+					m_cCustomerList[i]->setPickedUp(true);
+					NumOrders--;
+					Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER2");
+					drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE2");
+					m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
 				}
 			}
 			m_cCustomerList[i]->Update(dt, m_iWorldTime, m_iWeather);
@@ -306,28 +353,6 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 
 	fpCamera.Update(dt, 0);
-	//tpCamera.Update(dt);
-
-	/*if (inputManager->getKey("BG_DOWN"))
-	{
-		if (m_fBGpos_y < m_fBGpos_MAX_y)
-		{
-			m_fBGpos_y += m_fBGscroll_speed * (float)dt;
-			if (m_fBGpos_y > m_fBGpos_MAX_y){
-				m_fBGpos_y = m_fBGpos_MAX_y;
-			}
-		}
-	}
-	if (inputManager->getKey("BG_UP"))
-	{
-		if (m_fBGpos_y > m_fBGpos_MIN_y)
-		{
-			m_fBGpos_y -= m_fBGscroll_speed * (float)dt;
-			if (m_fBGpos_y < m_fBGpos_MIN_y){
-				m_fBGpos_y = m_fBGpos_MIN_y;
-			}
-		}
-	}*/
 }
 
 void SceneManagerCMPlay::UpdateGoodsDelivery(double dt)
@@ -523,10 +548,12 @@ void SceneManagerCMPlay::RenderStaticObject()
 		drawMesh = resourceManager.retrieveMesh("HORSEFLIP");
 		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
 		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
-
-		drawMesh = resourceManager.retrieveMesh("DRINKS");
-		drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
-		Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(1000, 660));
+		if (NumOrders > 0)
+		{
+			drawMesh = resourceManager.retrieveMesh("DRINKS");
+			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
+			Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(1000, 660));
+		}
 
 		if (m_fReserve >= 20)
 		{

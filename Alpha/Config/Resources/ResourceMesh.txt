@@ -134,6 +134,48 @@
 			[AnimationTime] 1.0
 		}
 	}
+	{
+		[NAME] CUSTOMER2
+		[Type] SpriteAnimation
+		[SpriteRow] 4
+		[SpriteCol] 3
+		{
+			[NAME] Walk_Down
+			[ID] 0
+			[StartFrame] 0
+			[EndFrame] 2
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 1.0
+		}
+		{
+			[NAME] Walk_Left
+			[ID] 1
+			[StartFrame] 3
+			[EndFrame] 5
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 1.0
+		}
+		{
+			[NAME] Walk_Right
+			[ID] 2
+			[StartFrame] 6
+			[EndFrame] 8
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 1.0
+		}
+		{
+			[NAME] Walk_Up
+			[ID] 3
+			[StartFrame] 9
+			[EndFrame] 11
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 1.0
+		}
+	}
 #Delivery Man Indoors######################################################
 	{
 		[NAME] SPRITE_DELIVERY_IN

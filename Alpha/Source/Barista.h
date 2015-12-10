@@ -56,6 +56,7 @@ public:
 	void AddWayPoints_Refill(Vector2 newWayPoint);
 	void AddWayPoints_Brew(Vector2 newWayPoint);
 
+	int GetNumDrinks(void);
 	bool GetDrinkPrepared(void);
 	void SubtractDrinkPrepared(void);
 
