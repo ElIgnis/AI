@@ -143,6 +143,7 @@ void Barista::Update(double dt, float& ingredients, float& trash, float& reserve
 	switch (currentState)
 	{
 	case S_IDLE:
+		m_v2Direction.Set(0, -1);
 		UpdateIdle(dt);
 		break;
 	case S_REFILL:

@@ -1,7 +1,7 @@
 #include "SceneManagerCMPlay.h"
 
 SceneManagerCMPlay::SceneManagerCMPlay()
-	: m_iWorldTime(0)
+	: m_iWorldTime(600)
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, order(false)
@@ -402,8 +402,8 @@ void SceneManagerCMPlay::Render()
 	RenderLight();
 	RenderBG();
 	RenderWaypoints();
-	RenderMobileObject();
 	RenderStaticObject();
+	RenderMobileObject();
 	RenderUIInfo();
 }
 
