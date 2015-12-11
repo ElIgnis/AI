@@ -156,6 +156,10 @@ void SceneManagerCMMenu::RenderStaticObject()
 	drawMesh->textureID = resourceManager.retrieveTexture("MENU_BG");
 
 	Render2DMesh(drawMesh, false, Vector2(this->sceneWidth, this->sceneHeight), Vector2(sceneWidth *0.5f, sceneHeight * 0.5f), 0);
+
+	drawMesh = resourceManager.retrieveMesh("FONT");
+	drawMesh->textureID = resourceManager.retrieveTexture("Font");
+	RenderTextOnScreen(drawMesh, "LEFT CLICK TO START", resourceManager.retrieveColor("Red"), 200, 500, sceneHeight - 100, 0);
 }
 
 void SceneManagerCMMenu::RenderMobileObject()
