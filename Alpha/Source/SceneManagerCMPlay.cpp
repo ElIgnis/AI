@@ -859,6 +859,8 @@ void SceneManagerCMPlay::RenderUIInfo()
 
 void SceneManagerCMPlay::FetchCustomer()
 {
+	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER");
+	drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE");
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
 		if (m_cCustomerList[i]->getActive() == false)
@@ -866,6 +868,7 @@ void SceneManagerCMPlay::FetchCustomer()
 			m_cCustomerList[i]->Reset();
 			m_cCustomerList[i]->setActive(true);
 			m_cCustomerList[i]->setStartPos(m_v2CustomerWaypointsOUTDOOR.at(0));
+			m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
 			break;
 		}
 	}
