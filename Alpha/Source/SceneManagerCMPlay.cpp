@@ -1,11 +1,12 @@
 #include "SceneManagerCMPlay.h"
 
 SceneManagerCMPlay::SceneManagerCMPlay()
-	: m_iWorldTime(600)
+	: m_iWorldTime(800)
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, order(false)
 	, NumOrders(0)
+	, NumDeliveryOrders(0)
 	, deliveryMan(NULL)
 	, barista(NULL)
 	, m_fCustomerSpawn(0.f)
@@ -146,7 +147,7 @@ void SceneManagerCMPlay::Update(double dt)
 		//Spawn customer
 		if (m_fCustomerSpawn >= m_fCustomerRate)
 		{
-			FetchCustomer();
+			//FetchCustomer();
 			m_fCustomerSpawn = 0.f;
 			m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
 		}
@@ -164,7 +165,14 @@ void SceneManagerCMPlay::Update(double dt)
 
 		//Generates a probability of getting an order when idle every hour
 		if (deliveryMan->getCurrentState() == DeliveryMan::S_IDLE)
+		{
 			order = deliveryMan->GenerateOrder();
+			if (order)
+			{
+				++NumDeliveryOrders;
+				barista->addNumDeliveryOrders(1);
+			}
+		}
 	}
 		
 	//Resetting world time to a new day
@@ -172,7 +180,7 @@ void SceneManagerCMPlay::Update(double dt)
 		m_iWorldTime = 0;
 	}
 	
-	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order);
+	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order, shop_mb);
 
 	//std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
 
@@ -368,7 +376,7 @@ void SceneManagerCMPlay::Update(double dt)
 		}
 	}
 
-	barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve);
+	barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb);
 
 	storeMan->Update(dt, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
 
@@ -621,7 +629,12 @@ void SceneManagerCMPlay::RenderStaticObject()
 			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
 			Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(1000, 660));
 		}
-
+		if (barista->getNumDeliveryPrepared() > 0)
+		{
+			drawMesh = resourceManager.retrieveMesh("DRINKS");
+			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
+			Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(900, 660));
+		}
 		if (m_fReserve >= 20)
 		{
 			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
@@ -760,7 +773,8 @@ void SceneManagerCMPlay::RenderUIInfo()
 		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
 		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
 		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
-		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
+		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(NumDeliveryOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
+		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 600, 0);
 	}
 	switch (storeMan->getCurrentState())
 	{
@@ -807,6 +821,10 @@ void SceneManagerCMPlay::RenderUIInfo()
 	case DeliveryMan::S_SLEEPING:
 		if (m_bDisplay_shop)
 			RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
+		break;
+	case DeliveryMan::S_COLLECTING:
+		if (m_bDisplay_shop)
+			RenderTextOnScreen(drawMesh, "Collecting", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
 		break;
 	case DeliveryMan::S_EATING:
 		if (m_bDisplay_shop)

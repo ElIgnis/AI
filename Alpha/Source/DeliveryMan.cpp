@@ -505,8 +505,9 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard*
 		if (!m_bOrderCollected)
 		{
 			//Collect order items when done message is received
-			//if (mb->GetMsg(MSG_DELIVERY_READY))
+			if (mb->GetMsg(MSG_DELIVERY_READY))
 			{
+				std::cout << "deliver" << std::endl;
 				//Proceed to collect after moving to collection area
 				if (UpdatePath(Collect, false, dt))
 				{
@@ -709,7 +710,8 @@ int DeliveryMan::RandomizePath(void)
 
 bool DeliveryMan::GenerateOrder(void)
 {
-	return Math::RandIntMinMax(0, 1);
+	//return Math::RandIntMinMax(0, 1);
+	return true;
 }
 
 Vector2 DeliveryMan::GetPos(void)

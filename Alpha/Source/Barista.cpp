@@ -237,25 +237,28 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 	if (m_fBrewProgress >= m_fBrewTimer)
 	{
 		//For customers
-		if (m_iNumOrders > 1)
+		if (m_iNumOrders > 0)
 		{
 			--m_iNumOrders;
+			++m_iDrinksPrepared;
 		}
 		//For deliveries
-		else if (m_iNumDeliveryOrders > 1)
+		else if (m_iNumDeliveryOrders > 0)
 		{
 			--m_iNumDeliveryOrders;
 			mb->AddMessage(MSG_DELIVERY_READY, ROLE_BARISTA, ROLE_DELIVERYMAN);
+			++m_iDeliveriesPrepared;
 		}
+		
 		ingredients -= 5;
 		trash += 5;
 		m_fBrewProgress = 0;
 		m_iBrewBar = 0;
-		++m_iDrinksPrepared;
+		
 	}
 
 	//Return to idle if there are no more orders
-	if (m_iNumOrders == 0)
+	if (m_iNumOrders == 0 && m_iNumDeliveryOrders == 0)
 	{
 		currentState = S_IDLE;
 		//Move back to idle
@@ -308,6 +311,11 @@ int Barista::getNumOrders(void)
 	return m_iNumOrders;
 }
 
+int Barista::getNumDrinksPrepared(void)
+{
+	return m_iDrinksPrepared;
+}
+
 void Barista::addNumDeliveryOrders(const int numOrders)
 {
 	this->m_iNumDeliveryOrders += numOrders;
@@ -316,6 +324,11 @@ void Barista::addNumDeliveryOrders(const int numOrders)
 int Barista::getNumDeliveryOrders(void)
 {
 	return m_iNumDeliveryOrders;
+}
+
+int Barista::getNumDeliveryPrepared(void)
+{
+	return m_iDeliveriesPrepared;
 }
 
 void Barista::AddWayPoints_Refill(Vector2 newWayPoint)

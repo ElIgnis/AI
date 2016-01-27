@@ -60,7 +60,7 @@ private:
 	bool order;
 
 	//Order stuff
-	int NumOrders;
+	int NumOrders, NumDeliveryOrders;
 
 	//Shop Resources
 	float m_fIngredients = 100.f;

@@ -2,4 +2,4 @@
 #Format first line = Type of Waypoints
 1080,700
 #Refill area
-800,700
+820,700

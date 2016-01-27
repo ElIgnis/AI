@@ -70,9 +70,11 @@ public:
 
 	void addNumOrders(const int numOrders);
 	int getNumOrders(void);
+	int getNumDrinksPrepared(void);
 
 	void addNumDeliveryOrders(const int numOrders);
 	int getNumDeliveryOrders(void);
+	int getNumDeliveryPrepared(void);
 
 	Vector2 GetPos();
 	Vector2 GetDir();
