@@ -12,6 +12,7 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_fCustomerSpawn(0.f)
 	, m_fCustomerRate(1.f)
 	, CustomerID(0)
+	, CuttingQueue(false)
 {
 }
 
@@ -268,11 +269,22 @@ void SceneManagerCMPlay::Update(double dt)
 	//Only if there are customers queueing
 	if (m_cQueueList.size() > 0)
 	{
+		for (unsigned a = 0; a < m_cQueueList.size(); ++a)
+		{
+			if (m_cQueueList[a]->getCutQueueStatus())
+			{
+				CuttingQueue = true;
+				break;
+			}
+			else if (a = m_cQueueList.size() - 1)
+			{
+				CuttingQueue = false;
+			}
+		}
 		//If customer has finished buying, then we remove him
 		if (!m_cQueueList[0]->getQueueStatus())
 		{
 			m_cQueueList[0]->setInQueueStatus(false);	//We set the In queue status to false
-			m_cQueueList[0]->SetQueueID(-1);
 			m_cQueueList.erase(m_cQueueList.begin());	//Remove from vector
 			m_v2CustomerQueueingPosition.pop_back();	//Remove last queuing position
 			//Move all customers forward
@@ -284,12 +296,6 @@ void SceneManagerCMPlay::Update(double dt)
 
 		if (m_cQueueList.size() > 0)
 		{
-
-			for (unsigned i = 0; i < m_cQueueList.size(); ++i)
-			{
-				m_cQueueList[i]->SetQueueID(i);
-			}
-
 			//We start from the customer behind
 			for (unsigned i = m_cQueueList.size() - 1; i > 0; --i)
 			{
@@ -307,7 +313,6 @@ void SceneManagerCMPlay::Update(double dt)
 
 			for (unsigned i = m_cQueueList.size() - 1; i > 0; --i)
 			{
-				//Get waypoint
 				if (customer_mb->GetMsg(Urgent, std::to_string(m_cQueueList[i]->GetQueueID())))
 				{
 					Vector2 Temp = m_cQueueList[i + 1]->getCurrentPos();
@@ -898,7 +903,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 					break;
 				}
 
-				RenderTextOnScreen(drawMesh, std::to_string(m_cCustomerList[i]->GetQueueID()), resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 90, 0);
+				RenderTextOnScreen(drawMesh, std::to_string(m_cCustomerList[i]->GetQueueID()), resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x + 90, m_cCustomerList[i]->getPos().y + 50, 0);
 			}
 			else if (!m_bDisplay_shop)
 			{
@@ -917,7 +922,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 					break;
 				}
 
-				RenderTextOnScreen(drawMesh, std::to_string(m_cCustomerList[i]->GetQueueID()), resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 90, 0);
+				//RenderTextOnScreen(drawMesh, std::to_string(m_cCustomerList[i]->GetQueueID()), resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x, m_cCustomerList[i]->getPos().y + 90, 0);
 			}
 		}
 	}

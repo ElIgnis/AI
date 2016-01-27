@@ -48,6 +48,7 @@ public:
 	int GetQueueID(void);	//Get Customer's Q ID
 
 	void setCutQueueStatus(bool status,int IDtoGO);
+	bool getCutQueueStatus(void);
 
 	bool getOutdoorStatus();	//Get where customer is (outdoor / indoor)
 	void setActive(bool active);	//Set active status
@@ -79,7 +80,7 @@ public:
 	SpriteAnimation* getSprite(void);	//Get current sprite
 
 	STATES getState(void);	//Get current state
-
+	void setState(STATES state);	//Set state
 	void Reset(void);	//Reset variables
 
 	int m_IDtoGO;

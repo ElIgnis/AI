@@ -298,6 +298,10 @@ Customer::STATES Customer::getState(void)
 {
 	return this->currentState;
 }
+void Customer::setState(STATES state)
+{
+	this->currentState = state;
+}
 
 void Customer::setDrinkAvailable(bool available)
 {
@@ -332,6 +336,10 @@ void Customer::setCutQueueStatus(bool status, int IDtoGO)
 	this->m_bAbleToCut = status;
 	this->m_IDtoGO = IDtoGO;
 }
+bool Customer::getCutQueueStatus(void)
+{
+	return this->m_bAbleToCut;
+}
 
 void Customer::Reset(void)
 {
@@ -347,4 +355,8 @@ void Customer::Reset(void)
 	m_bDrinkAvailable = false;
 	m_bOrderPlaced = false;
 	m_bInWait = false;
+	m_bRandomUrgent = false;
+	m_bAbleToCut = false;
+	m_QueueID = -1;
+	m_IDtoGO = -1;
 }

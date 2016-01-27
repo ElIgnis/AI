@@ -89,6 +89,7 @@ private:
 	RubbishMan* rubbishMan;
 
 	int CustomerID;	//Customer's ID
+	bool CuttingQueue;
 	vector<Customer*> m_cCustomerList;	//List containing all customers
 	float m_fCustomerSpawn;	//Spawning timer
 	float m_fCustomerRate;	//Rate of spawn
