@@ -274,31 +274,42 @@ void SceneManagerCMPlay::Update(double dt)
 			}
 		}
 
-		for (unsigned i = 0; i < m_cQueueList.size(); ++i)
+		if (m_cQueueList.size() > 0)
 		{
-			m_cQueueList[i]->SetQueueID(i);
-		}
 
-		//We start from the customer behind
-		for (unsigned i = m_cQueueList.size() - 1; i > 0; --i)
-		{
-			int temp = i - 1;
-			//Only if there is a customer infront of the current customer
-			if (temp >= 0)
+			for (unsigned i = 0; i < m_cQueueList.size(); ++i)
 			{
-				//Only if the customer infront of the current customer is queueing
-				if (m_cQueueList[i]->getState() == Customer::S_QUEUE)
+				m_cQueueList[i]->SetQueueID(i);
+			}
+
+			//We start from the customer behind
+			for (unsigned i = m_cQueueList.size() - 1; i > 0; --i)
+			{
+				int temp = i - 1;
+				//Only if there is a customer infront of the current customer
+				if (temp >= 0)
 				{
-					m_cQueueList[i]->setCutQueueStatus(true, m_cQueueList[i-1]->GetQueueID());
+					//Only if the customer infront of the current customer is queueing
+					if (m_cQueueList[i]->getState() == Customer::S_QUEUE)
+					{
+						m_cQueueList[i]->setCutQueueStatus(true, m_cQueueList[i - 1]->GetQueueID());
+					}
 				}
 			}
 
-			//Get waypoint
-			if (customer_mb->GetMsg(Urgent, std::to_string(m_cQueueList[i]->GetQueueID())))
+			for (unsigned i = m_cQueueList.size() - 1; i > 0; --i)
 			{
-				Vector2 Temp = m_cQueueList[i + 1]->getCurrentPos();
-				m_cQueueList[i + 1]->setNextPoint(m_cQueueList[i]->getCurrentPos());
-				m_cQueueList[i]->setNextPoint(Temp);
+				//Get waypoint
+				if (customer_mb->GetMsg(Urgent, std::to_string(m_cQueueList[i]->GetQueueID())))
+				{
+					Vector2 Temp = m_cQueueList[i + 1]->getCurrentPos();
+					Vector2 Temp2 = m_cQueueList[i]->getCurrentPos();
+					Customer* temp = m_cQueueList[i + 1];
+					m_cQueueList[i + 1] = m_cQueueList[i];
+					m_cQueueList[i] = temp;
+					m_cQueueList[i + 1]->setNextPoint(Temp);
+					m_cQueueList[i]->setNextPoint(Temp2);
+				}
 			}
 		}
 	}
