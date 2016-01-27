@@ -29,7 +29,7 @@ Barista::Barista()
 , m_fBrewProgress(0.f)
 , m_fRefillTimer(1.f)
 , m_fRefillProgress(0.f)
-, m_fMoveSpeed(500.f)
+, m_fMoveSpeed(150.f)
 , m_fDistSquared(0.f)
 
 //Text file reading
@@ -186,7 +186,7 @@ void Barista::UpdateIdle(double dt, MessageBoard* mb)
 		}
 	}
 	//Go back to idling spot
-	if (m_iNumOrders == 0)
+	if (m_iNumOrders == 0 && m_iNumDeliveryOrders == 0)
 	{
 		if (m_v2CurrentPos != Brew.at(0))
 			UpdatePath(Brew, true, dt);
@@ -254,7 +254,6 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 		trash += 5;
 		m_fBrewProgress = 0;
 		m_iBrewBar = 0;
-		
 	}
 
 	//Return to idle if there are no more orders

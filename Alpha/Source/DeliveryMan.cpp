@@ -36,7 +36,7 @@ DeliveryMan::DeliveryMan()
 , m_iNextPoint(0)
 
 , m_fTotalTime(0.f)
-, m_fMoveSpeed(500.f)
+, m_fMoveSpeed(250.f)
 , m_fDistSquared(0.f)
 , m_fDelay(0.f)
 
@@ -385,24 +385,25 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, Mess
 	switch (currentState)
 	{
 	case S_IDLE:
-		m_fMoveSpeed = 500.f;
+		m_fMoveSpeed = 250.f;
 		UpdateIdle(dt, worldTime, order, mb);
 		break;
 	case S_SLEEPING:
 		m_v2Direction.Set(0, -1);
-		UpdateSleeping(dt, worldTime, mb);
+		UpdateSleeping(dt, worldTime);
 		break;
 	case S_EATING:
-		UpdateEating(dt, worldTime, mb);
+		UpdateEating(dt, worldTime);
 		break;
 	case S_COLLECTING:
+		m_v2Direction.Set(0, -1);
 		UpdateCollecting(dt, worldTime);
 		break;
 	case S_DELIVERING:
-		UpdateDelivering(dt, worldTime, weather, order, mb);
+		UpdateDelivering(dt, worldTime, weather, order);
 		break;
 	case S_RETURNING:
-		UpdateReturning(dt, worldTime, weather, order, mb);
+		UpdateReturning(dt, worldTime, weather, order);
 		break;
 	default:
 		break;
@@ -455,6 +456,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, Mess
 			this->spriteAnim_Outdoor_Night->currentAni = WALK_DOWN;
 		}	
 	}
+	std::cout << currentState << std::endl;
 }
 
 void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard* mb)
@@ -485,7 +487,7 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard*
 	}
 
 	//Eating portion
-	else if (m_bNeedToEat && !m_bExiting)
+	else if (m_bNeedToEat && !m_bExiting &&!m_bOrderToCollect)
 	{
 		// Proceed to eat after moving to eating area
 		if (UpdatePath(Eat, false, dt))
@@ -507,7 +509,11 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard*
 			//Collect order items when done message is received
 			if (mb->GetMsg(MSG_DELIVERY_READY))
 			{
-				std::cout << "deliver" << std::endl;
+				m_bOrderToCollect = true;
+			}
+			//If there is an order to collect
+			if (m_bOrderToCollect)
+			{
 				//Proceed to collect after moving to collection area
 				if (UpdatePath(Collect, false, dt))
 				{
@@ -547,13 +553,17 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard*
 }
 void DeliveryMan::UpdateCollecting(double dt, int worldTime)
 {
+	m_fDelay += (float)dt;
+
 	//Receive msg to move to collect drinks
-	if (UpdatePath(Collect, true, dt))
+	if (m_fDelay > 1.5f && UpdatePath(Collect, true, dt))
 	{
 		m_bOrderCollected = true;
+		currentState = S_IDLE;
+		m_fDelay = 0.f;
 	}
 }
-void DeliveryMan::UpdateEating(double dt, int worldTime, MessageBoard* mb)
+void DeliveryMan::UpdateEating(double dt, int worldTime)
 {
 	int tempConversion = worldTime - m_iStartHour;
 
@@ -575,7 +585,7 @@ void DeliveryMan::UpdateEating(double dt, int worldTime, MessageBoard* mb)
 		
 	}
 }
-void DeliveryMan::UpdateSleeping(double dt, int worldTime, MessageBoard* mb)
+void DeliveryMan::UpdateSleeping(double dt, int worldTime)
 {
 	int tempConversion = worldTime - m_iStartHour;
 
@@ -596,7 +606,7 @@ void DeliveryMan::UpdateSleeping(double dt, int worldTime, MessageBoard* mb)
 		}
 	}
 }
-void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order, MessageBoard* mb)
+void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order)
 {
 	//Generate time
 	if (m_bPendingDelivery)
@@ -613,7 +623,7 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 		m_fTotalTime = (float)(weather * m_iHoursNeeded);
 		if (m_fTotalTime > m_iHoursNeeded)
 		{
-			m_fMoveSpeed = 500.f * (m_fTotalTime / m_iHoursNeeded);
+			m_fMoveSpeed = 250.f * (m_fTotalTime / m_iHoursNeeded);
 		}
 	}
 
@@ -642,10 +652,11 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 		break;
 	}
 }
-void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool order, MessageBoard* mb)
+void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool order)
 {
 	//Add a delay of 1.5s before returning
 	m_fDelay += (float)dt;
+	m_bOrderCollected = false;
 
 	//Update and travel according to path
 	if (m_bOutdoor && m_fDelay > 1.5f)

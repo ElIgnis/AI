@@ -55,10 +55,10 @@ public:
 	void Update(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
 	void UpdateIdle(double dt, int worldTime, bool order, MessageBoard* mb);
 	void UpdateCollecting(double dt, int worldTime);
-	void UpdateEating(double dt, int worldTime, MessageBoard* mb);
-	void UpdateSleeping(double dt, int worldTime, MessageBoard* mb);
-	void UpdateDelivering(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
-	void UpdateReturning(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
+	void UpdateEating(double dt, int worldTime);
+	void UpdateSleeping(double dt, int worldTime);
+	void UpdateDelivering(double dt, int worldTime, int weather, bool order);
+	void UpdateReturning(double dt, int worldTime, int weather, bool order);
 	void Draw(SceneManager* sceneManager);
 
 	//Outdoor controls
@@ -113,6 +113,7 @@ private:
 	bool m_bPendingDelivery;
 	bool m_bInCarriage;
 	bool m_bOrderCollected;
+	bool m_bOrderToCollect;
 
 	int m_iHoursNeeded;
 	int m_iResult;
