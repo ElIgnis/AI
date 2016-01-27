@@ -52,7 +52,8 @@ private:
 	float m_fInputDelay;
 	const float m_fMAX_DELAY = 0.15f;
 
-	MessageBoard *shop_mb, customer_mb;
+	MessageBoard *shop_mb;
+	MessageBoard *customer_mb;
 
 	//Probability stuff
 	int m_iWeather;
@@ -87,6 +88,7 @@ private:
 	StoreMan* storeMan; //Store man handler
 	RubbishMan* rubbishMan;
 
+	int CustomerID;	//Customer's ID
 	vector<Customer*> m_cCustomerList;	//List containing all customers
 	float m_fCustomerSpawn;	//Spawning timer
 	float m_fCustomerRate;	//Rate of spawn

@@ -5,6 +5,10 @@
 #include "SceneManager.h"
 #include "Vector2.h"
 #include "SpriteAnimation.h"
+#include "MessageBoard.h"
+
+#define Urgent "Urgent!"
+#define Busy "Busy on Call!"
 
 class Customer : GameObject2D
 {
@@ -33,22 +37,30 @@ public:
 	Customer(Vector2 startPos);	//Default constructor
 	~Customer();	//Default destructor
 
-	void Update(double dt, int worldTime, int weather);	//Update based on state	
+	void Update(double dt, int worldTime, int weather, MessageBoard *mb);	//Update based on state	
 
 	STATES getCurrentState(void);	//Get current state 
 	Vector2 getCurrentPos();	//Get current position
 	void setStartPos(Vector2 startpos);	//Setting new start position 
 	void setNextPoint(Vector2 nextpoint);	//Set next point to head towards
 
+	void SetQueueID(int id);	//Set Customer's Q ID
+	int GetQueueID(void);	//Get Customer's Q ID
+
+	void setCutQueueStatus(bool status,int IDtoGO);
+
 	bool getOutdoorStatus();	//Get where customer is (outdoor / indoor)
 	void setActive(bool active);	//Set active status
+
 	bool getActive();	//Get active status
 	bool getQueueStatus();	//Get queue status
 
 	bool getInQueueStatus();	//Get queue status
 	void setInQueueStatus(bool inqueue);	//Set queue status
+
 	bool getWaitStatus();	//Get wait status
 	bool getInWaitStatus();	//Get in wait status
+
 	void setInWaitStatus(bool wait);	//Set in wait status
 	void setDrinkAvailable(bool available);	//set If drink available status
 
@@ -60,6 +72,7 @@ public:
 	void setOrderPlaced(bool placed);	//Get whether customer has placed order
 	bool getOrderPlaced(void);	//Get whether customer has placed order
 
+	bool CalculateUrgentProbability(void);	//Calculate if customer is urgent
 	bool CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
 
 	void setSprite(SpriteAnimation* sprite);	//Set current sprite
@@ -68,6 +81,8 @@ public:
 	STATES getState(void);	//Get current state
 
 	void Reset(void);	//Reset variables
+
+	int m_IDtoGO;
 private:
 	STATES currentState;	//Current state
 
@@ -91,7 +106,11 @@ private:
 	bool m_bWait;	//Start waiting
 	bool m_bInWait;	//Inside waiting queue
 	bool m_bOrderPlaced;	//Placed Order status
+	bool m_bRandomUrgent;	//Random Urgent status
+	bool m_bAbleToCut;	//Able to Cut Queue, Only if Customer Infront is Queuing as well this will be set to true
 	float m_fDelay;	//Timer for delays
+
+	int m_QueueID;	//Customer's Q ID, -1 == not in queue
 
 	SpriteAnimation* currentSprite;
 };

@@ -13,7 +13,11 @@ Customer::Customer(Vector2 startPos) :
 		m_bDrinkAvailable(false),
 		m_bOrderPlaced(false),
 		m_bWait(false),
-		m_bInWait(false)
+		m_bInWait(false),
+		m_bRandomUrgent(false),
+		m_bAbleToCut(false),
+		m_QueueID(-1),
+		m_IDtoGO(-1)
 {
 	m_v2CurrentPos = startPos;
 	m_v2ShopPos = Vector2(1080, 280);
@@ -27,7 +31,7 @@ Customer::~Customer()
 
 }
 
-void Customer::Update(double dt, int worldTime, int weather)
+void Customer::Update(double dt, int worldTime, int weather, MessageBoard *mb)
 {
 	Vector2 direction = (m_v2NextPos - m_v2CurrentPos).Normalized();
 	switch (currentState)
@@ -125,6 +129,16 @@ void Customer::Update(double dt, int worldTime, int weather)
 		if (m_v2CurrentPos != m_v2NextPos)
 		{
 			currentState = S_WALKING;
+
+			//Only if customer is able to Cut the queue and has not randomed his urgent probability
+			if (m_bAbleToCut && !m_bRandomUrgent)
+			{
+				//Calculate Customer's Urgent Probability
+				if (CalculateUrgentProbability())
+				{
+					mb->AddMessage(Urgent, std::to_string(m_QueueID), std::to_string(m_IDtoGO));
+				}
+			}
 		}
 		break;
 	case S_BUY:	
@@ -202,6 +216,19 @@ void Customer::setInWaitStatus(bool wait)
 	this->m_bInWait = wait;
 }
 
+bool Customer::CalculateUrgentProbability(void)
+{
+	int prob = Math::RandIntMinMax(1, 100);
+	if (prob >= 1)
+	{
+		m_bRandomUrgent = true;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 bool Customer::CalculateProbability(int time, int weather)
 {
 	int chance = Math::RandIntMinMax(1, 100);
@@ -286,9 +313,24 @@ bool Customer::getOrderPlaced(void)
 	return this->m_bOrderPlaced;
 }
 
+void Customer::SetQueueID(int id)
+{
+	this->m_QueueID = id;
+}
+int Customer::GetQueueID(void)
+{
+	return this->m_QueueID;
+}
+
 Vector2 Customer::getPos()
 {
 	return this->m_v2CurrentPos;
+}
+
+void Customer::setCutQueueStatus(bool status, int IDtoGO)
+{
+	this->m_bAbleToCut = status;
+	this->m_IDtoGO = IDtoGO;
 }
 
 void Customer::Reset(void)
