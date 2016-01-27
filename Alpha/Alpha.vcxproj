@@ -108,6 +108,7 @@
     <ClCompile Include="Source\MenuStateCM.cpp" />
     <ClCompile Include="Source\Mesh.cpp" />
     <ClCompile Include="Source\MeshBuilder.cpp" />
+    <ClCompile Include="Source\MessageBoard.cpp" />
     <ClCompile Include="Source\MobileGameObject.cpp" />
     <ClCompile Include="Source\Mouse.cpp" />
     <ClCompile Include="Source\OBB2D.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Source\MenuStateCM.h" />
     <ClInclude Include="Source\Mesh.h" />
     <ClInclude Include="Source\MeshBuilder.h" />
+    <ClInclude Include="Source\MessageBoard.h" />
     <ClInclude Include="Source\MobileGameObject.h" />
     <ClInclude Include="Source\Mouse.h" />
     <ClInclude Include="Source\OBB2D.h" />

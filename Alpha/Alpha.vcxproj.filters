@@ -79,6 +79,9 @@
     <Filter Include="AIs">
       <UniqueIdentifier>{88ad9c34-2ae1-448f-9820-911423dafa11}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AIs\MessageBoard">
+      <UniqueIdentifier>{9870e429-7b13-4b9b-9a25-d26d4e4e5b84}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Utility.cpp">
@@ -218,6 +221,9 @@
     </ClCompile>
     <ClCompile Include="Source\RubbishMan.cpp">
       <Filter>AIs</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MessageBoard.cpp">
+      <Filter>AIs\MessageBoard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -382,6 +388,9 @@
     </ClInclude>
     <ClInclude Include="Source\RubbishMan.h">
       <Filter>AIs</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\MessageBoard.h">
+      <Filter>AIs\MessageBoard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
