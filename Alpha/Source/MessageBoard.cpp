@@ -19,12 +19,26 @@ void MessageBoard::AddMessage(string message, string sender, string receiver)
 
 	msg_list.push_back(msg);
 }
-bool MessageBoard::GetMessage(string message)
+bool MessageBoard::GetMsg(string message)
 {
 	for (std::vector<Message>::iterator itr = msg_list.begin(); itr != msg_list.end(); ++itr)
 	{
 		if ((*itr).message == message)
 		{
+			msg_list.erase(itr);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool MessageBoard::GetMsg(string message, string receiver)
+{
+	for (std::vector<Message>::iterator itr = msg_list.begin(); itr != msg_list.end(); ++itr)
+	{
+		if ((*itr).message == message && (*itr).receiver == receiver)
+		{
+			msg_list.erase(itr);
 			return true;
 		}
 	}
