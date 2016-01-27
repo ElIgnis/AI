@@ -4,10 +4,16 @@
 #include "GameObject2D.h"
 #include "SceneManager.h"
 #include "Vector2.h"
+#include "MessageBoard.h"
+#include "Barista.h"
+
 #include <fstream>
 #include <sstream>
 
 using std::getline;
+
+//Define messages to send here
+#define RC_TO_DELIVERYMAN "Too many orders"
 
 class DeliveryMan : GameObject2D
 {
@@ -16,6 +22,7 @@ public:
 	{
 		S_IDLE = 0,
 		S_SLEEPING,
+		S_COLLECTING,
 		S_EATING,
 		S_DELIVERING,
 		S_RETURNING,
@@ -45,12 +52,13 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt, int worldTime, int weather, bool order);
-	void UpdateIdle(double dt, int worldTime, bool order);
-	void UpdateEating(double dt, int worldTime);
-	void UpdateSleeping(double dt, int worldTime);
-	void UpdateDelivering(double dt, int worldTime, int weather, bool order);
-	void UpdateReturning(double dt, int worldTime, int weather, bool order);
+	void Update(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
+	void UpdateIdle(double dt, int worldTime, bool order, MessageBoard* mb);
+	void UpdateCollecting(double dt, int worldTime);
+	void UpdateEating(double dt, int worldTime, MessageBoard* mb);
+	void UpdateSleeping(double dt, int worldTime, MessageBoard* mb);
+	void UpdateDelivering(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
+	void UpdateReturning(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
 	void Draw(SceneManager* sceneManager);
 
 	//Outdoor controls
@@ -63,6 +71,7 @@ public:
 	bool getInCarriage(void);
 
 	void ReadWayPoints_Eat(string fileName);
+	void ReadWayPoints_Collecting(string fileName);
 	void ReadWayPoints_Sleep(string fileName);
 	void ReadWayPoints_Exiting(string fileName);
 	void ReadWayPoints_Path1(string fileName);
@@ -70,6 +79,7 @@ public:
 	void ReadWayPoints_Path3(string fileName);
 
 	void AddWayPoints_Eat(Vector2 newWayPoint);
+	void AddWayPoints_Collecting(Vector2 newWayPoint);
 	void AddWayPoints_Sleep(Vector2 newWayPoint);
 	void AddWayPoints_Exiting(Vector2 newWayPoint);
 	void AddWayPoints_Path1(Vector2 newWayPoint);
@@ -102,6 +112,7 @@ private:
 	bool m_bPathAssigned;
 	bool m_bPendingDelivery;
 	bool m_bInCarriage;
+	bool m_bOrderCollected;
 
 	int m_iHoursNeeded;
 	int m_iResult;
@@ -121,6 +132,7 @@ private:
 
 	vector<Vector2> Eat;
 	vector<Vector2> Sleep;
+	vector<Vector2> Collect;
 	vector<Vector2> Exiting;
 	vector<Vector2> PathOne;
 	vector<Vector2> PathTwo;

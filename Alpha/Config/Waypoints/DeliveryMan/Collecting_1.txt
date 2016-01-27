@@ -1,0 +1,9 @@
+#Waypoints for moving between Idle and Collecting
+#Format first line = Type of Waypoints
+#Idle
+585,895
+#Collect
+585,610
+780,610
+780,640
+900,640

@@ -20,8 +20,10 @@ Barista::Barista()
 
 , m_iNextPoint(0)
 , m_iNumOrders(0)
+, m_iNumDeliveryOrders(0)
 , m_iBrewBar(0)
 , m_iDrinksPrepared(0)
+, m_iDeliveriesPrepared(0)
 
 , m_fBrewTimer(1.f)
 , m_fBrewProgress(0.f)
@@ -137,22 +139,22 @@ void Barista::ReadWayPoints_Brew(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void Barista::Update(double dt, float& ingredients, float& trash, float& reserve)
+void Barista::Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb)
 {
 	//Need to start brewing if there is a order
 	switch (currentState)
 	{
 	case S_IDLE:
 		m_v2Direction.Set(0, -1);
-		UpdateIdle(dt);
+		UpdateIdle(dt, mb);
 		break;
 	case S_REFILL:
 		m_v2Direction.Set(0, -1);
-		UpdateRefill(dt, ingredients, reserve);
+		UpdateRefill(dt, ingredients, reserve, mb);
 		break;
 	case S_BREW:
 		m_v2Direction.Set(0, -1);
-		UpdateBrew(dt, ingredients, trash);
+		UpdateBrew(dt, ingredients, trash, mb);
 		break;
 	default:
 		break;
@@ -172,10 +174,10 @@ void Barista::Update(double dt, float& ingredients, float& trash, float& reserve
 		this->spriteAnim->currentAni = WALK_DOWN;
 }
 
-void Barista::UpdateIdle(double dt)
+void Barista::UpdateIdle(double dt, MessageBoard* mb)
 {
 	//Continue to brew as long as there are orders
-	if (m_iNumOrders > 0)
+	if (m_iNumOrders > 0 || m_iNumDeliveryOrders > 0)
 	{
 		//Move to counter
 		if (UpdatePath(Brew, false, dt))
@@ -190,7 +192,7 @@ void Barista::UpdateIdle(double dt)
 			UpdatePath(Brew, true, dt);
 	}
 }
-void Barista::UpdateRefill(double dt, float& ingredients, float& reserve)
+void Barista::UpdateRefill(double dt, float& ingredients, float& reserve, MessageBoard* mb)
 {
 	m_fRefillProgress += dt;
 
@@ -226,15 +228,25 @@ void Barista::UpdateRefill(double dt, float& ingredients, float& reserve)
 		}
 	}
 }
-void Barista::UpdateBrew(double dt, float& ingredients, float& trash)
+void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoard* mb)
 {
 	m_fBrewProgress += dt;
 	++m_iBrewBar;
 
-	//Brew once every second
+	//Brew orders per second
 	if (m_fBrewProgress >= m_fBrewTimer)
 	{
-		--m_iNumOrders;
+		//For customers
+		if (m_iNumOrders > 1)
+		{
+			--m_iNumOrders;
+		}
+		//For deliveries
+		else if (m_iNumDeliveryOrders > 1)
+		{
+			--m_iNumDeliveryOrders;
+			mb->AddMessage(MSG_DELIVERY_READY, ROLE_BARISTA, ROLE_DELIVERYMAN);
+		}
 		ingredients -= 5;
 		trash += 5;
 		m_fBrewProgress = 0;
@@ -294,6 +306,16 @@ void Barista::addNumOrders(const int numOrders)
 int Barista::getNumOrders(void)
 {
 	return m_iNumOrders;
+}
+
+void Barista::addNumDeliveryOrders(const int numOrders)
+{
+	this->m_iNumDeliveryOrders += numOrders;
+}
+
+int Barista::getNumDeliveryOrders(void)
+{
+	return m_iNumDeliveryOrders;
 }
 
 void Barista::AddWayPoints_Refill(Vector2 newWayPoint)

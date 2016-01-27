@@ -59,6 +59,7 @@ void DeliveryMan::Init(void)
 
 	ReadWayPoints_Eat("Config\\Waypoints\\DeliveryMan\\Eat_1.txt");
 	ReadWayPoints_Sleep("Config\\Waypoints\\DeliveryMan\\Sleep_1.txt");
+	ReadWayPoints_Collecting("Config\\Waypoints\\DeliveryMan\\Collecting_1.txt");
 	ReadWayPoints_Exiting("Config\\Waypoints\\DeliveryMan\\Exiting_1.txt");
 	ReadWayPoints_Path1("Config\\Waypoints\\DeliveryMan\\PathOne_1.txt");
 	ReadWayPoints_Path2("Config\\Waypoints\\DeliveryMan\\PathTwo_1.txt");
@@ -98,6 +99,49 @@ void DeliveryMan::ReadWayPoints_Eat(string fileName)
 
 			//Load the points in
 			AddWayPoints_Eat(Vector2(
+				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
+				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
+				));
+
+			++m_iReadLine;
+		}
+		WPTokens.clear();
+		inTxtFile.close();
+	}
+	else
+		std::cout << "Load Waypoint file failed" << std::endl;
+}
+
+void DeliveryMan::ReadWayPoints_Collecting(string fileName)
+{
+	//vector to contain elements split
+	vector<string>WPTokens;
+
+	//Reset line
+	m_iReadLine = 0;
+
+	//Load Level details
+	std::ifstream inTxtFile;
+	inTxtFile.open(fileName);
+	if (inTxtFile.good())
+	{
+		while (getline(inTxtFile, WPData))
+		{
+			std::istringstream split(WPData);
+
+			//Dont read lines with #
+			if (WPData[0] == '#')
+			{
+				continue;
+			}
+
+			for (string each; std::getline(split, each, m_cSplit_Char);)
+			{
+				WPTokens.push_back(each);
+			}
+
+			//Load the points in
+			AddWayPoints_Collecting(Vector2(
 				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
 				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
 				));
@@ -324,7 +368,7 @@ void DeliveryMan::ReadWayPoints_Path3(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
+void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, MessageBoard* mb)
 {
 	// Need to eat at 1200 hours
 	if (worldTime == 1200 || worldTime == 1800)
@@ -342,25 +386,28 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
 	{
 	case S_IDLE:
 		m_fMoveSpeed = 500.f;
-		UpdateIdle(dt, worldTime, order);
+		UpdateIdle(dt, worldTime, order, mb);
 		break;
 	case S_SLEEPING:
 		m_v2Direction.Set(0, -1);
-		UpdateSleeping(dt, worldTime);
+		UpdateSleeping(dt, worldTime, mb);
 		break;
 	case S_EATING:
-		UpdateEating(dt, worldTime);
+		UpdateEating(dt, worldTime, mb);
+		break;
+	case S_COLLECTING:
+		UpdateCollecting(dt, worldTime);
 		break;
 	case S_DELIVERING:
-		UpdateDelivering(dt, worldTime, weather, order);
+		UpdateDelivering(dt, worldTime, weather, order, mb);
 		break;
 	case S_RETURNING:
-		UpdateReturning(dt, worldTime, weather, order);
+		UpdateReturning(dt, worldTime, weather, order, mb);
 		break;
 	default:
 		break;
 	}
-
+	
 	// Update sprite based on direction
 	if (!m_bInCarriage)
 	{
@@ -410,7 +457,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order)
 	}
 }
 
-void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
+void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard* mb)
 {
 	//If received order, AI need to remember to process it
 	if (order)
@@ -454,34 +501,58 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order)
 	//Delivery only when no need to eat/sleep
 	else if (m_bPendingDelivery)
 	{
-		//Get out of cafe first
-		if (!m_bOutdoor)
+		//Check if the order is collected
+		if (!m_bOrderCollected)
 		{
-			m_bExiting = true;
-			if (m_v2CurrentPos == Exiting.at(2))
-				m_bInCarriage = true;
-
-			if (UpdatePath(Exiting, false, dt))
+			//Collect order items when done message is received
+			//if (mb->GetMsg(MSG_DELIVERY_READY))
 			{
-				m_bOutdoor = true;
+				//Proceed to collect after moving to collection area
+				if (UpdatePath(Collect, false, dt))
+				{
+					currentState = S_COLLECTING;
+				}
 			}
 		}
-		//Randomizes outdoor path
-		if (m_bOutdoor)
+		else
 		{
-			//Assign the start of action hour
-			if (m_iStartHour == 0)
-				m_iStartHour = worldTime;
+			//Get out of cafe first
+			if (!m_bOutdoor)
+			{
+				m_bExiting = true;
+				if (m_v2CurrentPos == Exiting.at(2))
+					m_bInCarriage = true;
 
-			//Snap new position to outside of cafe
-			m_v2CurrentPos = Vector2(1290, 600);
+				if (UpdatePath(Exiting, false, dt))
+				{
+					m_bOutdoor = true;
+				}
+			}
+			//Randomizes outdoor path
+			if (m_bOutdoor)
+			{
+				//Assign the start of action hour
+				if (m_iStartHour == 0)
+					m_iStartHour = worldTime;
 
-			currentState = S_DELIVERING;
-			m_iCurrentPath = RandomizePath();
+				//Snap new position to outside of cafe
+				m_v2CurrentPos = Vector2(1290, 600);
+
+				currentState = S_DELIVERING;
+				m_iCurrentPath = RandomizePath();
+			}
 		}
 	}
 }
-void DeliveryMan::UpdateEating(double dt, int worldTime)
+void DeliveryMan::UpdateCollecting(double dt, int worldTime)
+{
+	//Receive msg to move to collect drinks
+	if (UpdatePath(Collect, true, dt))
+	{
+		m_bOrderCollected = true;
+	}
+}
+void DeliveryMan::UpdateEating(double dt, int worldTime, MessageBoard* mb)
 {
 	int tempConversion = worldTime - m_iStartHour;
 
@@ -503,7 +574,7 @@ void DeliveryMan::UpdateEating(double dt, int worldTime)
 		
 	}
 }
-void DeliveryMan::UpdateSleeping(double dt, int worldTime)
+void DeliveryMan::UpdateSleeping(double dt, int worldTime, MessageBoard* mb)
 {
 	int tempConversion = worldTime - m_iStartHour;
 
@@ -524,7 +595,7 @@ void DeliveryMan::UpdateSleeping(double dt, int worldTime)
 		}
 	}
 }
-void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order)
+void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order, MessageBoard* mb)
 {
 	//Generate time
 	if (m_bPendingDelivery)
@@ -570,10 +641,10 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 		break;
 	}
 }
-void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool order)
+void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool order, MessageBoard* mb)
 {
 	//Add a delay of 1.5s before returning
-	m_fDelay += dt;
+	m_fDelay += (float)dt;
 
 	//Update and travel according to path
 	if (m_bOutdoor && m_fDelay > 1.5f)
@@ -664,6 +735,10 @@ bool DeliveryMan::getInCarriage(void)
 void DeliveryMan::AddWayPoints_Eat(Vector2 newWayPoint)
 {
 	Eat.push_back(newWayPoint);
+}
+void DeliveryMan::AddWayPoints_Collecting(Vector2 newWayPoint)
+{
+	Collect.push_back(newWayPoint);
 }
 void DeliveryMan::AddWayPoints_Sleep(Vector2 newWayPoint)
 {

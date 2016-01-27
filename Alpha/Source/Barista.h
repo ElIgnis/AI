@@ -5,10 +5,18 @@
 #include "SceneManager.h"
 #include "Vector2.h"
 #include "Customer.h"
+#include "MessageBoard.h"
+
 #include <fstream>
 #include <sstream>
 
 using std::getline;
+
+//Define messages to send here
+#define MSG_DELIVERY_READY "Delivery items are ready"
+#define MSG_LOW_INGREDIENTS "Ingredients are running low"
+#define MSG_RUBBISH_FULL "Rubbish bin is full"
+#define RC_TO_BARISTA "Too many customers"
 
 class Barista : GameObject2D
 {
@@ -44,10 +52,10 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt, float& ingredients, float& trash, float& reserve);
-	void UpdateIdle(double dt);
-	void UpdateRefill(double dt, float& ingredients, float& reserve);
-	void UpdateBrew(double dt, float& ingredients, float& trash);
+	void Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb);
+	void UpdateIdle(double dt, MessageBoard* mb);
+	void UpdateRefill(double dt, float& ingredients, float& reserve, MessageBoard* mb);
+	void UpdateBrew(double dt, float& ingredients, float& trash, MessageBoard* mb);
 	void Draw(SceneManager* sceneManager);
 
 	void ReadWayPoints_Refill(string fileName);
@@ -62,6 +70,9 @@ public:
 
 	void addNumOrders(const int numOrders);
 	int getNumOrders(void);
+
+	void addNumDeliveryOrders(const int numOrders);
+	int getNumDeliveryOrders(void);
 
 	Vector2 GetPos();
 	Vector2 GetDir();
@@ -82,8 +93,10 @@ private:
 
 	int m_iNextPoint;
 	int m_iNumOrders;
+	int m_iNumDeliveryOrders;
 	int m_iBrewBar;
 	int m_iDrinksPrepared;
+	int m_iDeliveriesPrepared;
 
 	float m_fBrewTimer;
 	float m_fBrewProgress;
