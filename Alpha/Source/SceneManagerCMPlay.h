@@ -9,6 +9,7 @@
 #include "Barista.h"
 #include "StoreMan.h"
 #include "RubbishMan.h"
+#include "MessageBoard.h"
 
 struct CustomerShopWaypoints
 {
@@ -50,6 +51,8 @@ private:
 	float m_fBGpos_y;
 	float m_fInputDelay;
 	const float m_fMAX_DELAY = 0.15f;
+
+	MessageBoard *shop_mb, customer_mb;
 
 	//Probability stuff
 	int m_iWeather;
