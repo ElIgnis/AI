@@ -219,7 +219,7 @@ void Customer::setInWaitStatus(bool wait)
 bool Customer::CalculateUrgentProbability(void)
 {
 	int prob = Math::RandIntMinMax(1, 100);
-	if (prob >= 1)
+	if (prob >= 50)
 	{
 		m_bRandomUrgent = true;
 		return true;
@@ -339,6 +339,11 @@ void Customer::setCutQueueStatus(bool status, int IDtoGO)
 bool Customer::getCutQueueStatus(void)
 {
 	return this->m_bAbleToCut;
+}
+
+Vector2 Customer::getNextPoint(void)
+{
+	return this->m_v2NextPos;
 }
 
 void Customer::Reset(void)

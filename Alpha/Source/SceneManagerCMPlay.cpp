@@ -303,10 +303,11 @@ void SceneManagerCMPlay::Update(double dt)
 				//Only if there is a customer infront of the current customer
 				if (temp >= 0)
 				{
-					//Only if the customer infront of the current customer is queueing
-					if (m_cQueueList[i]->getState() == Customer::S_QUEUE)
+					//Only if the customer infront of the current customer is queueing and is not the one that has already cut queue
+					if (m_cQueueList[i-1]->getState() == Customer::S_QUEUE)
 					{
 						m_cQueueList[i]->setCutQueueStatus(true, m_cQueueList[i - 1]->GetQueueID());
+						break;
 					}
 				}
 			}
@@ -315,13 +316,16 @@ void SceneManagerCMPlay::Update(double dt)
 			{
 				if (customer_mb->GetMsg(Urgent, std::to_string(m_cQueueList[i]->GetQueueID())))
 				{
-					Vector2 Temp = m_cQueueList[i + 1]->getCurrentPos();
-					Vector2 Temp2 = m_cQueueList[i]->getCurrentPos();
-					Customer* temp = m_cQueueList[i + 1];
-					m_cQueueList[i + 1] = m_cQueueList[i];
+					m_cQueueList[i + 1]->setNextPoint(m_cQueueList[i]->getNextPoint());	//Set the customer behind to cut the customer infront
+					m_cQueueList[i]->setNextPoint(m_cQueueList[i]->getCurrentPos());	//Set customer infront to stay at his own position
+					/*Vector2 temp = m_v2CustomerQueueingPosition[i + 1];
+					m_v2CustomerQueueingPosition[i + 1] = m_v2CustomerQueueingPosition[i];
+					m_v2CustomerQueueingPosition[i] = temp;*/
+					Customer* temp = m_cQueueList[i + 1];//Swapping them
+					m_cQueueList[i + 1] = m_cQueueList[i];	
 					m_cQueueList[i] = temp;
-					m_cQueueList[i + 1]->setNextPoint(Temp);
-					m_cQueueList[i]->setNextPoint(Temp2);
+					//m_cQueueList[i + 1]->setNextPoint(Temp);	//Moving the one in front backwards
+					//m_cQueueList[i]->setNextPoint(Temp2);	//
 				}
 			}
 		}

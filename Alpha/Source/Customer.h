@@ -43,6 +43,7 @@ public:
 	Vector2 getCurrentPos();	//Get current position
 	void setStartPos(Vector2 startpos);	//Setting new start position 
 	void setNextPoint(Vector2 nextpoint);	//Set next point to head towards
+	Vector2 getNextPoint(void);	//Get next point
 
 	void SetQueueID(int id);	//Set Customer's Q ID
 	int GetQueueID(void);	//Get Customer's Q ID
