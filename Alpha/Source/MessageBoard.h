@@ -13,12 +13,12 @@ using std::vector;
 #define ROLE_RUBBISHMAN "Rubbishman"
 #define ROLE_STOREMAN "Storeman"
 
+struct Message{
+	string sender, receiver, message;
+};
 
 class MessageBoard
 {	
-	struct Message{
-		string sender, receiver, message;
-	};
 public:
 	MessageBoard();
 	~MessageBoard();
@@ -29,9 +29,10 @@ public:
 	//Function to get a message from message board
 	bool GetMsg(string message);
 	bool GetMsg(string message, string receiver);
+	vector<Message*> GetMsgBoard(void);
 
 private:
 	vector<Message*> msg_list;
-
+	vector<Message*> display_list;
 };
 

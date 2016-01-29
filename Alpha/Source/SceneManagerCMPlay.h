@@ -55,6 +55,8 @@ private:
 	MessageBoard *shop_mb;
 	MessageBoard *customer_mb;
 
+	
+
 	//Probability stuff
 	int m_iWeather;
 	bool order;

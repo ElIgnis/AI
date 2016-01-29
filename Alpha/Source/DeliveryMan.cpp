@@ -36,7 +36,7 @@ DeliveryMan::DeliveryMan()
 , m_iNextPoint(0)
 
 , m_fTotalTime(0.f)
-, m_fMoveSpeed(250.f)
+, m_fMoveSpeed(500.f)
 , m_fDistSquared(0.f)
 , m_fDelay(0.f)
 
@@ -385,7 +385,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, Mess
 	switch (currentState)
 	{
 	case S_IDLE:
-		m_fMoveSpeed = 250.f;
+		m_fMoveSpeed = 500.f;
 		UpdateIdle(dt, worldTime, order, mb);
 		break;
 	case S_SLEEPING:

@@ -784,6 +784,14 @@ void SceneManagerCMPlay::RenderUIInfo()
 		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
 		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(NumDeliveryOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
 		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 600, 0);
+
+		//Render messages from message board
+		for (int i = 0; i < shop_mb->GetMsgBoard().size(); ++i)
+		{
+			RenderTextOnScreen(drawMesh, "From: " + shop_mb->GetMsgBoard().at(i)->sender, resourceManager.retrieveColor("Red"), 30, sceneWidth - 600, (sceneHeight - 700 - 50 * i), 0);
+			RenderTextOnScreen(drawMesh, "To: " + shop_mb->GetMsgBoard().at(i)->receiver, resourceManager.retrieveColor("Red"), 30, sceneWidth - 400, (sceneHeight - 700 - 50 * i), 0);
+			RenderTextOnScreen(drawMesh, "Message: " + shop_mb->GetMsgBoard().at(i)->message, resourceManager.retrieveColor("Red"), 30, sceneWidth - 600, (sceneHeight - 700 - 70 * i+1), 0);
+		}
 	}
 	switch (storeMan->getCurrentState())
 	{

@@ -18,6 +18,12 @@ void MessageBoard::AddMessage(string message, string sender, string receiver)
 	msg->receiver = receiver;
 
 	msg_list.push_back(msg);
+	display_list.push_back(msg);
+	
+	if (display_list.size() > 5)
+	{
+		display_list.erase(display_list.begin());
+	}
 }
 bool MessageBoard::GetMsg(string message)
 {
@@ -25,6 +31,13 @@ bool MessageBoard::GetMsg(string message)
 	{
 		if ((*itr)->message == message)
 		{
+			display_list.push_back((*itr));
+
+			if (display_list.size() > 5)
+			{
+				display_list.erase(display_list.begin());
+			}
+
 			msg_list.erase(itr);
 			return true;
 		}
@@ -38,10 +51,21 @@ bool MessageBoard::GetMsg(string message, string receiver)
 	{
 		if ((*itr)->message == message && (*itr)->receiver == receiver)
 		{
+			display_list.push_back((*itr));
+
+			if (display_list.size() > 5)
+			{
+				display_list.erase(display_list.begin());
+			}
+
 			msg_list.erase(itr);
 			return true;
 		}
 	}
-	
 	return false;
+}
+
+vector<Message*> MessageBoard::GetMsgBoard(void)
+{
+	return display_list;
 }
