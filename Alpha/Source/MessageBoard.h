@@ -3,9 +3,12 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <ostream>
 
 using std::string;
 using std::vector;
+using std::ostream;
+
 
 //Define AI roles
 #define ROLE_BARISTA "Barista"
@@ -29,10 +32,10 @@ public:
 	//Function to get a message from message board
 	bool GetMsg(string message);
 	bool GetMsg(string message, string receiver);
-	vector<Message*> GetMsgBoard(void);
+	vector<string> GetDisplayBoard(void);
 
 private:
 	vector<Message*> msg_list;
-	vector<Message*> display_list;
+	vector<string> display_list;
 };
 

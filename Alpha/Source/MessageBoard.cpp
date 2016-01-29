@@ -17,8 +17,9 @@ void MessageBoard::AddMessage(string message, string sender, string receiver)
 	msg->sender = sender;
 	msg->receiver = receiver;
 
+	string Display = msg->sender + " - \"" + msg->message +"\"" + " to " + msg->receiver;
 	msg_list.push_back(msg);
-	display_list.push_back(msg);
+	display_list.push_back(Display);
 	
 	if (display_list.size() > 5)
 	{
@@ -31,7 +32,9 @@ bool MessageBoard::GetMsg(string message)
 	{
 		if ((*itr)->message == message)
 		{
-			display_list.push_back((*itr));
+
+			string Display = (*itr)->receiver + " Retrieved \"" + (*itr)->message + "\"";
+			display_list.push_back(Display);
 
 			if (display_list.size() > 5)
 			{
@@ -51,7 +54,8 @@ bool MessageBoard::GetMsg(string message, string receiver)
 	{
 		if ((*itr)->message == message && (*itr)->receiver == receiver)
 		{
-			display_list.push_back((*itr));
+			string Display = (*itr)->receiver + " Retrieved \"" + (*itr)->message + "\"";
+			display_list.push_back(Display);
 
 			if (display_list.size() > 5)
 			{
@@ -65,7 +69,7 @@ bool MessageBoard::GetMsg(string message, string receiver)
 	return false;
 }
 
-vector<Message*> MessageBoard::GetMsgBoard(void)
+vector<string> MessageBoard::GetDisplayBoard(void)
 {
 	return display_list;
 }

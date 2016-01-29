@@ -304,7 +304,7 @@ void SceneManagerCMPlay::Update(double dt)
 				if (temp >= 0)
 				{
 					//Only if the customer infront of the current customer is queueing and is not the one that has already cut queue
-					if (m_cQueueList[i-1]->getState() == Customer::S_QUEUE)
+					if (m_cQueueList[i - 1]->getState() == Customer::S_QUEUE && !m_cQueueList[i - 1]->getCutQueueStatus())
 					{
 						m_cQueueList[i]->setCutQueueStatus(true, m_cQueueList[i - 1]->GetQueueID());
 						break;
@@ -785,12 +785,18 @@ void SceneManagerCMPlay::RenderUIInfo()
 		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(NumDeliveryOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
 		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 600, 0);
 
+		RenderTextOnScreen(drawMesh, "Shop Message Board:", resourceManager.retrieveColor("Red"), 30, sceneWidth - 500, (sceneHeight - 670), 0);
 		//Render messages from message board
-		for (int i = 0; i < shop_mb->GetMsgBoard().size(); ++i)
+		for (int i = 0; i < shop_mb->GetDisplayBoard().size(); ++i)
 		{
-			RenderTextOnScreen(drawMesh, "From: " + shop_mb->GetMsgBoard().at(i)->sender, resourceManager.retrieveColor("Red"), 30, sceneWidth - 600, (sceneHeight - 700 - 50 * i), 0);
-			RenderTextOnScreen(drawMesh, "To: " + shop_mb->GetMsgBoard().at(i)->receiver, resourceManager.retrieveColor("Red"), 30, sceneWidth - 400, (sceneHeight - 700 - 50 * i), 0);
-			RenderTextOnScreen(drawMesh, "Message: " + shop_mb->GetMsgBoard().at(i)->message, resourceManager.retrieveColor("Red"), 30, sceneWidth - 600, (sceneHeight - 700 - 70 * i+1), 0);
+			RenderTextOnScreen(drawMesh, shop_mb->GetDisplayBoard().at(i), resourceManager.retrieveColor("Red"), 30, sceneWidth - 500, (sceneHeight - 700 - 40 * i), 0);
+		}
+
+		RenderTextOnScreen(drawMesh, "Customer Message Board:", resourceManager.retrieveColor("Red"), 30, 100, (sceneHeight - 670), 0);
+		//Render messages from message board
+		for (int i = 0; i < customer_mb->GetDisplayBoard().size(); ++i)
+		{
+			RenderTextOnScreen(drawMesh, customer_mb->GetDisplayBoard().at(i), resourceManager.retrieveColor("Red"), 30, 100, (sceneHeight - 700 - 40 * i), 0);
 		}
 	}
 	switch (storeMan->getCurrentState())
