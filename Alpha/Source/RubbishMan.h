@@ -1,5 +1,5 @@
-#ifndef RUBBISH_MAN
-#define RUBBISH_MAN
+#ifndef RUBBISH_MAN_H
+#define RUBBISH_MAN_H
 
 #include "GameObject2D.h"
 #include "SceneManager.h"

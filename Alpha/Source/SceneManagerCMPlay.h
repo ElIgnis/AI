@@ -3,13 +3,12 @@
 
 #include "SceneManagerGameplay.h"
 #include "SceneNode.h"
-#include "DeliveryMan.h"
 #include "Customer.h"
 #include "Application.h"
-#include "Barista.h"
 #include "StoreMan.h"
 #include "RubbishMan.h"
 #include "MessageBoard.h"
+#include "GenericAI.h"
 
 struct CustomerShopWaypoints
 {
@@ -24,6 +23,7 @@ public:
 	~SceneManagerCMPlay();
 
 	void Init(const int width, const int height, ResourcePool* RP, InputManager* controls);
+	void InitGenericAI();
 	void Update(double dt);
 	void Render();
 	void Exit();
@@ -41,8 +41,9 @@ public:
 	void RenderUIInfo();
 
 	void FetchCustomer();	//Set new customer at spawn
-
+	bool GenerateOrder();
 	void UpdateGoodsDelivery(double dt); // Update the goods delivery status
+	//GenericAI* RetrieveRole(GenericAI::Roles RoleToCheck);
 
 private:
 	const float m_fBGpos_MAX_y = 730.f;
@@ -55,14 +56,15 @@ private:
 	MessageBoard *shop_mb;
 	MessageBoard *customer_mb;
 
-	
-
 	//Probability stuff
 	int m_iWeather;
 	bool order;
 
-	//Order stuff
-	int NumOrders, NumDeliveryOrders;
+	//Ordering
+	int m_iNumOrders;
+	int m_iNumDelivery;
+	int m_iNumOrdersProcessed;
+	int m_iNumDeliveryOrdersProcessed;
 
 	//Shop Resources
 	float m_fIngredients = 100.f;
@@ -83,9 +85,8 @@ private:
 	int m_iWorldTime;
 	float m_fMinutes;
 
-	vector<DeliveryMan*> m_cDeliveryList;	//List containing all delivery guy(GTH)
-	DeliveryMan* deliveryMan;
-	Barista* barista;
+	GenericAI *GenericAI_One, *GenericAI_Two;
+	vector<GenericAI*> GenericAI_List;
 
 	StoreMan* storeMan; //Store man handler
 	RubbishMan* rubbishMan;

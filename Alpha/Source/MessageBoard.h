@@ -9,7 +9,6 @@ using std::string;
 using std::vector;
 using std::ostream;
 
-
 //Define AI roles
 #define ROLE_BARISTA "Barista"
 #define ROLE_DELIVERYMAN "Deliveryman"

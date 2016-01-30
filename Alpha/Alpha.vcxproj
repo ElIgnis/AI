@@ -99,6 +99,7 @@
     <ClCompile Include="Source\GameObject3D.cpp" />
     <ClCompile Include="Source\GameObjectSprite2D.cpp" />
     <ClCompile Include="Source\GameStateManager.cpp" />
+    <ClCompile Include="Source\GenericAI.cpp" />
     <ClCompile Include="Source\InputManager.cpp" />
     <ClCompile Include="Source\Keyboard.cpp" />
     <ClCompile Include="Source\LoadHmap.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Source\GameObjectSprite2D.h" />
     <ClInclude Include="Source\GameState.h" />
     <ClInclude Include="Source\GameStateManager.h" />
+    <ClInclude Include="Source\GenericAI.h" />
     <ClInclude Include="Source\InputManager.h" />
     <ClInclude Include="Source\Keyboard.h" />
     <ClInclude Include="Source\Light.h" />

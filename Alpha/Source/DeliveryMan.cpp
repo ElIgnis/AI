@@ -27,6 +27,9 @@ DeliveryMan::DeliveryMan()
 , m_bPendingDelivery(false)
 , m_bPathAssigned(false)
 , m_bInCarriage(false)
+, m_bOrderCollected(false)
+, m_bOrderToCollect(false)
+, m_bDeliveryCompleted(false)
 
 , m_iHoursNeeded(2)
 , m_iResult(0)
@@ -368,7 +371,7 @@ void DeliveryMan::ReadWayPoints_Path3(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, MessageBoard* mb)
+void DeliveryMan::Update(double dt, int worldTime, int weather, int numOrder, MessageBoard* mb)
 {
 	// Need to eat at 1200 hours
 	if (worldTime == 1200 || worldTime == 1800)
@@ -382,11 +385,16 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, Mess
 		m_bNeedToSleep = true;
 	}
 
+	if (numOrder > 0)
+	{
+		m_bPendingDelivery = true;
+	}
+
 	switch (currentState)
 	{
 	case S_IDLE:
 		m_fMoveSpeed = 500.f;
-		UpdateIdle(dt, worldTime, order, mb);
+		UpdateIdle(dt, worldTime, mb);
 		break;
 	case S_SLEEPING:
 		m_v2Direction.Set(0, -1);
@@ -400,10 +408,10 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, Mess
 		UpdateCollecting(dt, worldTime);
 		break;
 	case S_DELIVERING:
-		UpdateDelivering(dt, worldTime, weather, order);
+		UpdateDelivering(dt, worldTime, weather);
 		break;
 	case S_RETURNING:
-		UpdateReturning(dt, worldTime, weather, order);
+		UpdateReturning(dt, worldTime, weather);
 		break;
 	default:
 		break;
@@ -459,13 +467,16 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, bool order, Mess
 	std::cout << currentState << std::endl;
 }
 
-void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard* mb)
+void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 {
-	//If received order, AI need to remember to process it
-	if (order)
+	//If received message to role change
+	//if (mb->GetMsg(RC_TO_BARISTA))
 	{
-		m_bPendingDelivery = true;
+		//Move to barista area
+
 	}
+
+	//If received order, AI need to remember to process it
 	if (!m_bPendingDelivery && !m_bNeedToEat && !m_bNeedToSleep)
 	{
 		if (m_v2CurrentPos != Sleep.at(0))
@@ -487,7 +498,7 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard*
 	}
 
 	//Eating portion
-	else if (m_bNeedToEat && !m_bExiting &&!m_bOrderToCollect)
+	else if (m_bNeedToEat && !m_bExiting && !m_bOrderToCollect)
 	{
 		// Proceed to eat after moving to eating area
 		if (UpdatePath(Eat, false, dt))
@@ -507,7 +518,7 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, bool order, MessageBoard*
 		if (!m_bOrderCollected)
 		{
 			//Collect order items when done message is received
-			if (mb->GetMsg(MSG_DELIVERY_READY))
+			if (!m_bOrderToCollect && mb->GetMsg(MSG_DELIVERY_READY))
 			{
 				m_bOrderToCollect = true;
 			}
@@ -606,7 +617,7 @@ void DeliveryMan::UpdateSleeping(double dt, int worldTime)
 		}
 	}
 }
-void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool order)
+void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather)
 {
 	//Generate time
 	if (m_bPendingDelivery)
@@ -652,7 +663,7 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather, bool o
 		break;
 	}
 }
-void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool order)
+void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather)
 {
 	//Add a delay of 1.5s before returning
 	m_fDelay += (float)dt;
@@ -707,9 +718,11 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 		if (UpdatePath(Exiting, true, dt))
 		{
 			currentState = S_IDLE;
+			m_bDeliveryCompleted = true;
 			m_iStartHour = 0;
 			m_v2Direction.SetZero();
 			m_bExiting = false;
+			m_bOrderToCollect = false;
 		}
 	}
 }
@@ -717,12 +730,6 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, bool or
 int DeliveryMan::RandomizePath(void)
 {
 	return Math::RandIntMinMax(0, 2);
-}
-
-bool DeliveryMan::GenerateOrder(void)
-{
-	//return Math::RandIntMinMax(0, 1);
-	return true;
 }
 
 Vector2 DeliveryMan::GetPos(void)
@@ -743,6 +750,16 @@ bool DeliveryMan::getOutdoor(void)
 bool DeliveryMan::getInCarriage(void)
 {
 	return m_bInCarriage;
+}
+
+bool DeliveryMan::GetDeliveryCompleted(void)
+{
+	return m_bDeliveryCompleted;
+}
+
+void DeliveryMan::SetDeliveryCompleted(bool deliveryCompleted)
+{
+	this->m_bDeliveryCompleted = deliveryCompleted;
 }
 
 void DeliveryMan::AddWayPoints_Eat(Vector2 newWayPoint)

@@ -4,11 +4,11 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	: m_iWorldTime(800)
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
+	, m_iNumOrders(0)
+	, m_iNumDelivery(0)
+	, m_iNumOrdersProcessed(0)
+	, m_iNumDeliveryOrdersProcessed(0)
 	, order(false)
-	, NumOrders(0)
-	, NumDeliveryOrders(0)
-	, deliveryMan(NULL)
-	, barista(NULL)
 	, m_fCustomerSpawn(0.f)
 	, m_fCustomerRate(1.f)
 	, CustomerID(0)
@@ -72,27 +72,40 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 		m_cCustomerList.push_back(temp);
 	}
 
-	deliveryMan = new DeliveryMan();
-	deliveryMan->Init();
+	InitGenericAI();
+
+	shop_mb = new MessageBoard;
+	customer_mb = new MessageBoard;
+}
+
+void SceneManagerCMPlay::InitGenericAI()
+{
+	Mesh* drawMesh;
+
+	//Initialise all sprites
+	GenericAI_One = new GenericAI(GenericAI::DELIVERY_MAN);
+	GenericAI_Two = new GenericAI(GenericAI::BARISTA);
 
 	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_IN");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In");
-	deliveryMan->SetIndoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_One->deliveryMan->SetIndoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_Two->deliveryMan->SetIndoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 
 	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out");
-	deliveryMan->SetOutdoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_One->deliveryMan->SetOutdoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_Two->deliveryMan->SetOutdoorSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 
 	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_OUT_NIGHT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_Out_Night");
-	deliveryMan->SetOutdoorSpriteAnim_Night(dynamic_cast<SpriteAnimation*> (drawMesh));
-
-	barista = new Barista();
-	barista->Init();
+	GenericAI_One->deliveryMan->SetOutdoorSpriteAnim_Night(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_Two->deliveryMan->SetOutdoorSpriteAnim_Night(dynamic_cast<SpriteAnimation*> (drawMesh));
 
 	drawMesh = resourceManager.retrieveMesh("SPRITE_BARISTA");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Barista");
-	barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_One->barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+	GenericAI_Two->barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+
 
 	storeMan = new StoreMan();
 	storeMan->Init();
@@ -108,8 +121,8 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_RubbishMan");
 	rubbishMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*>(drawMesh));
 
-	shop_mb = new MessageBoard;
-	customer_mb = new MessageBoard;
+	GenericAI_List.push_back(GenericAI_One);
+	GenericAI_List.push_back(GenericAI_Two);
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -164,24 +177,40 @@ void SceneManagerCMPlay::Update(double dt)
 		m_iWorldTime += 100;
 		m_fMinutes = 0;
 
-		//Generates a probability of getting an order when idle every hour
-		if (deliveryMan->getCurrentState() == DeliveryMan::S_IDLE)
+		//Order is generated every hour
+		order = GenerateOrder();
+
+		if (order)
 		{
-			order = deliveryMan->GenerateOrder();
-			if (order)
+			++m_iNumDelivery;
+
+			//Check for barista roles
+			for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 			{
-				++NumDeliveryOrders;
-				barista->addNumDeliveryOrders(1);
+				//Only assign order to current barista with 4 or lesser orders
+				if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->getNumDeliveryOrders() < 5)
+				{
+					(*itr)->barista->addNumDeliveryOrders(1);
+				}
 			}
 		}
 	}
+
+
 		
 	//Resetting world time to a new day
 	if (m_iWorldTime == 2400){
 		m_iWorldTime = 0;
 	}
 	
-	deliveryMan->Update(dt, m_iWorldTime, m_iWeather, order, shop_mb);
+	//Check for deliveryman roles
+	for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
+	{
+		if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN)
+		{
+			(*itr)->deliveryMan->Update(dt, m_iWorldTime, m_iWeather, m_iNumDelivery, shop_mb);
+		}
+	}
 
 	//std::cout << "X: " << Application::getMouse()->getCurrentPosX() << "Y: " << Application::getWindowHeight() - Application::getMouse()->getCurrentPosY() << std::endl;
 
@@ -322,7 +351,7 @@ void SceneManagerCMPlay::Update(double dt)
 					m_v2CustomerQueueingPosition[i + 1] = m_v2CustomerQueueingPosition[i];
 					m_v2CustomerQueueingPosition[i] = temp;*/
 					Customer* temp = m_cQueueList[i + 1];//Swapping them
-					m_cQueueList[i + 1] = m_cQueueList[i];	
+					m_cQueueList[i + 1] = m_cQueueList[i];
 					m_cQueueList[i] = temp;
 					//m_cQueueList[i + 1]->setNextPoint(Temp);	//Moving the one in front backwards
 					//m_cQueueList[i]->setNextPoint(Temp2);	//
@@ -339,31 +368,44 @@ void SceneManagerCMPlay::Update(double dt)
 			//Update number of orders based on orders placed
 			if (m_cCustomerList[i]->getOrderPlaced())
 			{
-				barista->addNumOrders(1);
+				++m_iNumOrders;
+				//Check for barista roles
+				for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
+				{
+					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && m_iNumOrders > 0)
+					{
+						--m_iNumOrders;
+						(*itr)->barista->addNumOrders(1);
+					}
+				}
 				m_cCustomerList[i]->setOrderPlaced(false);
 			}
 			else if (m_cCustomerList[i]->getState() == Customer::S_WAIT && !m_cCustomerList[i]->getWaitStatus())
 			{
-				//Only if drinks are available to pick up
-				if (barista->GetDrinkPrepared())
+				//Check for barista roles
+				for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 				{
-					NumOrders++;
-					m_cCustomerList[i]->setDrinkAvailable(true);
-					barista->SubtractDrinkPrepared();
-					//Only if there are customers waiting
-					if (m_cWaitList.size() > 0)
+					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->GetDrinkPrepared())
 					{
-						//If customer has finished waiting, then we remove him
-						if (!m_cWaitList[0]->getWaitStatus())
-						{
-							m_cWaitList[0]->setInWaitStatus(false);	//We set the In wait status to false
-							m_cWaitList.erase(m_cWaitList.begin());	//Remove from vector
-							m_v2CustomerWaitingPosition.pop_back();	//Remove last waiting position
+						m_iNumOrdersProcessed++;
+						m_cCustomerList[i]->setDrinkAvailable(true);
+						(*itr)->barista->SubtractDrinkPrepared();
 
-							//Move all customers forward
-							for (unsigned a = 0; a < m_cWaitList.size(); ++a)
+						//Only if there are customers waiting
+						if (m_cWaitList.size() > 0)
+						{
+							//If customer has finished waiting, then we remove him
+							if (!m_cWaitList[0]->getWaitStatus())
 							{
-								m_cWaitList[a]->setNextPoint(m_v2CustomerWaitingPosition[a]);
+								m_cWaitList[0]->setInWaitStatus(false);	//We set the In wait status to false
+								m_cWaitList.erase(m_cWaitList.begin());	//Remove from vector
+								m_v2CustomerWaitingPosition.pop_back();	//Remove last waiting position
+
+								//Move all customers forward
+								for (unsigned a = 0; a < m_cWaitList.size(); ++a)
+								{
+									m_cWaitList[a]->setNextPoint(m_v2CustomerWaitingPosition[a]);
+								}
 							}
 						}
 					}
@@ -374,7 +416,7 @@ void SceneManagerCMPlay::Update(double dt)
 				if (m_cCustomerList[i]->getDelay() > 0.1f)
 				{
 					m_cCustomerList[i]->setPickedUp(true);
-					NumOrders--;
+					m_iNumOrdersProcessed--;
 					Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER2");
 					drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE2");
 					m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
@@ -385,7 +427,15 @@ void SceneManagerCMPlay::Update(double dt)
 		}
 	}
 
-	barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb);
+
+	//Check for barista roles
+	for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
+	{
+		if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
+		{
+			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb);
+		}
+	}
 
 	storeMan->Update(dt, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
 
@@ -429,6 +479,11 @@ void SceneManagerCMPlay::Update(double dt)
 	fpCamera.Update(dt, 0);
 }
 
+bool SceneManagerCMPlay::GenerateOrder()
+{
+	return Math::RandIntMinMax(0, 1);
+}
+
 void SceneManagerCMPlay::UpdateGoodsDelivery(double dt)
 {
 	//If waiting for order update waiting
@@ -470,22 +525,18 @@ void SceneManagerCMPlay::Render()
 
 void SceneManagerCMPlay::Exit()
 {
-	while (m_cDeliveryList.size() > 0)
-	{
-		DeliveryMan *DeliveryMan = m_cDeliveryList.back();
-		delete DeliveryMan;
-		m_cDeliveryList.pop_back();
-	}
 	while (m_cCustomerList.size() > 0)
 	{
 		Customer *customer = m_cCustomerList.back();
 		delete customer;
 		m_cCustomerList.pop_back();
 	}
-	if (deliveryMan)
+
+	while (GenericAI_List.size() > 0)
 	{
-		delete deliveryMan;
-		deliveryMan = NULL;
+		GenericAI * genericAI = GenericAI_List.back();
+		delete genericAI;
+		GenericAI_List.pop_back();
 	}
 	if (storeMan)
 	{
@@ -632,13 +683,13 @@ void SceneManagerCMPlay::RenderStaticObject()
 		drawMesh = resourceManager.retrieveMesh("HORSEFLIP");
 		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
 		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
-		if (NumOrders > 0)
+		if (m_iNumOrdersProcessed > 0)
 		{
 			drawMesh = resourceManager.retrieveMesh("DRINKS");
 			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
 			Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(1000, 660));
 		}
-		if (barista->getNumDeliveryPrepared() > 0)
+		if (m_iNumDeliveryOrdersProcessed > 0)
 		{
 			drawMesh = resourceManager.retrieveMesh("DRINKS");
 			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
@@ -663,18 +714,24 @@ void SceneManagerCMPlay::RenderStaticObject()
 			drawMesh->textureID = resourceManager.retrieveTexture("GAME_CRATE");
 			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(450, 850));
 		}
-		if (barista->getCurrentState() == Barista::S_BREW)
+
+		for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 		{
-			drawMesh = resourceManager.retrieveMesh("DRINKS_2");
-			drawMesh->textureID = resourceManager.retrieveTexture("Drinks_2");
-			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1050, 660));
-			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1100, 660));
-		}
-		if (deliveryMan->getCurrentState() == DeliveryMan::S_EATING)
-		{
-			drawMesh = resourceManager.retrieveMesh("FOOD");
-			drawMesh->textureID = resourceManager.retrieveTexture("Food");
-			Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(670, 690));
+			if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->getCurrentState() == Barista::S_BREW)
+			{
+				drawMesh = resourceManager.retrieveMesh("DRINKS_2");
+				drawMesh->textureID = resourceManager.retrieveTexture("Drinks_2");
+				Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1050, 660));
+				Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1100, 660));
+			}
+
+			if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN && (*itr)->deliveryMan->getCurrentState() == DeliveryMan::S_EATING)
+			{
+				drawMesh = resourceManager.retrieveMesh("FOOD");
+				drawMesh->textureID = resourceManager.retrieveTexture("Food");
+				Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(670, 690));
+			}
+			
 		}
 	}
 }
@@ -727,34 +784,43 @@ void SceneManagerCMPlay::RenderMobileObject()
 	//Indoor deliveryman
 	if (m_bDisplay_shop)
 	{
-		if (!deliveryMan->getOutdoor())
+		for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 		{
-			if (!deliveryMan->getInCarriage())
+			if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN && !(*itr)->deliveryMan->getOutdoor())
 			{
-				Render2DMesh(deliveryMan->GetIndoorSpriteAnim(), false, Vector2(50, 50), deliveryMan->GetPos());
-				Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(850, 895));
+				if (!(*itr)->deliveryMan->getInCarriage())
+				{
+					Render2DMesh((*itr)->deliveryMan->GetIndoorSpriteAnim(), false, Vector2(50, 50), (*itr)->deliveryMan->GetPos());
+					Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(850, 895));
+				}
+				else
+					Render2DMesh((*itr)->deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(175, 175), (*itr)->deliveryMan->GetPos());
 			}
-			else
-				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(175, 175), deliveryMan->GetPos());
+			if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
+			{
+				Render2DMesh((*itr)->barista->GetSpriteAnim(), false, Vector2(50, 50), (*itr)->barista->GetPos());
+			}
 		}
-		Render2DMesh(barista->GetSpriteAnim(), false, Vector2(50, 50), barista->GetPos());
 	}
 
 	//Outdoor deliveryman
 	else
 	{
-		if (deliveryMan->getOutdoor())
+		for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 		{
-			//Night time sprite
-			if (m_iWorldTime >= 0 && m_iWorldTime <= 0700
-				|| m_iWorldTime >= 1900)
+			if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN && (*itr)->deliveryMan->getOutdoor())
 			{
-				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim_Night(), false, Vector2(100, 100), deliveryMan->GetPos());
-			}
-			//Day time sprite
-			else
-			{
-				Render2DMesh(deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), deliveryMan->GetPos());
+				//Night time sprite
+				if (m_iWorldTime >= 0 && m_iWorldTime <= 0700
+					|| m_iWorldTime >= 1900)
+				{
+					Render2DMesh((*itr)->deliveryMan->GetOutdoorSpriteAnim_Night(), false, Vector2(100, 100), (*itr)->deliveryMan->GetPos());
+				}
+				//Day time sprite
+				else
+				{
+					Render2DMesh((*itr)->deliveryMan->GetOutdoorSpriteAnim(), false, Vector2(100, 100), (*itr)->deliveryMan->GetPos());
+				}
 			}
 		}
 	}
@@ -781,8 +847,8 @@ void SceneManagerCMPlay::RenderUIInfo()
 	{
 		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
 		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
-		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(barista->getNumOrders()), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
-		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(NumDeliveryOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
+		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_iNumOrdersProcessed), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
+		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(m_iNumDeliveryOrdersProcessed), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
 		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 600, 0);
 
 		RenderTextOnScreen(drawMesh, "Shop Message Board:", resourceManager.retrieveColor("Red"), 30, sceneWidth - 500, (sceneHeight - 670), 0);
@@ -834,53 +900,60 @@ void SceneManagerCMPlay::RenderUIInfo()
 	default:
 		break;
 	}
-
-	switch (deliveryMan->getCurrentState())
+	for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 	{
-	case DeliveryMan::S_IDLE:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x, deliveryMan->GetPos().y + 50, 0);
-		break;
-	case DeliveryMan::S_SLEEPING:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
-		break;
-	case DeliveryMan::S_COLLECTING:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Collecting", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
-		break;
-	case DeliveryMan::S_EATING:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
-		break;
-	case DeliveryMan::S_DELIVERING:
-		if (!m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
-		break;
-	case DeliveryMan::S_RETURNING:
-		if (!m_bDisplay_shop && deliveryMan->getOutdoor() || m_bDisplay_shop && !deliveryMan->getOutdoor())
-			RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 40, deliveryMan->GetPos().x - 15, deliveryMan->GetPos().y + 50, 0);
-		break;
-	default:
-		break;
-	}
-
-	switch (barista->getCurrentState())
-	{
-	case Barista::S_IDLE:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, barista->GetPos().x, barista->GetPos().y + 50, 0);
-		break;
-	case Barista::S_BREW:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Brewing", resourceManager.retrieveColor("Red"), 40, barista->GetPos().x - 15, barista->GetPos().y + 50, 0);
-		break;
-	case Barista::S_REFILL:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Refilling", resourceManager.retrieveColor("Red"), 40, barista->GetPos().x - 15, barista->GetPos().y + 50, 0);
-		break;
-	default:
-		break;
+		if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN)
+		{
+			switch ((*itr)->deliveryMan->getCurrentState())
+			{
+			case DeliveryMan::S_IDLE:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, (*itr)->deliveryMan->GetPos().x, (*itr)->deliveryMan->GetPos().y + 50, 0);
+				break;
+			case DeliveryMan::S_SLEEPING:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Sleeping", resourceManager.retrieveColor("Red"), 40, (*itr)->deliveryMan->GetPos().x - 15, (*itr)->deliveryMan->GetPos().y + 50, 0);
+				break;
+			case DeliveryMan::S_COLLECTING:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Collecting", resourceManager.retrieveColor("Red"), 40, (*itr)->deliveryMan->GetPos().x - 15, (*itr)->deliveryMan->GetPos().y + 50, 0);
+				break;
+			case DeliveryMan::S_EATING:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Eating", resourceManager.retrieveColor("Red"), 40, (*itr)->deliveryMan->GetPos().x - 15, (*itr)->deliveryMan->GetPos().y + 50, 0);
+				break;
+			case DeliveryMan::S_DELIVERING:
+				if (!m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Delivering", resourceManager.retrieveColor("Red"), 40, (*itr)->deliveryMan->GetPos().x - 15, (*itr)->deliveryMan->GetPos().y + 50, 0);
+				break;
+			case DeliveryMan::S_RETURNING:
+				if (!m_bDisplay_shop && (*itr)->deliveryMan->getOutdoor() || m_bDisplay_shop && !(*itr)->deliveryMan->getOutdoor())
+					RenderTextOnScreen(drawMesh, "Returning", resourceManager.retrieveColor("Red"), 40, (*itr)->deliveryMan->GetPos().x - 15, (*itr)->deliveryMan->GetPos().y + 50, 0);
+				break;
+			default:
+				break;
+			}
+		}
+		if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
+		{
+			switch ((*itr)->barista->getCurrentState())
+			{
+			case Barista::S_IDLE:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, (*itr)->barista->GetPos().x, (*itr)->barista->GetPos().y + 50, 0);
+				break;
+			case Barista::S_BREW:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Brewing", resourceManager.retrieveColor("Red"), 40, (*itr)->barista->GetPos().x - 15, (*itr)->barista->GetPos().y + 50, 0);
+				break;
+			case Barista::S_REFILL:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Refilling", resourceManager.retrieveColor("Red"), 40, (*itr)->barista->GetPos().x - 15, (*itr)->barista->GetPos().y + 50, 0);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	//Customer

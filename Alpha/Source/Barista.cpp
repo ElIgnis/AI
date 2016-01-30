@@ -254,6 +254,12 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 		trash += 5;
 		m_fBrewProgress = 0;
 		m_iBrewBar = 0;
+
+		//Calls for help if 4 or more orders
+		if ((m_iNumOrders + m_iNumDeliveryOrders) > 3)
+		{
+			//mb->AddMessage(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
+		}
 	}
 
 	//Return to idle if there are no more orders

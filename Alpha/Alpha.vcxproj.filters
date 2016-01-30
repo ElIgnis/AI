@@ -225,6 +225,9 @@
     <ClCompile Include="Source\MessageBoard.cpp">
       <Filter>AIs\MessageBoard</Filter>
     </ClCompile>
+    <ClCompile Include="Source\GenericAI.cpp">
+      <Filter>AIs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Utility.h">
@@ -391,6 +394,9 @@
     </ClInclude>
     <ClInclude Include="Source\MessageBoard.h">
       <Filter>AIs\MessageBoard</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\GenericAI.h">
+      <Filter>AIs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

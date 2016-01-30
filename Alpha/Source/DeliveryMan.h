@@ -52,23 +52,24 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt, int worldTime, int weather, bool order, MessageBoard* mb);
-	void UpdateIdle(double dt, int worldTime, bool order, MessageBoard* mb);
+	void Update(double dt, int worldTime, int weather, int numOrder, MessageBoard* mb);
+	void UpdateIdle(double dt, int worldTime, MessageBoard* mb);
 	void UpdateCollecting(double dt, int worldTime);
 	void UpdateEating(double dt, int worldTime);
 	void UpdateSleeping(double dt, int worldTime);
-	void UpdateDelivering(double dt, int worldTime, int weather, bool order);
-	void UpdateReturning(double dt, int worldTime, int weather, bool order);
+	void UpdateDelivering(double dt, int worldTime, int weather);
+	void UpdateReturning(double dt, int worldTime, int weather);
 	void Draw(SceneManager* sceneManager);
 
 	//Outdoor controls
-	bool GenerateOrder(void);
 	int RandomizePath(void);
-
 	bool getOutdoor(void);
 	void setOutdoor(const bool isOutDoor);
-
 	bool getInCarriage(void);
+
+	//Delivery completed
+	bool GetDeliveryCompleted(void);
+	void SetDeliveryCompleted(bool deliveryCompleted);
 
 	void ReadWayPoints_Eat(string fileName);
 	void ReadWayPoints_Collecting(string fileName);
@@ -114,6 +115,7 @@ private:
 	bool m_bInCarriage;
 	bool m_bOrderCollected;
 	bool m_bOrderToCollect;
+	bool m_bDeliveryCompleted;
 
 	int m_iHoursNeeded;
 	int m_iResult;
