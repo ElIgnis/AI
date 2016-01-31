@@ -17,7 +17,8 @@ Barista::Barista()
 , m_bNeedToRefill(false)
 , m_bNeedToBrew(false)
 , m_bPathAssigned(false)
-, m_bRoleChange(false)
+, m_bRC_DeliveryMan(false)
+, m_bRC_Completed(false)
 
 , m_iNextPoint(0)
 , m_iNumOrders(0)
@@ -50,6 +51,7 @@ void Barista::Init(void)
 
 	ReadWayPoints_Refill("Config\\Waypoints\\Barista\\Refill_1.txt");
 	ReadWayPoints_Brew("Config\\Waypoints\\Barista\\Brew_1.txt");
+	ReadWayPoints_RC_DeliveryMan("Config\\Waypoints\\Barista\\RC_ToDeliveryMan_1.txt");
 	
 	//Initialise at sleeping position first
 	m_v2CurrentPos = Brew.at(0);
@@ -140,7 +142,50 @@ void Barista::ReadWayPoints_Brew(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void Barista::Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb)
+void Barista::ReadWayPoints_RC_DeliveryMan(string fileName)
+{
+	//vector to contain elements split
+	vector<string>WPTokens;
+
+	//Reset line
+	m_iReadLine = 0;
+
+	//Load Level details
+	std::ifstream inTxtFile;
+	inTxtFile.open(fileName);
+	if (inTxtFile.good())
+	{
+		while (getline(inTxtFile, WPData))
+		{
+			std::istringstream split(WPData);
+
+			//Dont read lines with #
+			if (WPData[0] == '#')
+			{
+				continue;
+			}
+
+			for (string each; std::getline(split, each, m_cSplit_Char);)
+			{
+				WPTokens.push_back(each);
+			}
+
+			//Load the points in based on the type
+			AddWayPoints_RC_DeliveryMan(Vector2(
+				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
+				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
+				));
+
+			++m_iReadLine;
+		}
+		WPTokens.clear();
+		inTxtFile.close();
+	}
+	else
+		std::cout << "Load Waypoint file failed" << std::endl;
+}
+
+void Barista::Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb, int& drinksPrepared, int& deliveriesPrepared)
 {
 	//Need to start brewing if there is a order
 	switch (currentState)
@@ -155,7 +200,7 @@ void Barista::Update(double dt, float& ingredients, float& trash, float& reserve
 		break;
 	case S_BREW:
 		m_v2Direction.Set(0, -1);
-		UpdateBrew(dt, ingredients, trash, mb);
+		UpdateBrew(dt, ingredients, trash, mb, drinksPrepared, deliveriesPrepared);
 		break;
 	default:
 		break;
@@ -181,16 +226,28 @@ void Barista::UpdateIdle(double dt, MessageBoard* mb)
 	if (m_iNumOrders > 0 || m_iNumDeliveryOrders > 0)
 	{
 		//Move to counter
-		if (UpdatePath(Brew, false, dt))
+		if (!m_bRC_DeliveryMan)
 		{
-			currentState = S_BREW;
+			if (UpdatePath(Brew, false, dt))
+				currentState = S_BREW;
+		}
+		else
+		{
+			//Role change
+			if (UpdatePath(RC_DeliveryMan, false, dt))
+			{
+				m_v2Direction.Set(0, -1);
+				m_bRC_Completed = true;
+				m_bRC_DeliveryMan = false;
+			}
 		}
 	}
 	//Go back to idling spot
-	if (m_iNumOrders == 0 && m_iNumDeliveryOrders == 0)
+	if (m_iNumOrders == 0 && m_iNumDeliveryOrders == 0 )
 	{
 		if (m_v2CurrentPos != Brew.at(0))
 			UpdatePath(Brew, true, dt);
+
 	}
 }
 void Barista::UpdateRefill(double dt, float& ingredients, float& reserve, MessageBoard* mb)
@@ -229,7 +286,7 @@ void Barista::UpdateRefill(double dt, float& ingredients, float& reserve, Messag
 		}
 	}
 }
-void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoard* mb)
+void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoard* mb, int& drinksPrepared, int& deliveriesPrepared)
 {
 	m_fBrewProgress += dt;
 	++m_iBrewBar;
@@ -241,21 +298,21 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 		if (m_iNumOrders > 0)
 		{
 			--m_iNumOrders;
-			++m_iDrinksPrepared;
+			++drinksPrepared;
 		}
 		//For deliveries
 		else if (m_iNumDeliveryOrders > 0)
 		{
 			--m_iNumDeliveryOrders;
 			mb->AddMessage(MSG_DELIVERY_READY, ROLE_BARISTA, ROLE_DELIVERYMAN);
-			++m_iDeliveriesPrepared;
+			++deliveriesPrepared;
 		}
 		
 		ingredients -= 5;
 		trash += 5;
 		m_fBrewProgress = 0;
 		m_iBrewBar = 0;
-
+		
 		////Calls for help if 4 or more orders
 		//if ((m_iNumOrders + m_iNumDeliveryOrders) > 3)
 		//{
@@ -280,22 +337,21 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 	}
 }
 
-int Barista::GetNumDrinks(void)
+bool Barista::getRC_DeliveryMan(void)
 {
-	return m_iDrinksPrepared;
+	return m_bRC_DeliveryMan;
 }
-
-bool Barista::GetDrinkPrepared(void)
+void Barista::setRC_DeliveryMan(bool roleChanged)
 {
-	if (m_iDrinksPrepared > 0)
-		return true;
-	else 
-		return false;
+	this->m_bRC_DeliveryMan = roleChanged;
 }
-
-void Barista::SubtractDrinkPrepared(void)
+bool Barista::getRC_Completed(void)
 {
-	--m_iDrinksPrepared;
+	return m_bRC_Completed;
+}
+void Barista::setRC_Completed(bool rc_Completed)
+{
+	this->m_bRC_Completed = rc_Completed;
 }
 
 Vector2 Barista::GetPos(void)
@@ -323,11 +379,6 @@ int Barista::getNumOrders(void)
 	return m_iNumOrders;
 }
 
-int Barista::getNumDrinksPrepared(void)
-{
-	return m_iDrinksPrepared;
-}
-
 void Barista::addNumDeliveryOrders(const int numOrders)
 {
 	this->m_iNumDeliveryOrders += numOrders;
@@ -338,20 +389,6 @@ int Barista::getNumDeliveryOrders(void)
 	return m_iNumDeliveryOrders;
 }
 
-int Barista::getNumDeliveryPrepared(void)
-{
-	return m_iDeliveriesPrepared;
-}
-
-bool Barista::getRoleChange(void)
-{
-	return m_bRoleChange;
-}
-void Barista::setRoleChange(bool roleChanged)
-{
-	this->m_bRoleChange = roleChanged;
-}
-
 void Barista::AddWayPoints_Refill(Vector2 newWayPoint)
 {
 	Refill.push_back(newWayPoint);
@@ -359,6 +396,10 @@ void Barista::AddWayPoints_Refill(Vector2 newWayPoint)
 void Barista::AddWayPoints_Brew(Vector2 newWayPoint)
 {
 	Brew.push_back(newWayPoint);
+}
+void Barista::AddWayPoints_RC_DeliveryMan(Vector2 newWayPoint)
+{
+	RC_DeliveryMan.push_back(newWayPoint);
 }
 
 bool Barista::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
@@ -373,7 +414,6 @@ bool Barista::UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt)
 		else
 		{
 			m_iNextPoint = 0;
-			
 		}
 		m_bPathAssigned = true;
 	}

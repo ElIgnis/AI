@@ -1,6 +1,8 @@
 #include "GenericAI.h"
 
 GenericAI::GenericAI(Roles role)
+: RCtoBarista(false)
+, RCtoDeliveryMan(false)
 {
 	//Creates an instance of all AIs
 	deliveryMan = new DeliveryMan();
@@ -49,22 +51,34 @@ void GenericAI::UpdateRoleChange(MessageBoard* mb)
 	switch (currentRole)
 	{
 	case BARISTA:
-		if (mb->GetMsg(RC_TO_DELIVERYMAN))
+		if (!RCtoDeliveryMan && mb->GetMsg(RC_TO_DELIVERYMAN))
+		{
+			barista->setRC_DeliveryMan(true);
+			RCtoDeliveryMan = true;
+		}
+		if (barista->getRC_Completed())
 		{
 			currentRole = DELIVERY_MAN;
+			deliveryMan->SetPos(barista->GetPos());
+			deliveryMan->setCurrentState(DeliveryMan::S_COLLECTING);
+			deliveryMan->setRC_Completed(false);
+			deliveryMan->setNeedToSleep(false);
+			RCtoDeliveryMan = false;
 		}
 		break;
 	case DELIVERY_MAN:
-		if (mb->GetMsg(RC_TO_BARISTA))
+		if (!RCtoBarista && mb->GetMsg(RC_TO_BARISTA))
 		{
 			deliveryMan->setRC_Barista(true);
+			RCtoBarista = true;
 		}
 		if (deliveryMan->getRC_Completed())
 		{
 			currentRole = BARISTA;
 			barista->SetPos(deliveryMan->GetPos());
 			barista->setCurrentState(Barista::S_REFILL);
-			//barista->addNumOrders(1);
+			barista->setRC_Completed(false);
+			RCtoBarista = false;
 		}
 		break;
 	case RUBBISH_MAN:

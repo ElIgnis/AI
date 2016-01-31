@@ -1,7 +1,7 @@
 #include "SceneManagerCMPlay.h"
 
 SceneManagerCMPlay::SceneManagerCMPlay()
-	: m_iWorldTime(800)
+	: m_iWorldTime(1900)
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, m_iNumOrders(0)
@@ -13,6 +13,8 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_fCustomerRate(1.f)
 	, CustomerID(0)
 	, CuttingQueue(false)
+	, request_delivery(false)
+	, request_barista(false)
 {
 }
 
@@ -167,7 +169,7 @@ void SceneManagerCMPlay::Update(double dt)
 		//Spawn customer
 		if (m_fCustomerSpawn >= m_fCustomerRate)
 		{
-			FetchCustomer();
+			//FetchCustomer();
 			m_fCustomerSpawn = 0.f;
 			m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
 		}
@@ -188,8 +190,12 @@ void SceneManagerCMPlay::Update(double dt)
 
 		if (order)
 		{
-			++m_iNumDelivery;
-
+			//Only allow a maximum or 10 orders
+			if (m_iNumDelivery <= 10)
+			{
+				++m_iNumDelivery;
+			}
+			
 			//Check for barista roles
 			for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 			{
@@ -198,6 +204,17 @@ void SceneManagerCMPlay::Update(double dt)
 				{
 					(*itr)->barista->addNumDeliveryOrders(1);
 				}
+				//Prompts barista to change to deliveryman if there are more than 3 total orders
+				if (m_iNumDeliveryOrdersProcessed > 3)//&& !request_delivery
+				{
+					shop_mb->AddMessageOnce(RC_TO_DELIVERYMAN, ROLE_DELIVERYMAN, ROLE_BARISTA);
+					//request_delivery = true;
+				}
+				////Spam control(Only re-allow request for role change if delivery orders are finished/too many delivery orders)
+				//if (m_iNumDeliveryOrdersProcessed > 10 || m_iNumDeliveryOrdersProcessed == 0)
+				//{
+				//	request_delivery = false;
+				//}
 			}
 		}
 	}
@@ -212,7 +229,7 @@ void SceneManagerCMPlay::Update(double dt)
 	{
 		if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN)
 		{
-			(*itr)->deliveryMan->Update(dt, m_iWorldTime, m_iWeather, m_iNumDelivery, shop_mb);
+			(*itr)->deliveryMan->Update(dt, m_iWorldTime, m_iWeather, m_iNumDeliveryOrdersProcessed, shop_mb);
 		}
 	}
 
@@ -376,9 +393,8 @@ void SceneManagerCMPlay::Update(double dt)
 				//Check for barista roles
 				for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 				{
-					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && m_iNumOrders < 5)
+					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->getNumOrders() < 5)
 					{
-						--m_iNumOrders;
 						(*itr)->barista->addNumOrders(1);
 					}
 				}
@@ -389,30 +405,39 @@ void SceneManagerCMPlay::Update(double dt)
 				//Check for barista roles
 				for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 				{
-					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->GetDrinkPrepared())
+					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
 					{
-						m_iNumOrdersProcessed++;
-						m_cCustomerList[i]->setDrinkAvailable(true);
-						(*itr)->barista->SubtractDrinkPrepared();
-
-						//Only if there are customers waiting
-						if (m_cWaitList.size() > 0)
+						//Let ordered customers claim the prepared drinks
+						if (m_iNumOrdersProcessed > 0)
 						{
-							//If customer has finished waiting, then we remove him
-							if (!m_cWaitList[0]->getWaitStatus())
-							{
-								m_cWaitList[0]->setInWaitStatus(false);	//We set the In wait status to false
-								m_cWaitList.erase(m_cWaitList.begin());	//Remove from vector
-								m_v2CustomerWaitingPosition.pop_back();	//Remove last waiting position
+							m_iNumOrdersProcessed++;
+							m_cCustomerList[i]->setDrinkAvailable(true);
+							--m_iNumOrders;
 
-								//Move all customers forward
-								for (unsigned a = 0; a < m_cWaitList.size(); ++a)
+							//Only if there are customers waiting
+							if (m_cWaitList.size() > 0)
+							{
+								//If customer has finished waiting, then we remove him
+								if (!m_cWaitList[0]->getWaitStatus())
 								{
-									m_cWaitList[a]->setNextPoint(m_v2CustomerWaitingPosition[a]);
+									m_cWaitList[0]->setInWaitStatus(false);	//We set the In wait status to false
+									m_cWaitList.erase(m_cWaitList.begin());	//Remove from vector
+									m_v2CustomerWaitingPosition.pop_back();	//Remove last waiting position
+
+									//Move all customers forward
+									for (unsigned a = 0; a < m_cWaitList.size(); ++a)
+									{
+										m_cWaitList[a]->setNextPoint(m_v2CustomerWaitingPosition[a]);
+									}
 								}
 							}
+							//Add orders to barista if they are more free
+							if (m_iNumOrders > 0)
+							{
+								(*itr)->barista->addNumOrders(1);
+							}
+							break;
 						}
-						break;
 					}
 				}
 			}
@@ -438,15 +463,23 @@ void SceneManagerCMPlay::Update(double dt)
 	{
 		if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
 		{
-			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb);
-
-			//Prompts deliveryman to change to barista
-			if (m_iNumOrders > 3)
-			{
-				shop_mb->AddMessage(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
-			}
+			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb, m_iNumOrdersProcessed, m_iNumDeliveryOrdersProcessed);
 		}
 	}
+	//Prompts deliveryman to change to barista
+	if (m_iNumOrders > 3 || m_iNumDelivery > 3)
+	{
+		//if (!request_barista)
+		//{
+		shop_mb->AddMessageOnce(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
+			//request_barista = true;
+		//}
+	}
+	////Spam control(Only re-allow request for role change if orders are finished/too many orders)
+	//if ((m_iNumOrders == 0 && m_iNumDelivery == 0) || m_iNumOrders > 5 || m_iNumDelivery > 5)
+	//{
+	//	request_barista = false;
+	//}
 
 	storeMan->Update(dt, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
 
@@ -488,14 +521,12 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 
 	fpCamera.Update(dt, 0);
-
-	std::cout << "One: " << GenericAI_One->barista->getNumDrinksPrepared() << std::endl;
-	std::cout << "Two: " << GenericAI_Two->barista->getNumDrinksPrepared() << std::endl;
 }
 
 bool SceneManagerCMPlay::GenerateOrder()
 {
-	return Math::RandIntMinMax(0, 1);
+	//return Math::RandIntMinMax(0, 1);
+	return true;
 }
 
 void SceneManagerCMPlay::UpdateGoodsDelivery(double dt)
@@ -697,18 +728,22 @@ void SceneManagerCMPlay::RenderStaticObject()
 		drawMesh = resourceManager.retrieveMesh("HORSEFLIP");
 		drawMesh->textureID = resourceManager.retrieveTexture("HorseFlip");
 		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
+
+		//Display prepared orders
 		if (m_iNumOrdersProcessed > 0)
 		{
 			drawMesh = resourceManager.retrieveMesh("DRINKS");
 			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
 			Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(1000, 660));
 		}
+		//Display prepared deliveries
 		if (m_iNumDeliveryOrdersProcessed > 0)
 		{
 			drawMesh = resourceManager.retrieveMesh("DRINKS");
 			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
 			Render2DMesh(drawMesh, false, Vector2(50, 50), Vector2(900, 660));
 		}
+
 		if (m_fReserve >= 20)
 		{
 			drawMesh = resourceManager.retrieveMesh("GAME_CRATE");
@@ -731,12 +766,15 @@ void SceneManagerCMPlay::RenderStaticObject()
 
 		for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 		{
-			if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->getCurrentState() == Barista::S_BREW)
+			if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
 			{
-				drawMesh = resourceManager.retrieveMesh("DRINKS_2");
-				drawMesh->textureID = resourceManager.retrieveTexture("Drinks_2");
-				Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1050, 660));
-				Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1100, 660));
+				if((*itr)->barista->getCurrentState() == Barista::S_BREW)
+				{
+					drawMesh = resourceManager.retrieveMesh("DRINKS_2");
+					drawMesh->textureID = resourceManager.retrieveTexture("Drinks_2");
+					Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1050, 660));
+					Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(1100, 660));
+				}
 			}
 
 			if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN && (*itr)->deliveryMan->getCurrentState() == DeliveryMan::S_EATING)
@@ -745,7 +783,6 @@ void SceneManagerCMPlay::RenderStaticObject()
 				drawMesh->textureID = resourceManager.retrieveTexture("Food");
 				Render2DMesh(drawMesh, false, Vector2(40, 40), Vector2(670, 690));
 			}
-			
 		}
 	}
 }
@@ -861,7 +898,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 	{
 		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
 		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
-		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_iNumOrdersProcessed), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
+		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_iNumOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
 		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(m_iNumDeliveryOrdersProcessed), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
 		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 600, 0);
 

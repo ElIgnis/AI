@@ -38,5 +38,8 @@ private:
 	Roles originalRole;
 	Roles currentRole;
 
+	bool RCtoBarista;
+	bool RCtoDeliveryMan;
+
 };
 

@@ -19,7 +19,7 @@ using std::ostream;
 #define MSG_DELIVERY_READY "Delivery items are ready"
 #define MSG_LOW_INGREDIENTS "Ingredients are running low"
 #define MSG_RUBBISH_FULL "Rubbish bin is full"
-#define RC_TO_BARISTA "Too many customers"
+#define RC_TO_BARISTA "Too many orders/deliveries"
 #define RC_TO_DELIVERYMAN "Too many orders"
 
 struct Message{
@@ -34,6 +34,7 @@ public:
 
 	//Function to Add A New Message to message board
 	void AddMessage(string message, string sender, string receiver);
+	void AddMessageOnce(string message, string sender, string receiver);
 
 	//Function to get a message from message board
 	bool GetMsg(string message);

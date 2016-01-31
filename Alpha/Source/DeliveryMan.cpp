@@ -416,7 +416,7 @@ void DeliveryMan::ReadWayPoints_Path3(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void DeliveryMan::Update(double dt, int worldTime, int weather, int numOrder, MessageBoard* mb)
+void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveriesPrepared, MessageBoard* mb)
 {
 	// Need to eat at 1200 hours
 	if (worldTime == 1200 || worldTime == 1800)
@@ -430,7 +430,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int numOrder, Me
 		m_bNeedToSleep = true;
 	}
 
-	if (numOrder > 0)
+	if (deliveriesPrepared > 0)
 	{
 		m_bPendingDelivery = true;
 	}
@@ -450,7 +450,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int numOrder, Me
 		break;
 	case S_COLLECTING:
 		m_v2Direction.Set(0, -1);
-		UpdateCollecting(dt, worldTime);
+		UpdateCollecting(dt, worldTime, deliveriesPrepared);
 		break;
 	case S_DELIVERING:
 		UpdateDelivering(dt, worldTime, weather);
@@ -510,18 +510,32 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int numOrder, Me
 		}	
 	}
 }
-
 void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 {
-	//If received order, AI need to remember to process it
-	if (!m_bPendingDelivery && !m_bNeedToEat && !m_bNeedToSleep)
+	////If received order, AI need to remember to process it
+	//if (!m_bPendingDelivery && !m_bNeedToEat && !m_bNeedToSleep)
+	//{
+	//	
+	//}
+
+	//Role change
+	if (!m_bNeedToSleep && !m_bNeedToEat && m_bRC_Barista && !m_bExiting)
 	{
-		if (m_v2CurrentPos != Sleep.at(0))
-			UpdatePath(Sleep, true, dt);
+		if (UpdatePath(RC_Barista, false, dt))
+		{
+			m_v2Direction.Set(0, -1);
+			m_bRC_Completed = true;
+			m_bRC_Barista = false;
+		}
 	}
+	//else
+	//{
+	//	if (m_v2CurrentPos != Sleep.at(0))
+	//		UpdatePath(Sleep, true, dt);
+	//}
 
 	// Sleeping portion
-	if (m_bNeedToSleep && !m_bExiting)
+	else if (m_bNeedToSleep && !m_bExiting && !m_bRC_Barista)
 	{
 		// Proceed to sleep after moving to sleeping area
 		if (UpdatePath(Sleep, false, dt))
@@ -535,7 +549,7 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 	}
 
 	//Eating portion
-	else if (m_bNeedToEat && !m_bExiting && !m_bOrderToCollect)
+	else if (m_bNeedToEat && !m_bExiting && !m_bOrderToCollect && !m_bRC_Barista)
 	{
 		// Proceed to eat after moving to eating area
 		if (UpdatePath(Eat, false, dt))
@@ -598,28 +612,24 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 			}
 		}
 	}
-	//Role change
-	if (!m_bNeedToEat && m_bRC_Barista && !m_bExiting && !m_bOrderToCollect)
-	{
-		std::cout << "begin role change" << std::endl;
-		if (UpdatePath(RC_Barista, false, dt))
-		{
-			m_v2Direction.Set(0, -1);
-			m_bRC_Completed = true;
-			m_bRC_Barista = false;
-		}
-	}
 }
-void DeliveryMan::UpdateCollecting(double dt, int worldTime)
+void DeliveryMan::UpdateCollecting(double dt, int worldTime, int& deliveriesPrepared)
 {
 	m_fDelay += (float)dt;
 
 	//Receive msg to move to collect drinks
-	if (m_fDelay > 1.5f && UpdatePath(Collect, true, dt))
+	if (m_fDelay > 1.5f)
 	{
+		--deliveriesPrepared;
 		m_bOrderCollected = true;
-		currentState = S_IDLE;
 		m_fDelay = 0.f;
+	}
+	if (m_bOrderCollected)
+	{
+		if (UpdatePath(Collect, true, dt))
+		{
+			currentState = S_IDLE;
+		}
 	}
 }
 void DeliveryMan::UpdateEating(double dt, int worldTime)
@@ -790,6 +800,11 @@ bool DeliveryMan::getRC_Completed(void)
 void DeliveryMan::setRC_Completed(bool rc_Completed)
 {
 	this->m_bRC_Completed = rc_Completed;
+}
+
+void DeliveryMan::setNeedToSleep(bool needToSleep)
+{
+	this->m_bNeedToSleep = needToSleep;
 }
 
 int DeliveryMan::RandomizePath(void)

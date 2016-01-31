@@ -47,32 +47,30 @@ public:
 	STATES getCurrentState(void);
 	void setCurrentState(STATES newState);
 
-	void Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb);
+	void Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb, int& drinksPrepared, int& deliveriesPrepared);
 	void UpdateIdle(double dt, MessageBoard* mb);
 	void UpdateRefill(double dt, float& ingredients, float& reserve, MessageBoard* mb);
-	void UpdateBrew(double dt, float& ingredients, float& trash, MessageBoard* mb);
+	void UpdateBrew(double dt, float& ingredients, float& trash, MessageBoard* mb, int& drinksPrepared, int& deliveriesPrepared);
 	void Draw(SceneManager* sceneManager);
 
 	void ReadWayPoints_Refill(string fileName);
 	void ReadWayPoints_Brew(string fileName);
+	void ReadWayPoints_RC_DeliveryMan(string fileName);
 
 	void AddWayPoints_Refill(Vector2 newWayPoint);
 	void AddWayPoints_Brew(Vector2 newWayPoint);
-
-	int GetNumDrinks(void);
-	bool GetDrinkPrepared(void);
-	void SubtractDrinkPrepared(void);
+	void AddWayPoints_RC_DeliveryMan(Vector2 newWayPoint);
 
 	void addNumOrders(const int numOrders);
 	int getNumOrders(void);
-	int getNumDrinksPrepared(void);
 
 	void addNumDeliveryOrders(const int numOrders);
 	int getNumDeliveryOrders(void);
-	int getNumDeliveryPrepared(void);
 
-	bool getRoleChange(void);
-	void setRoleChange(bool roleChanged);
+	bool getRC_DeliveryMan(void);
+	void setRC_DeliveryMan(bool roleChanged);
+	bool getRC_Completed(void);
+	void setRC_Completed(bool rc_Completed);
 
 	Vector2 GetPos();
 	Vector2 GetDir();
@@ -91,7 +89,8 @@ private:
 	bool m_bNeedToRefill;
 	bool m_bNeedToBrew;
 	bool m_bPathAssigned;
-	bool m_bRoleChange;
+	bool m_bRC_DeliveryMan;
+	bool m_bRC_Completed;
 
 	int m_iNextPoint;
 	int m_iNumOrders;
@@ -113,6 +112,7 @@ private:
 
 	vector<Vector2> Brew;
 	vector<Vector2> Refill;
+	vector<Vector2> RC_DeliveryMan;
 
 	//Text file reading
 	int m_iReadLine;

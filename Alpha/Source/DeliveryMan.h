@@ -49,9 +49,9 @@ public:
 	STATES getCurrentState(void);
 	void setCurrentState(STATES newState);
 
-	void Update(double dt, int worldTime, int weather, int numOrder, MessageBoard* mb);
+	void Update(double dt, int worldTime, int weather, int& deliveriesPrepared, MessageBoard* mb);
 	void UpdateIdle(double dt, int worldTime, MessageBoard* mb);
-	void UpdateCollecting(double dt, int worldTime);
+	void UpdateCollecting(double dt, int worldTime, int& deliveriesPrepared);
 	void UpdateEating(double dt, int worldTime);
 	void UpdateSleeping(double dt, int worldTime);
 	void UpdateDelivering(double dt, int worldTime, int weather);
@@ -104,6 +104,9 @@ public:
 	void SetIndoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	void SetOutdoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	void SetOutdoorSpriteAnim_Night(SpriteAnimation* NewSpriteAnim);
+
+	//State control
+	void setNeedToSleep(bool needToSleep);
 	
 private:
 	SpriteAnimation* spriteAnim_Indoor;

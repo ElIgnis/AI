@@ -85,8 +85,10 @@ private:
 	int m_iWorldTime;
 	float m_fMinutes;
 
+	//Role changing
 	GenericAI *GenericAI_One, *GenericAI_Two;
 	vector<GenericAI*> GenericAI_List;
+	bool request_delivery, request_barista;
 
 	StoreMan* storeMan; //Store man handler
 	RubbishMan* rubbishMan;
