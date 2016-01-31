@@ -5,15 +5,11 @@
 #include "SceneManager.h"
 #include "Vector2.h"
 #include "MessageBoard.h"
-#include "Barista.h"
 
 #include <fstream>
 #include <sstream>
 
 using std::getline;
-
-//Define messages to send here
-#define RC_TO_DELIVERYMAN "Too many orders"
 
 class DeliveryMan : GameObject2D
 {
@@ -51,6 +47,7 @@ public:
 	void Init();
 
 	STATES getCurrentState(void);
+	void setCurrentState(STATES newState);
 
 	void Update(double dt, int worldTime, int weather, int numOrder, MessageBoard* mb);
 	void UpdateIdle(double dt, int worldTime, MessageBoard* mb);
@@ -72,6 +69,7 @@ public:
 	void SetDeliveryCompleted(bool deliveryCompleted);
 
 	void ReadWayPoints_Eat(string fileName);
+	void ReadWayPoints_RC_Barista(string fileName);
 	void ReadWayPoints_Collecting(string fileName);
 	void ReadWayPoints_Sleep(string fileName);
 	void ReadWayPoints_Exiting(string fileName);
@@ -80,6 +78,7 @@ public:
 	void ReadWayPoints_Path3(string fileName);
 
 	void AddWayPoints_Eat(Vector2 newWayPoint);
+	void AddWayPoints_RC_Barista(Vector2 newWayPoint);
 	void AddWayPoints_Collecting(Vector2 newWayPoint);
 	void AddWayPoints_Sleep(Vector2 newWayPoint);
 	void AddWayPoints_Exiting(Vector2 newWayPoint);
@@ -87,6 +86,12 @@ public:
 	void AddWayPoints_Path2(Vector2 newWayPoint);
 	void AddWayPoints_Path3(Vector2 newWayPoint);
 
+	bool getRC_Barista(void);
+	void setRC_Barista(bool roleChanged);
+	bool getRC_Completed(void);
+	void setRC_Completed(bool rc_Completed);
+
+	void SetPos(Vector2 newPos);
 	Vector2 GetPos();
 	Vector2 GetDir();
 
@@ -116,6 +121,8 @@ private:
 	bool m_bOrderCollected;
 	bool m_bOrderToCollect;
 	bool m_bDeliveryCompleted;
+	bool m_bRC_Barista;
+	bool m_bRC_Completed;
 
 	int m_iHoursNeeded;
 	int m_iResult;
@@ -136,6 +143,7 @@ private:
 	vector<Vector2> Eat;
 	vector<Vector2> Sleep;
 	vector<Vector2> Collect;
+	vector<Vector2> RC_Barista;
 	vector<Vector2> Exiting;
 	vector<Vector2> PathOne;
 	vector<Vector2> PathTwo;

@@ -57,7 +57,14 @@ void GenericAI::UpdateRoleChange(MessageBoard* mb)
 	case DELIVERY_MAN:
 		if (mb->GetMsg(RC_TO_BARISTA))
 		{
+			deliveryMan->setRC_Barista(true);
+		}
+		if (deliveryMan->getRC_Completed())
+		{
 			currentRole = BARISTA;
+			barista->SetPos(deliveryMan->GetPos());
+			barista->setCurrentState(Barista::S_REFILL);
+			//barista->addNumOrders(1);
 		}
 		break;
 	case RUBBISH_MAN:

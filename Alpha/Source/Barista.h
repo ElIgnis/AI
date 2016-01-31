@@ -12,12 +12,6 @@
 
 using std::getline;
 
-//Define messages to send here
-#define MSG_DELIVERY_READY "Delivery items are ready"
-#define MSG_LOW_INGREDIENTS "Ingredients are running low"
-#define MSG_RUBBISH_FULL "Rubbish bin is full"
-#define RC_TO_BARISTA "Too many customers"
-
 class Barista : GameObject2D
 {
 public:
@@ -51,6 +45,7 @@ public:
 	void Init();
 
 	STATES getCurrentState(void);
+	void setCurrentState(STATES newState);
 
 	void Update(double dt, float& ingredients, float& trash, float& reserve, MessageBoard* mb);
 	void UpdateIdle(double dt, MessageBoard* mb);
@@ -76,8 +71,12 @@ public:
 	int getNumDeliveryOrders(void);
 	int getNumDeliveryPrepared(void);
 
+	bool getRoleChange(void);
+	void setRoleChange(bool roleChanged);
+
 	Vector2 GetPos();
 	Vector2 GetDir();
+	void SetPos(Vector2 newPos);
 
 	vector<Vector2> ReturnCurrentPath;
 	bool UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt);
@@ -92,6 +91,7 @@ private:
 	bool m_bNeedToRefill;
 	bool m_bNeedToBrew;
 	bool m_bPathAssigned;
+	bool m_bRoleChange;
 
 	int m_iNextPoint;
 	int m_iNumOrders;

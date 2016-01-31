@@ -15,6 +15,13 @@ using std::ostream;
 #define ROLE_RUBBISHMAN "Rubbishman"
 #define ROLE_STOREMAN "Storeman"
 
+//Define messages
+#define MSG_DELIVERY_READY "Delivery items are ready"
+#define MSG_LOW_INGREDIENTS "Ingredients are running low"
+#define MSG_RUBBISH_FULL "Rubbish bin is full"
+#define RC_TO_BARISTA "Too many customers"
+#define RC_TO_DELIVERYMAN "Too many orders"
+
 struct Message{
 	string sender, receiver, message;
 };

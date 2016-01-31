@@ -30,6 +30,7 @@ DeliveryMan::DeliveryMan()
 , m_bOrderCollected(false)
 , m_bOrderToCollect(false)
 , m_bDeliveryCompleted(false)
+, m_bRC_Barista(false)
 
 , m_iHoursNeeded(2)
 , m_iResult(0)
@@ -62,6 +63,7 @@ void DeliveryMan::Init(void)
 
 	ReadWayPoints_Eat("Config\\Waypoints\\DeliveryMan\\Eat_1.txt");
 	ReadWayPoints_Sleep("Config\\Waypoints\\DeliveryMan\\Sleep_1.txt");
+	ReadWayPoints_RC_Barista("Config\\Waypoints\\DeliveryMan\\RC_ToBarista_1.txt");
 	ReadWayPoints_Collecting("Config\\Waypoints\\DeliveryMan\\Collecting_1.txt");
 	ReadWayPoints_Exiting("Config\\Waypoints\\DeliveryMan\\Exiting_1.txt");
 	ReadWayPoints_Path1("Config\\Waypoints\\DeliveryMan\\PathOne_1.txt");
@@ -102,6 +104,49 @@ void DeliveryMan::ReadWayPoints_Eat(string fileName)
 
 			//Load the points in
 			AddWayPoints_Eat(Vector2(
+				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
+				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
+				));
+
+			++m_iReadLine;
+		}
+		WPTokens.clear();
+		inTxtFile.close();
+	}
+	else
+		std::cout << "Load Waypoint file failed" << std::endl;
+}
+
+void DeliveryMan::ReadWayPoints_RC_Barista(string fileName)
+{
+	//vector to contain elements split
+	vector<string>WPTokens;
+
+	//Reset line
+	m_iReadLine = 0;
+
+	//Load Level details
+	std::ifstream inTxtFile;
+	inTxtFile.open(fileName);
+	if (inTxtFile.good())
+	{
+		while (getline(inTxtFile, WPData))
+		{
+			std::istringstream split(WPData);
+
+			//Dont read lines with #
+			if (WPData[0] == '#')
+			{
+				continue;
+			}
+
+			for (string each; std::getline(split, each, m_cSplit_Char);)
+			{
+				WPTokens.push_back(each);
+			}
+
+			//Load the points in
+			AddWayPoints_RC_Barista(Vector2(
 				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
 				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
 				));
@@ -464,18 +509,10 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int numOrder, Me
 			this->spriteAnim_Outdoor_Night->currentAni = WALK_DOWN;
 		}	
 	}
-	std::cout << currentState << std::endl;
 }
 
 void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 {
-	//If received message to role change
-	//if (mb->GetMsg(RC_TO_BARISTA))
-	{
-		//Move to barista area
-
-	}
-
 	//If received order, AI need to remember to process it
 	if (!m_bPendingDelivery && !m_bNeedToEat && !m_bNeedToSleep)
 	{
@@ -559,6 +596,17 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 				currentState = S_DELIVERING;
 				m_iCurrentPath = RandomizePath();
 			}
+		}
+	}
+	//Role change
+	if (!m_bNeedToEat && m_bRC_Barista && !m_bExiting && !m_bOrderToCollect)
+	{
+		std::cout << "begin role change" << std::endl;
+		if (UpdatePath(RC_Barista, false, dt))
+		{
+			m_v2Direction.Set(0, -1);
+			m_bRC_Completed = true;
+			m_bRC_Barista = false;
 		}
 	}
 }
@@ -727,6 +775,23 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather)
 	}
 }
 
+bool DeliveryMan::getRC_Barista(void)
+{
+	return m_bRC_Barista;
+}
+void DeliveryMan::setRC_Barista(bool roleChanged)
+{
+	this->m_bRC_Barista = roleChanged;
+}
+bool DeliveryMan::getRC_Completed(void)
+{
+	return m_bRC_Completed;
+}
+void DeliveryMan::setRC_Completed(bool rc_Completed)
+{
+	this->m_bRC_Completed = rc_Completed;
+}
+
 int DeliveryMan::RandomizePath(void)
 {
 	return Math::RandIntMinMax(0, 2);
@@ -740,6 +805,11 @@ Vector2 DeliveryMan::GetPos(void)
 Vector2 DeliveryMan::GetDir(void)
 {
 	return m_v2Direction;
+}
+
+void DeliveryMan::SetPos(Vector2 newPos)
+{
+	this->m_v2CurrentPos = newPos;
 }
 
 bool DeliveryMan::getOutdoor(void)
@@ -765,6 +835,10 @@ void DeliveryMan::SetDeliveryCompleted(bool deliveryCompleted)
 void DeliveryMan::AddWayPoints_Eat(Vector2 newWayPoint)
 {
 	Eat.push_back(newWayPoint);
+}
+void DeliveryMan::AddWayPoints_RC_Barista(Vector2 newWayPoint)
+{
+	RC_Barista.push_back(newWayPoint);
 }
 void DeliveryMan::AddWayPoints_Collecting(Vector2 newWayPoint)
 {
@@ -859,6 +933,11 @@ void DeliveryMan::Draw(SceneManager* sceneManager)
 DeliveryMan::STATES DeliveryMan::getCurrentState(void)
 {
 	return currentState;
+}
+
+void DeliveryMan::setCurrentState(DeliveryMan::STATES newState)
+{
+	this->currentState = newState;
 }
 
 void DeliveryMan::SetIndoorSpriteAnim(SpriteAnimation* newSprite)

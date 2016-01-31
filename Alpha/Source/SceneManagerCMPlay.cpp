@@ -129,6 +129,12 @@ void SceneManagerCMPlay::Update(double dt)
 {
 	SceneManagerGameplay::Update(dt);
 
+	//Update all Generic AIs
+	for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
+	{
+		(*itr)->UpdateRoleChange(shop_mb);
+	}
+
 	if (inputManager->getKey("NEW_CUSTOMER") && m_fInputDelay > m_fMAX_DELAY)
 	{
 		FetchCustomer();
@@ -161,7 +167,7 @@ void SceneManagerCMPlay::Update(double dt)
 		//Spawn customer
 		if (m_fCustomerSpawn >= m_fCustomerRate)
 		{
-			//FetchCustomer();
+			FetchCustomer();
 			m_fCustomerSpawn = 0.f;
 			m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
 		}
@@ -196,8 +202,6 @@ void SceneManagerCMPlay::Update(double dt)
 		}
 	}
 
-
-		
 	//Resetting world time to a new day
 	if (m_iWorldTime == 2400){
 		m_iWorldTime = 0;
@@ -372,7 +376,7 @@ void SceneManagerCMPlay::Update(double dt)
 				//Check for barista roles
 				for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
 				{
-					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && m_iNumOrders > 0)
+					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && m_iNumOrders < 5)
 					{
 						--m_iNumOrders;
 						(*itr)->barista->addNumOrders(1);
@@ -408,6 +412,7 @@ void SceneManagerCMPlay::Update(double dt)
 								}
 							}
 						}
+						break;
 					}
 				}
 			}
@@ -434,6 +439,12 @@ void SceneManagerCMPlay::Update(double dt)
 		if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
 		{
 			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb);
+
+			//Prompts deliveryman to change to barista
+			if (m_iNumOrders > 3)
+			{
+				shop_mb->AddMessage(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
+			}
 		}
 	}
 
@@ -477,6 +488,9 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 
 	fpCamera.Update(dt, 0);
+
+	std::cout << "One: " << GenericAI_One->barista->getNumDrinksPrepared() << std::endl;
+	std::cout << "Two: " << GenericAI_Two->barista->getNumDrinksPrepared() << std::endl;
 }
 
 bool SceneManagerCMPlay::GenerateOrder()

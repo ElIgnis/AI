@@ -17,6 +17,7 @@ Barista::Barista()
 , m_bNeedToRefill(false)
 , m_bNeedToBrew(false)
 , m_bPathAssigned(false)
+, m_bRoleChange(false)
 
 , m_iNextPoint(0)
 , m_iNumOrders(0)
@@ -207,10 +208,10 @@ void Barista::UpdateRefill(double dt, float& ingredients, float& reserve, Messag
 		m_fRefillProgress = 0;
 	}
 
-	//Proceed to other states once fully replenished ingredients
-	if (ingredients == 100)
+	//Proceed to other states once reserve is depleted
+	if (reserve == 0 && ingredients > 0)
 	{
-		if (m_iNumOrders > 0)
+		if (m_iNumOrders > 0 || m_iNumDeliveryOrders > 0)
 		{
 			//Move back to counter
 			if (UpdatePath(Refill, true, dt))
@@ -234,7 +235,7 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 	++m_iBrewBar;
 
 	//Brew orders per second
-	if (m_fBrewProgress >= m_fBrewTimer)
+	if (m_fBrewProgress >= m_fBrewTimer && ingredients > 0)
 	{
 		//For customers
 		if (m_iNumOrders > 0)
@@ -255,11 +256,12 @@ void Barista::UpdateBrew(double dt, float& ingredients, float& trash, MessageBoa
 		m_fBrewProgress = 0;
 		m_iBrewBar = 0;
 
-		//Calls for help if 4 or more orders
-		if ((m_iNumOrders + m_iNumDeliveryOrders) > 3)
-		{
-			//mb->AddMessage(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
-		}
+		////Calls for help if 4 or more orders
+		//if ((m_iNumOrders + m_iNumDeliveryOrders) > 3)
+		//{
+		//	mb->AddMessage(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
+		//	std::cout << "role change to barista" << std::endl;
+		//}
 	}
 
 	//Return to idle if there are no more orders
@@ -306,6 +308,11 @@ Vector2 Barista::GetDir(void)
 	return m_v2Direction;
 }
 
+void Barista::SetPos(Vector2 newPos)
+{
+	this->m_v2CurrentPos = newPos;
+}
+
 void Barista::addNumOrders(const int numOrders)
 {
 	this->m_iNumOrders += numOrders;
@@ -334,6 +341,15 @@ int Barista::getNumDeliveryOrders(void)
 int Barista::getNumDeliveryPrepared(void)
 {
 	return m_iDeliveriesPrepared;
+}
+
+bool Barista::getRoleChange(void)
+{
+	return m_bRoleChange;
+}
+void Barista::setRoleChange(bool roleChanged)
+{
+	this->m_bRoleChange = roleChanged;
 }
 
 void Barista::AddWayPoints_Refill(Vector2 newWayPoint)
@@ -413,6 +429,11 @@ void Barista::Draw(SceneManager* sceneManager)
 Barista::STATES Barista::getCurrentState(void)
 {
 	return currentState;
+}
+
+void Barista::setCurrentState(Barista::STATES newState)
+{
+	this->currentState = newState;
 }
 
 void Barista::SetSpriteAnim(SpriteAnimation* newSprite)
