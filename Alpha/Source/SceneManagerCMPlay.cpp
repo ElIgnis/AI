@@ -901,7 +901,7 @@ void SceneManagerCMPlay::RenderUIInfo()
 	{
 		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 150, 0);
 		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 200, 0);
-		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_iNumOrders), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 300, 0);
+		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_cWaitList.size()), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 300, 0);
 		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(m_iNumDelivery), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 350, 0);
 		RenderTextOnScreen(drawMesh, "Number of prepared orders: " + std::to_string(m_iNumOrdersProcessed), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 400, 0);
 		RenderTextOnScreen(drawMesh, "Number of prepared deliveries: " + std::to_string(m_iNumDeliveryOrdersProcessed), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 450, 0);
