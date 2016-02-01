@@ -464,7 +464,17 @@ void SceneManagerCMPlay::Update(double dt)
 				--m_iNumOrders;
 			}
 
-			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb, m_iNumOrdersProcessed, m_iNumDeliveryOrdersProcessed);	
+			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb, m_iNumOrdersProcessed, m_iNumDeliveryOrdersProcessed);
+
+			if (m_fTrash >= 80 && rubbishMan->getCurrentState() != RubbishMan::S_TAKETRASH)
+			{
+				shop_mb->AddMessageOnce(MSG_RUBBISH_FULL, ROLE_BARISTA, ROLE_RUBBISHMAN);
+			}
+
+			if (m_fReserve <= 80 && !m_bWaitingOrder && storeMan->getCurrentState() != StoreMan::S_NEWORDER && storeMan->getCurrentState() != StoreMan::S_MOVEORDER)
+			{
+				shop_mb->AddMessageOnce(MSG_LOW_INGREDIENTS, ROLE_BARISTA, ROLE_STOREMAN);
+			}
 		}
 	}
 
@@ -484,7 +494,7 @@ void SceneManagerCMPlay::Update(double dt)
 	//	request_barista = false;
 	//}
 
-	storeMan->Update(dt, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
+	storeMan->Update(dt, shop_mb, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
 
 	if (m_bWaitingOrder)
 	{
@@ -499,7 +509,7 @@ void SceneManagerCMPlay::Update(double dt)
 		}
 	}
 
-	rubbishMan->Update(dt, m_iWorldTime, &m_fTrash);
+	rubbishMan->Update(dt, m_iWorldTime, shop_mb, &m_fTrash);
 
 	if (m_fTrash >= 80 && !m_bCarryingTrash)
 	{

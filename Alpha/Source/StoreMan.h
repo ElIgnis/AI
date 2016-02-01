@@ -5,6 +5,7 @@
 #include "SceneManager.h"
 #include "SpriteAnimation.h"
 #include "Vector2.h"
+#include "MessageBoard.h"
 #include <fstream>
 #include <sstream>
 
@@ -44,8 +45,8 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt, float* ingredient, bool* orderarrived, bool* waitOrder);
-	void UpdateFSM(float ingredients, bool* orderarrived, bool* waitOrder);
+	void Update(double dt, MessageBoard* mb, float* ingredient, bool* orderarrived, bool* waitOrder);
+	void UpdateFSM(MessageBoard* mb, bool* orderarrived, bool* waitOrder);
 	void UpdateIdle(double dt);
 	void UpdateMakeOrder(double dt, bool* waitOrder);
 	void UpdateMoveOrder(double dt, float* ingredients);

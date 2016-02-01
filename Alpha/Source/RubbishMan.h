@@ -4,6 +4,7 @@
 #include "GameObject2D.h"
 #include "SceneManager.h"
 #include "SpriteAnimation.h"
+#include "MessageBoard.h"
 #include "Vector2.h"
 #include <fstream>
 #include <sstream>
@@ -44,8 +45,8 @@ public:
 
 	STATES getCurrentState(void);
 
-	void Update(double dt,int worldTime, float* trash);
-	void UpdateFSM(int worldTime, float trash);
+	void Update(double dt,int worldTime, MessageBoard* mb, float* trash);
+	void UpdateFSM(int worldTime, MessageBoard* mb);
 	void UpdateIdle(double dt);
 	void UpdateTakeTrash(double dt, float* trash);
 	void UpdateEat(double dt, int worldTime);

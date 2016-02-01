@@ -36,7 +36,7 @@ RubbishMan::STATES RubbishMan::getCurrentState(void)
 	return this->currentState;
 }
 
-void RubbishMan::Update(double dt, int worldTime, float* trash)
+void RubbishMan::Update(double dt, int worldTime, MessageBoard* mb, float* trash)
 {
 	// Need to eat at 1200 hours
 	if (worldTime == 1200 || worldTime == 1800)
@@ -59,7 +59,7 @@ void RubbishMan::Update(double dt, int worldTime, float* trash)
 
 	if (m_bTaskFinish)
 	{
-		UpdateFSM(worldTime, *trash);
+		UpdateFSM(worldTime, mb);
 	}
 
 	spriteAnim->Update(dt);
@@ -75,9 +75,9 @@ void RubbishMan::Update(double dt, int worldTime, float* trash)
 		this->spriteAnim->currentAni = WALK_DOWN;
 }
 
-void RubbishMan::UpdateFSM(int worldTime, float trash)
+void RubbishMan::UpdateFSM(int worldTime, MessageBoard* mb)
 {
-	if (trash >= 80)
+	if (mb->GetMsg(MSG_RUBBISH_FULL))
 	{
 		currentState = S_TAKETRASH;
 		m_bTaskFinish = false;

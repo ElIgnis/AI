@@ -174,7 +174,7 @@ void StoreMan::AddWayPoints_MoveOrder(Vector2 newWayPoint)
 	MoveOrder.push_back(newWayPoint);
 }
 
-void StoreMan::Update(double dt, float* ingredients, bool* orderarrived, bool* waitOrder)
+void StoreMan::Update(double dt, MessageBoard* mb, float* ingredients, bool* orderarrived, bool* waitOrder)
 {
 	switch (currentState)
 	{
@@ -191,7 +191,7 @@ void StoreMan::Update(double dt, float* ingredients, bool* orderarrived, bool* w
 
 	if (m_bTaskFinish)
 	{
-		UpdateFSM(*ingredients, orderarrived, waitOrder);
+		UpdateFSM(mb, orderarrived, waitOrder);
 	}
 
 	spriteAnim->Update(dt);
@@ -323,7 +323,7 @@ bool StoreMan::UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt)
 	return false;
 }
 
-void StoreMan::UpdateFSM(float ingredients, bool* orderarrived, bool* waitOrder)
+void StoreMan::UpdateFSM(MessageBoard* mb, bool* orderarrived, bool* waitOrder)
 {
 	if (m_bWaitingOrder && *orderarrived)
 	{
@@ -334,7 +334,7 @@ void StoreMan::UpdateFSM(float ingredients, bool* orderarrived, bool* waitOrder)
 		*waitOrder = m_bWaitingOrder;
 	}
 
-	else if (ingredients <= 20 && !m_bWaitingOrder)
+	else if (mb->GetMsg(MSG_LOW_INGREDIENTS))
 	{
 		currentState = S_NEWORDER;
 		m_bTaskFinish = false;
