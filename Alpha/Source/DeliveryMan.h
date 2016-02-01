@@ -49,13 +49,13 @@ public:
 	STATES getCurrentState(void);
 	void setCurrentState(STATES newState);
 
-	void Update(double dt, int worldTime, int weather, int& deliveriesPrepared, MessageBoard* mb);
+	void Update(double dt, int worldTime, int weather, int& deliveries, int& deliveriesPrepared, MessageBoard* mb);
 	void UpdateIdle(double dt, int worldTime, MessageBoard* mb);
 	void UpdateCollecting(double dt, int worldTime, int& deliveriesPrepared);
 	void UpdateEating(double dt, int worldTime);
 	void UpdateSleeping(double dt, int worldTime);
 	void UpdateDelivering(double dt, int worldTime, int weather);
-	void UpdateReturning(double dt, int worldTime, int weather);
+	void UpdateReturning(double dt, int worldTime, int weather, int& deliveries);
 	void Draw(SceneManager* sceneManager);
 
 	//Outdoor controls
@@ -107,6 +107,9 @@ public:
 
 	//State control
 	void setNeedToSleep(bool needToSleep);
+	bool getNeedToSleep(void);
+	bool getNeedToEat(void);
+	bool getOrderToCollect(void);
 	
 private:
 	SpriteAnimation* spriteAnim_Indoor;

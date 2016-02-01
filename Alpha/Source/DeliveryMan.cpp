@@ -416,7 +416,7 @@ void DeliveryMan::ReadWayPoints_Path3(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
-void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveriesPrepared, MessageBoard* mb)
+void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveries, int& deliveriesPrepared, MessageBoard* mb)
 {
 	// Need to eat at 1200 hours
 	if (worldTime == 1200 || worldTime == 1800)
@@ -434,11 +434,15 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveriesP
 	{
 		m_bPendingDelivery = true;
 	}
+	else if (deliveriesPrepared == 0 && !m_bOrderCollected)
+	{
+		m_bPendingDelivery = false;
+	}
 
 	switch (currentState)
 	{
 	case S_IDLE:
-		m_fMoveSpeed = 500.f;
+		//m_fMoveSpeed = 500.f;
 		UpdateIdle(dt, worldTime, mb);
 		break;
 	case S_SLEEPING:
@@ -456,7 +460,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveriesP
 		UpdateDelivering(dt, worldTime, weather);
 		break;
 	case S_RETURNING:
-		UpdateReturning(dt, worldTime, weather);
+		UpdateReturning(dt, worldTime, weather, deliveries);
 		break;
 	default:
 		break;
@@ -512,14 +516,27 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveriesP
 }
 void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 {
-	////If received order, AI need to remember to process it
-	//if (!m_bPendingDelivery && !m_bNeedToEat && !m_bNeedToSleep)
+	
+	//if (!m_bOrderToCollect && !m_bNeedToEat && !m_bNeedToSleep)
 	//{
-	//	
+		////Return to idle post if not doing anything
+		//if (m_v2CurrentPos != Sleep.at(0))
+		//	UpdatePath(Sleep, true, dt);
+
+	
 	//}
 
-	//Role change
-	if (!m_bNeedToSleep && !m_bNeedToEat && m_bRC_Barista && !m_bExiting)
+	////Role change
+	//if (!m_bNeedToSleep && !m_bNeedToEat  && !m_bExiting)
+	//{
+
+	//}
+	//else
+	//{
+
+	//}
+	//Only perform delivery duties if no need to role change
+	if (m_bRC_Barista)
 	{
 		if (UpdatePath(RC_Barista, false, dt))
 		{
@@ -528,94 +545,102 @@ void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 			m_bRC_Barista = false;
 		}
 	}
-	//else
-	//{
-	//	if (m_v2CurrentPos != Sleep.at(0))
-	//		UpdatePath(Sleep, true, dt);
-	//}
 
-	// Sleeping portion
-	else if (m_bNeedToSleep && !m_bExiting && !m_bRC_Barista)
-	{
-		// Proceed to sleep after moving to sleeping area
-		if (UpdatePath(Sleep, false, dt))
+
+		// Sleeping portion
+	else if (m_bNeedToSleep && !m_bExiting)
 		{
-			currentState = S_SLEEPING;
-
-			//Assign the start of action hour
-			if (m_iStartHour == 0)
-				m_iStartHour = worldTime;
-		}
-	}
-
-	//Eating portion
-	else if (m_bNeedToEat && !m_bExiting && !m_bOrderToCollect && !m_bRC_Barista)
-	{
-		// Proceed to eat after moving to eating area
-		if (UpdatePath(Eat, false, dt))
-		{
-			currentState = S_EATING;
-
-			//Assign the start of action hour
-			if (m_iStartHour == 0)
-				m_iStartHour = worldTime;
-		}
-	}
-
-	//Delivery only when no need to eat/sleep
-	else if (m_bPendingDelivery)
-	{
-		//Check if the order is collected
-		if (!m_bOrderCollected)
-		{
-			//Collect order items when done message is received
-			if (!m_bOrderToCollect && mb->GetMsg(MSG_DELIVERY_READY))
+			// Proceed to sleep after moving to sleeping area
+			if (UpdatePath(Sleep, false, dt))
 			{
-				m_bOrderToCollect = true;
-			}
-			//If there is an order to collect
-			if (m_bOrderToCollect)
-			{
-				//Proceed to collect after moving to collection area
-				if (UpdatePath(Collect, false, dt))
-				{
-					currentState = S_COLLECTING;
-				}
-			}
-		}
-		else
-		{
-			//Get out of cafe first
-			if (!m_bOutdoor)
-			{
-				m_bExiting = true;
-				if (m_v2CurrentPos == Exiting.at(2))
-					m_bInCarriage = true;
+				currentState = S_SLEEPING;
 
-				if (UpdatePath(Exiting, false, dt))
-				{
-					m_bOutdoor = true;
-				}
-			}
-			//Randomizes outdoor path
-			if (m_bOutdoor)
-			{
 				//Assign the start of action hour
 				if (m_iStartHour == 0)
 					m_iStartHour = worldTime;
-
-				//Snap new position to outside of cafe
-				m_v2CurrentPos = Vector2(1290, 600);
-
-				currentState = S_DELIVERING;
-				m_iCurrentPath = RandomizePath();
 			}
 		}
-	}
+
+		//Eating portion
+		else if (m_bNeedToEat && !m_bExiting && !m_bOrderToCollect)
+		{
+			// Proceed to eat after moving to eating area
+			if (UpdatePath(Eat, false, dt))
+			{
+				currentState = S_EATING;
+
+				//Assign the start of action hour
+				if (m_iStartHour == 0)
+					m_iStartHour = worldTime;
+			}
+		}
+
+		//Delivery only when no need to eat/sleep
+		else if (m_bPendingDelivery)
+		{
+			//Check if the order is collected
+			if (!m_bOrderCollected)
+			{
+				//Collect order items when done message is received
+				if (!m_bOrderToCollect && mb->GetMsg(MSG_DELIVERY_READY))
+				{
+					m_bOrderToCollect = true;
+				}
+				//If there is an order to collect
+				if (m_bOrderToCollect)
+				{
+					//Proceed to collect after moving to collection area
+					if (UpdatePath(Collect, false, dt))
+					{
+						currentState = S_COLLECTING;
+					}
+				}
+			}
+			else
+			{
+				//Get out of cafe first
+				if (!m_bOutdoor)
+				{
+					m_bExiting = true;
+					if (m_v2CurrentPos == Exiting.at(2))
+						m_bInCarriage = true;
+
+					if (UpdatePath(Exiting, false, dt))
+					{
+						m_bOutdoor = true;
+					}
+				}
+				//Randomizes outdoor path
+				if (m_bOutdoor)
+				{
+					//Assign the start of action hour
+					if (m_iStartHour == 0)
+						m_iStartHour = worldTime;
+
+					//Snap new position to outside of cafe
+					m_v2CurrentPos = Vector2(1290, 600);
+
+					currentState = S_DELIVERING;
+					m_iCurrentPath = RandomizePath();
+				}
+			}
+		}
+	
 }
 void DeliveryMan::UpdateCollecting(double dt, int worldTime, int& deliveriesPrepared)
 {
 	m_fDelay += (float)dt;
+
+	//Out of deliveries to collect
+	if (m_bPendingDelivery == false)
+	{
+		m_fDelay = 0.f;
+		m_bOrderToCollect = false;
+		if (UpdatePath(Collect, true, dt))
+		{
+			currentState = S_IDLE;
+		}
+	}
 
 	//Receive msg to move to collect drinks
 	if (m_fDelay > 1.5f)
@@ -692,7 +717,7 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather)
 		m_fTotalTime = (float)(weather * m_iHoursNeeded);
 		if (m_fTotalTime > m_iHoursNeeded)
 		{
-			m_fMoveSpeed = 250.f * (m_fTotalTime / m_iHoursNeeded);
+			//m_fMoveSpeed = 250.f * (m_fTotalTime / m_iHoursNeeded);
 		}
 	}
 
@@ -721,7 +746,7 @@ void DeliveryMan::UpdateDelivering(double dt, int worldTime, int weather)
 		break;
 	}
 }
-void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather)
+void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, int& deliveries)
 {
 	//Add a delay of 1.5s before returning
 	m_fDelay += (float)dt;
@@ -781,6 +806,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather)
 			m_v2Direction.SetZero();
 			m_bExiting = false;
 			m_bOrderToCollect = false;
+			--deliveries;
 		}
 	}
 }
@@ -805,6 +831,18 @@ void DeliveryMan::setRC_Completed(bool rc_Completed)
 void DeliveryMan::setNeedToSleep(bool needToSleep)
 {
 	this->m_bNeedToSleep = needToSleep;
+}
+bool DeliveryMan::getNeedToSleep(void)
+{
+	return m_bNeedToSleep;
+}
+bool DeliveryMan::getNeedToEat(void)
+{
+	return m_bNeedToEat;
+}
+bool DeliveryMan::getOrderToCollect(void)
+{
+	return m_bOrderToCollect;
 }
 
 int DeliveryMan::RandomizePath(void)

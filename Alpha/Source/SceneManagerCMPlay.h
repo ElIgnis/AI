@@ -77,6 +77,7 @@ private:
 	bool m_bDisplayCrate = false;
 	bool m_bDisplayTrash = false;
 	bool m_bCarryingTrash = false;
+	bool m_bRenderDrinks;
 
 	const float m_fMaxDeliveryTimer = 10.f;
 	float m_fDeliveryTimeElapsed = 9.f;
@@ -88,7 +89,6 @@ private:
 	//Role changing
 	GenericAI *GenericAI_One, *GenericAI_Two;
 	vector<GenericAI*> GenericAI_List;
-	bool request_delivery, request_barista;
 
 	StoreMan* storeMan; //Store man handler
 	RubbishMan* rubbishMan;

@@ -235,7 +235,7 @@ bool Customer::CalculateProbability(int time, int weather)
 	//Peak hour
 	if (time >= 1600 && time <= 1900)
 	{
-		if (chance > 1)	{
+		if (chance > 35)	{
 			return true;
 		}
 		else{
@@ -244,7 +244,7 @@ bool Customer::CalculateProbability(int time, int weather)
 	}
 	//Normal timing
 	else{
-		if (chance > 1)	{
+		if (chance > 50)	{
 			return true;
 		}
 		else{

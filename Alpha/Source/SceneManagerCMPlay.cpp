@@ -1,7 +1,7 @@
 #include "SceneManagerCMPlay.h"
 
 SceneManagerCMPlay::SceneManagerCMPlay()
-	: m_iWorldTime(1900)
+	: m_iWorldTime(800)
 	, m_fMinutes(0.f)
 	, m_iWeather(1)
 	, m_iNumOrders(0)
@@ -12,9 +12,8 @@ SceneManagerCMPlay::SceneManagerCMPlay()
 	, m_fCustomerSpawn(0.f)
 	, m_fCustomerRate(1.f)
 	, CustomerID(0)
-	, CuttingQueue(false)
-	, request_delivery(false)
-	, request_barista(false)
+	, CuttingQueue(false)	
+	, m_bRenderDrinks(false)
 {
 }
 
@@ -169,7 +168,7 @@ void SceneManagerCMPlay::Update(double dt)
 		//Spawn customer
 		if (m_fCustomerSpawn >= m_fCustomerRate)
 		{
-			//FetchCustomer();
+			FetchCustomer();
 			m_fCustomerSpawn = 0.f;
 			m_fCustomerRate = Math::RandFloatMinMax(0.3f, 1.5f);
 		}
@@ -229,7 +228,7 @@ void SceneManagerCMPlay::Update(double dt)
 	{
 		if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN)
 		{
-			(*itr)->deliveryMan->Update(dt, m_iWorldTime, m_iWeather, m_iNumDeliveryOrdersProcessed, shop_mb);
+			(*itr)->deliveryMan->Update(dt, m_iWorldTime, m_iWeather, m_iNumDelivery, m_iNumDeliveryOrdersProcessed, shop_mb);
 		}
 	}
 
@@ -390,14 +389,14 @@ void SceneManagerCMPlay::Update(double dt)
 			if (m_cCustomerList[i]->getOrderPlaced())
 			{
 				++m_iNumOrders;
-				//Check for barista roles
-				for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
-				{
-					if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && (*itr)->barista->getNumOrders() < 5)
-					{
-						(*itr)->barista->addNumOrders(1);
-					}
-				}
+				////Check for barista roles
+				//for (vector<GenericAI*>::iterator itr = GenericAI_List.begin(); itr != GenericAI_List.end(); ++itr)
+				//{
+				//	if ((*itr)->GetCurrentRole() == GenericAI::BARISTA && m_iNumOrders > 0 && (*itr)->barista->getNumOrders() < 5)
+				//	{
+				//		(*itr)->barista->addNumOrders(1);	
+				//	}
+				//}
 				m_cCustomerList[i]->setOrderPlaced(false);
 			}
 			else if (m_cCustomerList[i]->getState() == Customer::S_WAIT && !m_cCustomerList[i]->getWaitStatus())
@@ -410,9 +409,9 @@ void SceneManagerCMPlay::Update(double dt)
 						//Let ordered customers claim the prepared drinks
 						if (m_iNumOrdersProcessed > 0)
 						{
-							m_iNumOrdersProcessed++;
+							--m_iNumOrdersProcessed;
 							m_cCustomerList[i]->setDrinkAvailable(true);
-							--m_iNumOrders;
+							m_bRenderDrinks = true;
 
 							//Only if there are customers waiting
 							if (m_cWaitList.size() > 0)
@@ -431,11 +430,6 @@ void SceneManagerCMPlay::Update(double dt)
 									}
 								}
 							}
-							//Add orders to barista if they are more free
-							if (m_iNumOrders > 0)
-							{
-								(*itr)->barista->addNumOrders(1);
-							}
 							break;
 						}
 					}
@@ -446,7 +440,7 @@ void SceneManagerCMPlay::Update(double dt)
 				if (m_cCustomerList[i]->getDelay() > 0.1f)
 				{
 					m_cCustomerList[i]->setPickedUp(true);
-					m_iNumOrdersProcessed--;
+					m_bRenderDrinks = false;
 					Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER2");
 					drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE2");
 					m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
@@ -463,11 +457,20 @@ void SceneManagerCMPlay::Update(double dt)
 	{
 		if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
 		{
-			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb, m_iNumOrdersProcessed, m_iNumDeliveryOrdersProcessed);
+			//Add orders to barista if they are more free
+			if (m_iNumOrders > 0 && (*itr)->barista->getNumOrders() < 2)
+			{
+				(*itr)->barista->addNumOrders(1);
+				--m_iNumOrders;
+			}
+
+			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb, m_iNumOrdersProcessed, m_iNumDeliveryOrdersProcessed);	
 		}
 	}
+
+	
 	//Prompts deliveryman to change to barista
-	if (m_iNumOrders > 3 || m_iNumDelivery > 3)
+	if (m_iNumOrders > 3)
 	{
 		//if (!request_barista)
 		//{
@@ -525,8 +528,8 @@ void SceneManagerCMPlay::Update(double dt)
 
 bool SceneManagerCMPlay::GenerateOrder()
 {
-	//return Math::RandIntMinMax(0, 1);
-	return true;
+	return Math::RandIntMinMax(0, 1);
+	//return true;
 }
 
 void SceneManagerCMPlay::UpdateGoodsDelivery(double dt)
@@ -730,7 +733,7 @@ void SceneManagerCMPlay::RenderStaticObject()
 		Render2DMesh(drawMesh, false, Vector2(200, 100), Vector2(225, 900));
 
 		//Display prepared orders
-		if (m_iNumOrdersProcessed > 0)
+		if (m_bRenderDrinks)
 		{
 			drawMesh = resourceManager.retrieveMesh("DRINKS");
 			drawMesh->textureID = resourceManager.retrieveTexture("Drinks");
@@ -892,15 +895,17 @@ void SceneManagerCMPlay::RenderUIInfo()
 	
 	drawMesh = resourceManager.retrieveMesh("FONT");
 	drawMesh->textureID = resourceManager.retrieveTexture("Font");
-	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 100, 0);
+	RenderTextOnScreen(drawMesh, "Current Time: " + std::to_string(m_iWorldTime), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 100, 0);
 	
 	if (m_bDisplay_shop)
 	{
-		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 200, 0);
-		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 300, 0);
-		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_iNumOrders), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 400, 0);
-		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(m_iNumDeliveryOrdersProcessed), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 500, 0);
-		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 75, sceneWidth - 500, sceneHeight - 600, 0);
+		RenderTextOnScreen(drawMesh, "Reserve: " + std::to_string(m_fReserve), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 150, 0);
+		RenderTextOnScreen(drawMesh, "Ingredients: " + std::to_string(m_fIngredients), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 200, 0);
+		RenderTextOnScreen(drawMesh, "Number of orders: " + std::to_string(m_iNumOrders), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 300, 0);
+		RenderTextOnScreen(drawMesh, "Number of deliveries: " + std::to_string(m_iNumDelivery), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 350, 0);
+		RenderTextOnScreen(drawMesh, "Number of prepared orders: " + std::to_string(m_iNumOrdersProcessed), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 400, 0);
+		RenderTextOnScreen(drawMesh, "Number of prepared deliveries: " + std::to_string(m_iNumDeliveryOrdersProcessed), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 450, 0);
+		RenderTextOnScreen(drawMesh, "Trash: " + std::to_string(m_fTrash), resourceManager.retrieveColor("Red"), 50, sceneWidth - 500, sceneHeight - 550, 0);
 
 		RenderTextOnScreen(drawMesh, "Shop Message Board:", resourceManager.retrieveColor("Red"), 30, sceneWidth - 500, (sceneHeight - 670), 0);
 		//Render messages from message board
