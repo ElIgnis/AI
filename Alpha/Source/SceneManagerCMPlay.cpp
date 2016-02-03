@@ -66,7 +66,7 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER");
 	drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE");
 	//20 customers in list
-	for (unsigned i = 0; i < 20; ++i)
+	for (unsigned i = 0; i < 8; ++i)
 	{
 		Customer* temp = new Customer(m_v2CustomerWaypointsOUTDOOR.at(0));
 		temp->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
