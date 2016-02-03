@@ -67,7 +67,8 @@ void GenericAI::UpdateRoleChange(MessageBoard* mb)
 		}
 		break;
 	case DELIVERY_MAN:
-		if (!RCtoBarista && !deliveryMan->getNeedToEat() && !deliveryMan->getNeedToSleep() && !deliveryMan->getOrderToCollect())
+		if (!RCtoBarista && !deliveryMan->getNeedToEat() && !deliveryMan->getNeedToSleep() && !deliveryMan->getOrderToCollect()
+			&& !deliveryMan->getOrderCollected())
 		{
 			if (mb->GetMsg(RC_TO_BARISTA))
 			{

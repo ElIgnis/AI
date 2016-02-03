@@ -43,7 +43,6 @@ public:
 	void FetchCustomer();	//Set new customer at spawn
 	bool GenerateOrder();
 	void UpdateGoodsDelivery(double dt); // Update the goods delivery status
-	//GenericAI* RetrieveRole(GenericAI::Roles RoleToCheck);
 
 private:
 	const float m_fBGpos_MAX_y = 730.f;

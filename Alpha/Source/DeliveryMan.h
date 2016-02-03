@@ -101,6 +101,7 @@ public:
 	SpriteAnimation* GetIndoorSpriteAnim(void);
 	SpriteAnimation* GetOutdoorSpriteAnim(void);
 	SpriteAnimation* GetOutdoorSpriteAnim_Night(void);
+	SpriteAnimation* GetLegendSpriteAnim(void);
 	void SetIndoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	void SetOutdoorSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	void SetOutdoorSpriteAnim_Night(SpriteAnimation* NewSpriteAnim);
@@ -110,11 +111,13 @@ public:
 	bool getNeedToSleep(void);
 	bool getNeedToEat(void);
 	bool getOrderToCollect(void);
+	bool getOrderCollected(void);
 	
 private:
 	SpriteAnimation* spriteAnim_Indoor;
 	SpriteAnimation* spriteAnim_Outdoor;
 	SpriteAnimation* spriteAnim_Outdoor_Night;
+	SpriteAnimation* spriteAnim_Legend;
 
 	STATES currentState;
 	bool m_bNeedToEat;

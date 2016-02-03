@@ -48,6 +48,7 @@ Barista::~Barista()
 void Barista::Init(void)
 {
 	spriteAnim = new SpriteAnimation();
+	spriteAnim_Legend = new SpriteAnimation();
 
 	ReadWayPoints_Refill("Config\\Waypoints\\Barista\\Refill_1.txt");
 	ReadWayPoints_Brew("Config\\Waypoints\\Barista\\Brew_1.txt");
@@ -207,6 +208,7 @@ void Barista::Update(double dt, float& ingredients, float& trash, float& reserve
 	}
 
 	spriteAnim->Update(dt);
+	spriteAnim_Legend->Update(dt);
 
 	if (m_v2Direction.x == -1)
 		this->spriteAnim->currentAni = WALK_LEFT;
@@ -479,10 +481,17 @@ void Barista::setCurrentState(Barista::STATES newState)
 void Barista::SetSpriteAnim(SpriteAnimation* newSprite)
 {
 	*(this->spriteAnim) = *newSprite;
+	*(this->spriteAnim_Legend) = *newSprite;
 	this->spriteAnim->currentAni = WALK_DOWN;
+	this->spriteAnim_Legend->currentAni = WALK_DOWN;
 }
 
 SpriteAnimation* Barista::GetSpriteAnim(void)
 {
 	return spriteAnim;
+}
+
+SpriteAnimation* Barista::GetLegendSpriteAnim(void)
+{
+	return spriteAnim_Legend;
 }

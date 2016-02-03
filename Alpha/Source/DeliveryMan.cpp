@@ -60,6 +60,7 @@ void DeliveryMan::Init(void)
 	spriteAnim_Indoor = new SpriteAnimation();
 	spriteAnim_Outdoor = new SpriteAnimation();
 	spriteAnim_Outdoor_Night = new SpriteAnimation();
+	spriteAnim_Legend = new SpriteAnimation();
 
 	ReadWayPoints_Eat("Config\\Waypoints\\DeliveryMan\\Eat_1.txt");
 	ReadWayPoints_Sleep("Config\\Waypoints\\DeliveryMan\\Sleep_1.txt");
@@ -465,7 +466,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveries,
 	default:
 		break;
 	}
-	
+
 	// Update sprite based on direction
 	if (!m_bInCarriage)
 	{
@@ -513,6 +514,7 @@ void DeliveryMan::Update(double dt, int worldTime, int weather, int& deliveries,
 			this->spriteAnim_Outdoor_Night->currentAni = WALK_DOWN;
 		}	
 	}
+	spriteAnim_Legend->Update(dt);
 }
 void DeliveryMan::UpdateIdle(double dt, int worldTime, MessageBoard* mb)
 {
@@ -750,7 +752,6 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, int& de
 {
 	//Add a delay of 1.5s before returning
 	m_fDelay += (float)dt;
-	m_bOrderCollected = false;
 
 	//Update and travel according to path
 	if (m_bOutdoor && m_fDelay > 1.5f)
@@ -807,6 +808,7 @@ void DeliveryMan::UpdateReturning(double dt, int worldTime, int weather, int& de
 			m_bExiting = false;
 			m_bOrderToCollect = false;
 			--deliveries;
+			m_bOrderCollected = false;
 		}
 	}
 }
@@ -843,6 +845,10 @@ bool DeliveryMan::getNeedToEat(void)
 bool DeliveryMan::getOrderToCollect(void)
 {
 	return m_bOrderToCollect;
+}
+bool DeliveryMan::getOrderCollected(void)
+{
+	return m_bOrderCollected;
 }
 
 int DeliveryMan::RandomizePath(void)
@@ -996,7 +1002,9 @@ void DeliveryMan::setCurrentState(DeliveryMan::STATES newState)
 void DeliveryMan::SetIndoorSpriteAnim(SpriteAnimation* newSprite)
 {
 	*(this->spriteAnim_Indoor) = *newSprite;
+	*(this->spriteAnim_Legend) = *newSprite;
 	this->spriteAnim_Indoor->currentAni = WALK_DOWN;
+	this->spriteAnim_Legend->currentAni = WALK_DOWN;
 }
 
 void DeliveryMan::SetOutdoorSpriteAnim(SpriteAnimation* newSprite)
@@ -1024,4 +1032,9 @@ SpriteAnimation* DeliveryMan::GetOutdoorSpriteAnim(void)
 SpriteAnimation* DeliveryMan::GetOutdoorSpriteAnim_Night(void)
 {
 	return spriteAnim_Outdoor_Night;
+}
+
+SpriteAnimation* DeliveryMan::GetLegendSpriteAnim(void)
+{
+	return spriteAnim_Legend;
 }

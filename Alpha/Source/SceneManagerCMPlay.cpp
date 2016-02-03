@@ -190,7 +190,7 @@ void SceneManagerCMPlay::Update(double dt)
 		if (order)
 		{
 			//Only allow a maximum or 10 orders
-			if (m_iNumDelivery <= 10)
+			if ((m_iNumDelivery + m_iNumDeliveryOrdersProcessed) <= 10)
 			{
 				++m_iNumDelivery;
 			}
@@ -203,12 +203,6 @@ void SceneManagerCMPlay::Update(double dt)
 				{
 					(*itr)->barista->addNumDeliveryOrders(1);
 				}
-				//Prompts barista to change to deliveryman if there are more than 3 total orders
-				if (m_iNumDeliveryOrdersProcessed > 3)//&& !request_delivery
-				{
-					shop_mb->AddMessageOnce(RC_TO_DELIVERYMAN, ROLE_DELIVERYMAN, ROLE_BARISTA);
-					//request_delivery = true;
-				}
 				////Spam control(Only re-allow request for role change if delivery orders are finished/too many delivery orders)
 				//if (m_iNumDeliveryOrdersProcessed > 10 || m_iNumDeliveryOrdersProcessed == 0)
 				//{
@@ -216,7 +210,13 @@ void SceneManagerCMPlay::Update(double dt)
 				//}
 			}
 		}
+		//Prompts barista to change to deliveryman if there are more than 3 total orders
+		if (m_iNumDeliveryOrdersProcessed > 3)
+		{
+			shop_mb->AddMessageOnce(RC_TO_DELIVERYMAN, ROLE_DELIVERYMAN, ROLE_BARISTA);
+		}
 	}
+
 
 	//Resetting world time to a new day
 	if (m_iWorldTime == 2400){
@@ -489,17 +489,8 @@ void SceneManagerCMPlay::Update(double dt)
 	//Prompts deliveryman to change to barista
 	if (m_iNumOrders > 3)
 	{
-		//if (!request_barista)
-		//{
 		shop_mb->AddMessageOnce(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
-			//request_barista = true;
-		//}
 	}
-	////Spam control(Only re-allow request for role change if orders are finished/too many orders)
-	//if ((m_iNumOrders == 0 && m_iNumDelivery == 0) || m_iNumOrders > 5 || m_iNumDelivery > 5)
-	//{
-	//	request_barista = false;
-	//}
 
 	storeMan->Update(dt, shop_mb, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
 
@@ -936,6 +927,68 @@ void SceneManagerCMPlay::RenderUIInfo()
 		for (int i = 0; i < customer_mb->GetDisplayBoard().size(); ++i)
 		{
 			RenderTextOnScreen(drawMesh, customer_mb->GetDisplayBoard().at(i), resourceManager.retrieveColor("Red"), 30, 100, (sceneHeight - 700 - 40 * i), 0);
+		}
+		
+		//Render AIs and their roles
+		for (int i = 0; i < GenericAI_List.size(); ++i)
+		{
+			//Assign roles
+			string originalRoleName, currentRoleName;
+
+			switch (GenericAI_List.at(i)->GetOriginalRole())
+			{
+			//Barista
+			case 0:
+				originalRoleName = "Barista";
+				break;
+			//Delivery man
+			case 1:
+				originalRoleName = "Delivery man";
+				break;
+			//Rubbish man
+			case 2:
+				originalRoleName = "Rubbish man";
+				break;
+			//Store man
+			case 3:
+				originalRoleName = "Store man";
+				break;
+			};
+
+			switch (GenericAI_List.at(i)->GetCurrentRole())
+			{
+				//Barista
+			case 0:
+				currentRoleName = "Barista";
+				break;
+				//Delivery man
+			case 1:
+				currentRoleName = "Delivery man";
+				break;
+				//Rubbish man
+			case 2:
+				currentRoleName = "Rubbish man";
+				break;
+				//Store man
+			case 3:
+				currentRoleName = "Store man";
+				break;
+			};
+
+			//Delivery man
+			if (GenericAI_List.at(i)->GetCurrentRole() == GenericAI::DELIVERY_MAN)
+			{
+				Render2DMesh(GenericAI_List.at(i)->deliveryMan->GetLegendSpriteAnim(), false, Vector2(50, 50), Vector2(500 + i * 300, 200));
+				RenderTextOnScreen(drawMesh, "Original Role: " + originalRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 130, 0);
+				RenderTextOnScreen(drawMesh, "Current Role: " + currentRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 90, 0);
+			}
+			//Barista
+			if (GenericAI_List.at(i)->GetCurrentRole() == GenericAI::BARISTA)
+			{
+				Render2DMesh(GenericAI_List.at(i)->barista->GetLegendSpriteAnim(), false, Vector2(50, 50), Vector2(500 + i * 300, 200));
+				RenderTextOnScreen(drawMesh, "Original Role: " + originalRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 130, 0);
+				RenderTextOnScreen(drawMesh, "Current Role: " + currentRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 90, 0);
+			}
 		}
 	}
 	switch (storeMan->getCurrentState())

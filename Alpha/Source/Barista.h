@@ -80,10 +80,12 @@ public:
 	bool UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt);
 
 	SpriteAnimation* GetSpriteAnim(void);
+	SpriteAnimation* GetLegendSpriteAnim(void);
 	void SetSpriteAnim(SpriteAnimation* NewSpriteAnim);
 	
 private:
 	SpriteAnimation* spriteAnim;
+	SpriteAnimation* spriteAnim_Legend;
 
 	STATES currentState;
 	bool m_bNeedToRefill;
