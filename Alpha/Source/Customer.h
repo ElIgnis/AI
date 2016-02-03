@@ -34,6 +34,13 @@ public:
 		NUM_SPRITES
 	};
 
+	enum TYPE
+	{
+		NORMAL,
+		FAMILY,
+		NUM_TYPE
+	};
+
 	Customer(Vector2 startPos);	//Default constructor
 	~Customer();	//Default destructor
 
@@ -75,6 +82,7 @@ public:
 	bool getOrderPlaced(void);	//Get whether customer has placed order
 
 	bool CalculateUrgentProbability(void);	//Calculate if customer is urgent
+	bool CalculateBusyProbability(void);	//Calculate if family is busy
 	bool CalculateProbability(int time, int weather);	//Calculating probability based on time, weather
 
 	void setSprite(SpriteAnimation* sprite);	//Set current sprite
@@ -85,6 +93,8 @@ public:
 	void Reset(void);	//Reset variables
 
 	int m_IDtoGO;
+	TYPE m_TypeOfCustomer;
+	bool m_bChanged;	//FAmily has changed
 private:
 	STATES currentState;	//Current state
 

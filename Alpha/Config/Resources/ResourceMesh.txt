@@ -180,6 +180,21 @@
 			[AnimationTime] 1.0
 		}
 	}
+	{
+		[NAME] FAMILYCUSTOMER
+		[Type] SpriteAnimation
+		[SpriteRow] 1
+		[SpriteCol] 1
+		{
+			[NAME] Walk_Down
+			[ID] 0
+			[StartFrame] 0
+			[EndFrame] 0
+			[Repeat] true
+			[Pause] false
+			[AnimationTime] 1.0
+		}
+	}
 #Delivery Man Indoors######################################################
 	{
 		[NAME] SPRITE_DELIVERY_IN

@@ -17,7 +17,9 @@ Customer::Customer(Vector2 startPos) :
 		m_bRandomUrgent(false),
 		m_bAbleToCut(false),
 		m_QueueID(-1),
-		m_IDtoGO(-1)
+		m_IDtoGO(-1),
+		m_TypeOfCustomer(NORMAL),
+		m_bChanged(false)
 {
 	m_v2CurrentPos = startPos;
 	m_v2ShopPos = Vector2(1080, 280);
@@ -131,12 +133,19 @@ void Customer::Update(double dt, int worldTime, int weather, MessageBoard *mb)
 			currentState = S_WALKING;
 
 			//Only if customer is able to Cut the queue and has not randomed his urgent probability
-			if (m_bAbleToCut && !m_bRandomUrgent)
+			if (m_bAbleToCut && !m_bRandomUrgent && m_TypeOfCustomer == NORMAL)
 			{
 				//Calculate Customer's Urgent Probability
 				if (CalculateUrgentProbability())
 				{
 					mb->AddMessage(Urgent, std::to_string(m_QueueID), std::to_string(m_IDtoGO));
+				}
+			}
+			else if (m_TypeOfCustomer == FAMILY && !m_bChanged)
+			{
+				if (CalculateBusyProbability())
+				{
+					mb->AddMessage(Busy, std::to_string(m_QueueID) + " FM 1", std::to_string(m_QueueID) + " FM 2");
 				}
 			}
 		}
@@ -216,6 +225,20 @@ void Customer::setInWaitStatus(bool wait)
 	this->m_bInWait = wait;
 }
 
+bool Customer::CalculateBusyProbability(void)
+{
+	int prob = Math::RandIntMinMax(1, 100);
+	m_bChanged = true;
+	if (prob >= 50)
+	{
+		m_bRandomUrgent = true;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 bool Customer::CalculateUrgentProbability(void)
 {
 	int prob = Math::RandIntMinMax(1, 100);
@@ -364,4 +387,5 @@ void Customer::Reset(void)
 	m_bAbleToCut = false;
 	m_QueueID = -1;
 	m_IDtoGO = -1;
+	m_bChanged = false;
 }

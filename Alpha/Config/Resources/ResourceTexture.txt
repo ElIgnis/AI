@@ -110,6 +110,7 @@
 		[NAME] Sprite_RubbishMan
 		[Directory] Config\\Resources\\Texture\\RubbishMan\\RubbishMan.tga
 	}
+	#Customer
 	{
 		[NAME] CUSTOMER_SPRITE
 		[Directory] Config\\Resources\\Texture\\CustomerSprite.tga
@@ -125,5 +126,13 @@
 	{
 		[NAME] CUSTOMER_SPRITE2_NIGHT
 		[Directory] Config\\Resources\\Texture\\CustomerSprite2_night.tga
+	}
+	{
+		[NAME] FAMILY_SPRITE
+		[Directory] Config\\Resources\\Texture\\FamilyCustomer.tga
+	}
+	{
+		[NAME] FAMILY_SPRITE2
+		[Directory] Config\\Resources\\Texture\\FamilyCustomer2.tga
 	}
 }

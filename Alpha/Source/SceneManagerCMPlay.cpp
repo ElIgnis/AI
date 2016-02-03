@@ -367,14 +367,17 @@ void SceneManagerCMPlay::Update(double dt)
 				{
 					m_cQueueList[i + 1]->setNextPoint(m_cQueueList[i]->getNextPoint());	//Set the customer behind to cut the customer infront
 					m_cQueueList[i]->setNextPoint(m_cQueueList[i]->getCurrentPos());	//Set customer infront to stay at his own position
-					/*Vector2 temp = m_v2CustomerQueueingPosition[i + 1];
-					m_v2CustomerQueueingPosition[i + 1] = m_v2CustomerQueueingPosition[i];
-					m_v2CustomerQueueingPosition[i] = temp;*/
+
 					Customer* temp = m_cQueueList[i + 1];//Swapping them
 					m_cQueueList[i + 1] = m_cQueueList[i];
 					m_cQueueList[i] = temp;
-					//m_cQueueList[i + 1]->setNextPoint(Temp);	//Moving the one in front backwards
-					//m_cQueueList[i]->setNextPoint(Temp2);	//
+
+				}
+				else if (customer_mb->GetMsg(Busy, std::to_string(m_cQueueList[i]->GetQueueID()) + " FM 2"))
+				{
+					Mesh* drawMesh2 = resourceManager.retrieveMesh("FAMILYCUSTOMER");
+					drawMesh2->textureID = resourceManager.retrieveTexture("FAMILY_SPRITE2");
+					m_cQueueList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh2));
 				}
 			}
 		}
@@ -441,9 +444,13 @@ void SceneManagerCMPlay::Update(double dt)
 				{
 					m_cCustomerList[i]->setPickedUp(true);
 					m_bRenderDrinks = false;
-					Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER2");
-					drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE2");
-					m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
+
+					if (m_cCustomerList[i]->m_TypeOfCustomer == Customer::TYPE::NORMAL)
+					{
+						Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER2");
+						drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE2");
+						m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
+					}
 				}
 			}
 
@@ -1059,8 +1066,10 @@ void SceneManagerCMPlay::RenderUIInfo()
 				default:
 					break;
 				}
-
-				RenderTextOnScreen(drawMesh, std::to_string(m_cCustomerList[i]->GetQueueID()), resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x + 90, m_cCustomerList[i]->getPos().y + 50, 0);
+				if (m_bDisplay_shop)
+				{
+					RenderTextOnScreen(drawMesh, std::to_string(m_cCustomerList[i]->GetQueueID()), resourceManager.retrieveColor("Red"), 40, m_cCustomerList[i]->getPos().x + 90, m_cCustomerList[i]->getPos().y + 50, 0);
+				}
 			}
 			else if (!m_bDisplay_shop)
 			{
@@ -1089,6 +1098,9 @@ void SceneManagerCMPlay::FetchCustomer()
 {
 	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER");
 	drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE");
+
+	Mesh* drawMesh2 = resourceManager.retrieveMesh("FAMILYCUSTOMER");
+	drawMesh2->textureID = resourceManager.retrieveTexture("FAMILY_SPRITE");
 	CustomerID++;
 	for (unsigned i = 0; i < m_cCustomerList.size(); ++i)
 	{
@@ -1098,7 +1110,17 @@ void SceneManagerCMPlay::FetchCustomer()
 			m_cCustomerList[i]->SetQueueID(CustomerID);
 			m_cCustomerList[i]->setActive(true);
 			m_cCustomerList[i]->setStartPos(m_v2CustomerWaypointsOUTDOOR.at(0));
-			m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
+			int chance = Math::RandIntMinMax(1, 100);
+			if (chance > 50)
+			{
+				m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh2));
+				m_cCustomerList[i]->m_TypeOfCustomer = Customer::TYPE::FAMILY;
+			}
+			else
+			{
+				m_cCustomerList[i]->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
+				m_cCustomerList[i]->m_TypeOfCustomer = Customer::TYPE::NORMAL;
+			}
 			break;
 		}
 	}
