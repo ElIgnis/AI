@@ -66,7 +66,7 @@ void SceneManagerCMPlay::Init(const int width, const int height, ResourcePool *R
 	Mesh* drawMesh = resourceManager.retrieveMesh("CUSTOMER");
 	drawMesh->textureID = resourceManager.retrieveTexture("CUSTOMER_SPRITE");
 	//20 customers in list
-	for (unsigned i = 0; i < 8; ++i)
+	for (unsigned i = 0; i < 20; ++i)
 	{
 		Customer* temp = new Customer(m_v2CustomerWaypointsOUTDOOR.at(0));
 		temp->setSprite(dynamic_cast<SpriteAnimation*> (drawMesh));
@@ -813,7 +813,14 @@ void SceneManagerCMPlay::RenderMobileObject()
 			{
 				if (m_cCustomerList[i]->getOutdoorStatus() == false)
 				{
-					Render2DMesh(m_cCustomerList[i]->getSprite() , false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					if (m_cCustomerList[i]->m_TypeOfCustomer == Customer::TYPE::NORMAL)
+					{
+						Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					}
+					else
+					{
+						Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(60, 50), m_cCustomerList[i]->getCurrentPos());
+					}
 				}
 			}
 			//Render outdoor customers
@@ -821,7 +828,14 @@ void SceneManagerCMPlay::RenderMobileObject()
 			{
 				if (m_cCustomerList[i]->getOutdoorStatus())
 				{
-					Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					if (m_cCustomerList[i]->m_TypeOfCustomer == Customer::TYPE::NORMAL)
+					{
+						Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(50, 50), m_cCustomerList[i]->getCurrentPos());
+					}
+					else
+					{
+						Render2DMesh(m_cCustomerList[i]->getSprite(), false, Vector2(60, 50), m_cCustomerList[i]->getCurrentPos());
+					}
 					if (m_cCustomerList[i]->getCurrentState() == Customer::S_DECIDE)
 					{
 						drawMesh = resourceManager.retrieveMesh("QUESTION_MARK");
