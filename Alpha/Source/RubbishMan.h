@@ -44,6 +44,7 @@ public:
 	void Init();
 
 	STATES getCurrentState(void);
+	void setCurrentState(STATES newState);
 
 	void Update(double dt,int worldTime, MessageBoard* mb, float* trash);
 	void UpdateFSM(int worldTime, MessageBoard* mb);
@@ -63,12 +64,15 @@ public:
 	bool UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt);
 
 	SpriteAnimation* GetSpriteAnim(void);
+	SpriteAnimation* GetLegendSpriteAnim(void);
 	void SetSpriteAnim(SpriteAnimation* NewSpriteAnim);
 
 	Vector2 GetPosition();
+	void SetPosition(Vector2 newPos);
 
 private:
 	SpriteAnimation* spriteAnim;
+	SpriteAnimation* spriteAnim_Legend;
 
 	STATES currentState;
 	bool m_bTaskFinish;

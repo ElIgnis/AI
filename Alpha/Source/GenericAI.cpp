@@ -3,6 +3,7 @@
 GenericAI::GenericAI(Roles role)
 : RCtoBarista(false)
 , RCtoDeliveryMan(false)
+, RCtoRubbishMan(false)
 {
 	//Creates an instance of all AIs
 	deliveryMan = new DeliveryMan();
@@ -86,8 +87,39 @@ void GenericAI::UpdateRoleChange(MessageBoard* mb)
 		}
 		break;
 	case RUBBISH_MAN:
+		if (currentRole != originalRole)
+		{
+			switch (originalRole)
+			{
+			case STORE_MAN:
+			{
+							  if (storeMan->getCurrentState() == StoreMan::S_IDLE)
+							  {
+								  currentRole = STORE_MAN;
+							  }
+			}
+				break;
+			}
+		}
 		break;
 	case STORE_MAN:
+		if (mb->GetMsg(RC_TO_RUBBISHMAN))
+		{
+			storeMan->SetRC_RubbishMan(true);
+			currentRole = RUBBISH_MAN;
+		}
+	/*	if (!RCtoRubbishMan && mb->GetMsg(RC_TO_RUBBISHMAN))
+		{
+			storeMan->SetRC_RubbishMan(true);
+			RCtoRubbishMan = true;
+		}
+		if (storeMan->GetRC_Completed())
+		{
+			currentRole = RUBBISH_MAN;
+			rubbishMan->SetPosition(storeMan->GetPosition());
+			rubbishMan->setCurrentState(RubbishMan::S_TAKETRASH);
+			
+		}*/
 		break;
 	default:
 		break;

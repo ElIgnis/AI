@@ -1,0 +1,12 @@
+#Waypoints for taking out trash
+#Format first line = Type of Waypoints
+#Room
+545,665
+545,725
+585,725
+#Bay
+585,850
+710,850
+710,925
+710,850
+585,850

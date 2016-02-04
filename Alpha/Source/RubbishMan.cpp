@@ -23,6 +23,7 @@ RubbishMan::~RubbishMan()
 void RubbishMan::Init()
 {
 	spriteAnim = new SpriteAnimation();
+	spriteAnim_Legend = new SpriteAnimation();
 
 	ReadWayPoints_Eat("Config\\Waypoints\\RubbishMan\\Eat.txt");
 	ReadWayPoints_TakeTrash("Config\\Waypoints\\RubbishMan\\TakeTrash.txt");
@@ -34,6 +35,11 @@ void RubbishMan::Init()
 RubbishMan::STATES RubbishMan::getCurrentState(void)
 {
 	return this->currentState;
+}
+
+void RubbishMan::setCurrentState(STATES newState)
+{
+	this->currentState = newState;
 }
 
 void RubbishMan::Update(double dt, int worldTime, MessageBoard* mb, float* trash)
@@ -151,6 +157,16 @@ void RubbishMan::UpdateEat(double dt, int worldTime)
 void RubbishMan::Draw(SceneManager* sceneManager)
 {
 	sceneManager->Render2DMesh(spriteAnim, true, Vector2(50, 50), m_v2CurrentPos);
+}
+
+SpriteAnimation* RubbishMan::GetSpriteAnim(void)
+{
+	return spriteAnim;
+}
+
+SpriteAnimation* RubbishMan::GetLegendSpriteAnim(void)
+{
+	return spriteAnim_Legend;
 }
 
 void RubbishMan::ReadWayPoints_Eat(string fileName)
@@ -381,10 +397,17 @@ bool RubbishMan::UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt)
 void RubbishMan::SetSpriteAnim(SpriteAnimation* NewSpriteAnim)
 {
 	*(this->spriteAnim) = *NewSpriteAnim;
+	*(this->spriteAnim_Legend) = *NewSpriteAnim;
 	this->spriteAnim->currentAni = WALK_DOWN;
+	this->spriteAnim_Legend->currentAni = WALK_DOWN;
 }
 
 Vector2 RubbishMan::GetPosition()
 {
 	return m_v2CurrentPos;
+}
+
+void RubbishMan::SetPosition(Vector2 newPos)
+{
+	this->m_v2CurrentPos = newPos;
 }

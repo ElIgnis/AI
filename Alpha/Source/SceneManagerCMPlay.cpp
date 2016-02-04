@@ -86,6 +86,7 @@ void SceneManagerCMPlay::InitGenericAI()
 	//Initialise all sprites
 	GenericAI_One = new GenericAI(GenericAI::DELIVERY_MAN);
 	GenericAI_Two = new GenericAI(GenericAI::BARISTA);
+	GenericAI_Three = new GenericAI(GenericAI::STORE_MAN);
 
 	drawMesh = resourceManager.retrieveMesh("SPRITE_DELIVERY_IN");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_Delivery_In");
@@ -107,23 +108,21 @@ void SceneManagerCMPlay::InitGenericAI()
 	GenericAI_One->barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 	GenericAI_Two->barista->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 
-
-	storeMan = new StoreMan();
-	storeMan->Init();
-
 	drawMesh = resourceManager.retrieveMesh("STORE_MAN");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_StoreMan");
-	storeMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*>(drawMesh));
-
-	rubbishMan = new RubbishMan();
-	rubbishMan->Init();
+	GenericAI_Three->storeMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
 
 	drawMesh = resourceManager.retrieveMesh("RUBBISH_MAN");
 	drawMesh->textureID = resourceManager.retrieveTexture("Sprite_RubbishMan");
+	GenericAI_Three->rubbishMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*> (drawMesh));
+
+	rubbishMan = new RubbishMan();
+	rubbishMan->Init();
 	rubbishMan->SetSpriteAnim(dynamic_cast<SpriteAnimation*>(drawMesh));
 
 	GenericAI_List.push_back(GenericAI_One);
 	GenericAI_List.push_back(GenericAI_Two);
+	GenericAI_List.push_back(GenericAI_Three);
 }
 
 void SceneManagerCMPlay::Update(double dt)
@@ -153,7 +152,7 @@ void SceneManagerCMPlay::Update(double dt)
 	}
 	if (inputManager->getKey("CHANGE_INGREDIENT") && m_fInputDelay > m_fMAX_DELAY)
 	{
-		m_fReserve = 0.f;
+		//m_fReserve = 0.f;
 		m_fInputDelay = 0.f;
 		m_fTrash = 100.0f;
 	}
@@ -229,6 +228,11 @@ void SceneManagerCMPlay::Update(double dt)
 		if ((*itr)->GetCurrentRole() == GenericAI::DELIVERY_MAN)
 		{
 			(*itr)->deliveryMan->Update(dt, m_iWorldTime, m_iWeather, m_iNumDelivery, m_iNumDeliveryOrdersProcessed, shop_mb);
+		}
+
+		if ((*itr)->GetCurrentRole() == GenericAI::STORE_MAN || (*itr)->GetCurrentRole() == GenericAI::RUBBISH_MAN)
+		{
+			(*itr)->storeMan->Update(dt, shop_mb, &m_fReserve, &m_fTrash, &m_bOrderArrived, &m_bWaitingOrder);
 		}
 	}
 
@@ -473,12 +477,16 @@ void SceneManagerCMPlay::Update(double dt)
 
 			(*itr)->barista->Update(dt, m_fIngredients, m_fTrash, m_fReserve, shop_mb, m_iNumOrdersProcessed, m_iNumDeliveryOrdersProcessed);
 
-			if (m_fTrash >= 80 && rubbishMan->getCurrentState() != RubbishMan::S_TAKETRASH)
+			if (m_fTrash >= 80 && rubbishMan->getCurrentState() != RubbishMan::S_TAKETRASH && rubbishMan->getCurrentState() != RubbishMan::S_EAT && GenericAI_Three->GetCurrentRole() != GenericAI::RUBBISH_MAN)
 			{
 				shop_mb->AddMessageOnce(MSG_RUBBISH_FULL, ROLE_BARISTA, ROLE_RUBBISHMAN);
 			}
+			else if (m_fTrash >= 70 && GenericAI_Three->GetCurrentRole() != GenericAI::RUBBISH_MAN && rubbishMan->getCurrentState() != RubbishMan::S_TAKETRASH)
+			{
+				shop_mb->AddMessageOnce(RC_TO_RUBBISHMAN, ROLE_RUBBISHMAN, ROLE_STOREMAN);
+			}
 
-			if (m_fReserve <= 80 && !m_bWaitingOrder && storeMan->getCurrentState() != StoreMan::S_NEWORDER && storeMan->getCurrentState() != StoreMan::S_MOVEORDER)
+			if (m_fReserve <= 80 && !m_bWaitingOrder && GenericAI_Three->storeMan->getCurrentState() != StoreMan::S_NEWORDER && GenericAI_Three->storeMan->getCurrentState() != StoreMan::S_MOVEORDER)
 			{
 				shop_mb->AddMessageOnce(MSG_LOW_INGREDIENTS, ROLE_BARISTA, ROLE_STOREMAN);
 			}
@@ -492,8 +500,6 @@ void SceneManagerCMPlay::Update(double dt)
 		shop_mb->AddMessageOnce(RC_TO_BARISTA, ROLE_BARISTA, ROLE_DELIVERYMAN);
 	}
 
-	storeMan->Update(dt, shop_mb, &m_fReserve, &m_bOrderArrived, &m_bWaitingOrder);
-
 	if (m_bWaitingOrder)
 	{
 		UpdateGoodsDelivery(dt);
@@ -501,7 +507,7 @@ void SceneManagerCMPlay::Update(double dt)
 
 	if (m_bDisplayCrate)
 	{
-		if (storeMan->GetPosition() == Vector2(500, 850))
+		if (GenericAI_Three->storeMan->GetPosition() == Vector2(500, 850))
 		{
 			m_bDisplayCrate = false;
 		}
@@ -525,7 +531,7 @@ void SceneManagerCMPlay::Update(double dt)
 
 	if (m_bDisplayTrash)
 	{
-		if (rubbishMan->GetPosition() == Vector2(545, 725))
+		if (rubbishMan->GetPosition() == Vector2(545, 725) || GenericAI_Three->storeMan->GetPosition() == Vector2(545, 725))
 		{
 			m_bCarryingTrash = true;
 		}
@@ -593,11 +599,6 @@ void SceneManagerCMPlay::Exit()
 		GenericAI * genericAI = GenericAI_List.back();
 		delete genericAI;
 		GenericAI_List.pop_back();
-	}
-	if (storeMan)
-	{
-		delete storeMan;
-		storeMan = NULL;
 	}
 	if (rubbishMan)
 	{
@@ -850,7 +851,6 @@ void SceneManagerCMPlay::RenderMobileObject()
 	//Render StoreMan
 	if (m_bDisplay_shop)
 	{
-		storeMan->Draw(this);
 		rubbishMan->Draw(this);
 	}
 
@@ -875,6 +875,10 @@ void SceneManagerCMPlay::RenderMobileObject()
 			if ((*itr)->GetCurrentRole() == GenericAI::BARISTA)
 			{
 				Render2DMesh((*itr)->barista->GetSpriteAnim(), false, Vector2(50, 50), (*itr)->barista->GetPos());
+			}
+			if ((*itr)->GetCurrentRole() == GenericAI::STORE_MAN || (*itr)->GetCurrentRole() == GenericAI::RUBBISH_MAN)
+			{
+				Render2DMesh((*itr)->storeMan->GetSpriteAnim(), false, Vector2(50, 50), (*itr)->storeMan->GetPosition());
 			}
 		}
 	}
@@ -1003,24 +1007,21 @@ void SceneManagerCMPlay::RenderUIInfo()
 				RenderTextOnScreen(drawMesh, "Original Role: " + originalRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 130, 0);
 				RenderTextOnScreen(drawMesh, "Current Role: " + currentRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 90, 0);
 			}
+			//Store man
+			if (GenericAI_List.at(i)->GetCurrentRole() == GenericAI::STORE_MAN)
+			{
+				Render2DMesh(GenericAI_List.at(i)->storeMan->GetLegendSpriteAnim(), false, Vector2(50, 50), Vector2(500 + i * 300, 200));
+				RenderTextOnScreen(drawMesh, "Original Role: " + originalRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 130, 0);
+				RenderTextOnScreen(drawMesh, "Current Role: " + currentRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 90, 0);
+			}
+			//Rubbish man
+			if (GenericAI_List.at(i)->GetCurrentRole() == GenericAI::RUBBISH_MAN)
+			{
+				Render2DMesh(GenericAI_List.at(i)->storeMan->GetLegendSpriteAnim(), false, Vector2(50, 50), Vector2(500 + i * 300, 200));
+				RenderTextOnScreen(drawMesh, "Original Role: " + originalRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 130, 0);
+				RenderTextOnScreen(drawMesh, "Current Role: " + currentRoleName, resourceManager.retrieveColor("Red"), 30, 420 + i * 300, 90, 0);
+			}
 		}
-	}
-	switch (storeMan->getCurrentState())
-	{
-	case StoreMan::S_IDLE:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x, storeMan->GetPosition().y + 50, 0);
-		break;
-	case StoreMan::S_NEWORDER:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Make Order", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x - 30, storeMan->GetPosition().y + 50, 0);
-		break;
-	case StoreMan::S_MOVEORDER:
-		if (m_bDisplay_shop)
-			RenderTextOnScreen(drawMesh, "Move Order", resourceManager.retrieveColor("Red"), 40, storeMan->GetPosition().x - 30, storeMan->GetPosition().y + 50, 0);
-		break;
-	default:
-		break;
 	}
 
 	switch (rubbishMan->getCurrentState())
@@ -1089,6 +1090,30 @@ void SceneManagerCMPlay::RenderUIInfo()
 			case Barista::S_REFILL:
 				if (m_bDisplay_shop)
 					RenderTextOnScreen(drawMesh, "Refilling", resourceManager.retrieveColor("Red"), 40, (*itr)->barista->GetPos().x - 15, (*itr)->barista->GetPos().y + 50, 0);
+				break;
+			default:
+				break;
+			}
+		}
+		if ((*itr)->GetCurrentRole() == GenericAI::STORE_MAN || (*itr)->GetCurrentRole() == GenericAI::RUBBISH_MAN)
+		{
+			switch ((*itr)->storeMan->getCurrentState())
+			{
+			case StoreMan::S_IDLE:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Idle", resourceManager.retrieveColor("Red"), 40, (*itr)->storeMan->GetPosition().x, (*itr)->storeMan->GetPosition().y + 50, 0);
+				break;
+			case StoreMan::S_NEWORDER:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Make Order", resourceManager.retrieveColor("Red"), 40, (*itr)->storeMan->GetPosition().x - 30, (*itr)->storeMan->GetPosition().y + 50, 0);
+				break;
+			case StoreMan::S_MOVEORDER:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Move Order", resourceManager.retrieveColor("Red"), 40, (*itr)->storeMan->GetPosition().x - 30, (*itr)->storeMan->GetPosition().y + 50, 0);
+				break;
+			case StoreMan::S_RCRUBBISHMAN:
+				if (m_bDisplay_shop)
+					RenderTextOnScreen(drawMesh, "Take Trash", resourceManager.retrieveColor("Red"), 40, (*itr)->storeMan->GetPosition().x - 30, (*itr)->storeMan->GetPosition().y + 50, 0);
 				break;
 			default:
 				break;

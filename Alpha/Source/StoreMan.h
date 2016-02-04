@@ -19,6 +19,7 @@ public:
 		S_IDLE = 0,
 		S_NEWORDER,
 		S_MOVEORDER,
+		S_RCRUBBISHMAN,
 		NUM_STATES,
 	};
 
@@ -44,36 +45,46 @@ public:
 	void Init();
 
 	STATES getCurrentState(void);
+	void setCurrentState(STATES newState);
 
-	void Update(double dt, MessageBoard* mb, float* ingredient, bool* orderarrived, bool* waitOrder);
+	void Update(double dt, MessageBoard* mb, float* ingredient, float* trash, bool* orderarrived, bool* waitOrder);
 	void UpdateFSM(MessageBoard* mb, bool* orderarrived, bool* waitOrder);
 	void UpdateIdle(double dt);
 	void UpdateMakeOrder(double dt, bool* waitOrder);
 	void UpdateMoveOrder(double dt, float* ingredients);
+	void UpdateRCRubbishMan(double dt, float* trash);
 	void Draw(SceneManager* sceneManager);
 
 	void ReadWayPoints_NewOrder(string fileName);
 	void ReadWayPoints_MoveOrder(string fileName);
+	void ReadWayPoints_RCRubbishMan(string fileName);
 	void ReadWayPoints_StartPosition(string fileName);
 
 	void AddWayPoints_NewOrder(Vector2 newWayPoint);
 	void AddWayPoints_MoveOrder(Vector2 newWayPoint);
+	void AddWayPoints_RCRubbishMan(Vector2 newWayPoint);
 
 	bool UpdatePath(vector<Vector2> PathToUpdate, bool Reverse, double dt);
 	bool UpdatePath(Vector2 PathToUpdate, bool Reverse, double dt);
 
 	SpriteAnimation* GetSpriteAnim(void);
+	SpriteAnimation* GetLegendSpriteAnim(void);
 	void SetSpriteAnim(SpriteAnimation* NewSpriteAnim);
 
+	void SetRC_RubbishMan(bool roleChanged);
+
 	Vector2 GetPosition();
+	void SetPosition(Vector2 newPos);
 
 private:
 	SpriteAnimation* spriteAnim;
+	SpriteAnimation* spriteAnim_Legend;
 
 	STATES currentState;
 	bool m_bTaskFinish;
 	bool m_bWaitingOrder;
 	bool m_bPathAssigned;
+	bool m_bRC_RubbishMan;
 
 	int m_iNextPoint;
 
@@ -87,6 +98,7 @@ private:
 	Vector2 Idle;
 	vector<Vector2> NewOrder;
 	vector<Vector2> MoveOrder;
+	vector<Vector2> RCRubbishMan;
 
 	//Text file reading
 	int m_iReadLine;

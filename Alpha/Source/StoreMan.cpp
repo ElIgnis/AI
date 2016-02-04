@@ -6,7 +6,8 @@ StoreMan::StoreMan()
 	, m_bWaitingOrder(false)
 	, currentState(S_IDLE)
 	, m_bPathAssigned(false)
-	, m_fMoveSpeed(150.f)
+	, m_bRC_RubbishMan(false)
+	, m_fMoveSpeed(350.f)
 	, m_iReadLine(0)
 	, WPData("")
 	, m_cSplit_Char(',')
@@ -21,9 +22,11 @@ StoreMan::~StoreMan()
 void StoreMan::Init()
 {
 	spriteAnim = new SpriteAnimation();
+	spriteAnim_Legend = new SpriteAnimation();
 
 	ReadWayPoints_MoveOrder("Config\\Waypoints\\StoreMan\\MoveOrder.txt");
 	ReadWayPoints_NewOrder("Config\\Waypoints\\StoreMan\\MakeOrder.txt");
+	ReadWayPoints_RCRubbishMan("Config\\Waypoints\\StoreMan\\RCRubbishMan.txt");
 	ReadWayPoints_StartPosition("Config\\Waypoints\\StoreMan\\StartPoint.txt");
 
 	m_v2CurrentPos = Idle;
@@ -32,6 +35,11 @@ void StoreMan::Init()
 StoreMan::STATES StoreMan::getCurrentState(void)
 {
 	return this->currentState;
+}
+
+void StoreMan::setCurrentState(STATES newState)
+{
+	this->currentState = newState;
 }
 
 void StoreMan::ReadWayPoints_NewOrder(string fileName)
@@ -120,6 +128,49 @@ void StoreMan::ReadWayPoints_MoveOrder(string fileName)
 		std::cout << "Load Waypoint file failed" << std::endl;
 }
 
+void StoreMan::ReadWayPoints_RCRubbishMan(string fileName)
+{
+	//vector to contain elements split
+	vector<string>WPTokens;
+
+	//Reset line
+	m_iReadLine = 0;
+
+	//Load Level details
+	std::ifstream inTxtFile;
+	inTxtFile.open(fileName);
+	if (inTxtFile.good())
+	{
+		while (getline(inTxtFile, WPData))
+		{
+			std::istringstream split(WPData);
+
+			//Dont read lines with #
+			if (WPData[0] == '#')
+			{
+				continue;
+			}
+
+			for (string each; std::getline(split, each, m_cSplit_Char);)
+			{
+				WPTokens.push_back(each);
+			}
+
+			//Load the points in
+			AddWayPoints_RCRubbishMan(Vector2(
+				stof(WPTokens.at(X + m_iReadLine * POS_INDEX))
+				, stof(WPTokens.at(Y + m_iReadLine * POS_INDEX))
+				));
+
+			++m_iReadLine;
+		}
+		WPTokens.clear();
+		inTxtFile.close();
+	}
+	else
+		std::cout << "Load Waypoint file failed" << std::endl;
+}
+
 void StoreMan::ReadWayPoints_StartPosition(string fileName)
 {
 	//vector to contain elements split
@@ -174,7 +225,12 @@ void StoreMan::AddWayPoints_MoveOrder(Vector2 newWayPoint)
 	MoveOrder.push_back(newWayPoint);
 }
 
-void StoreMan::Update(double dt, MessageBoard* mb, float* ingredients, bool* orderarrived, bool* waitOrder)
+void StoreMan::AddWayPoints_RCRubbishMan(Vector2 newWayPoint)
+{
+	RCRubbishMan.push_back(newWayPoint);
+}
+
+void StoreMan::Update(double dt, MessageBoard* mb, float* ingredients, float* trash, bool* orderarrived, bool* waitOrder)
 {
 	switch (currentState)
 	{
@@ -186,6 +242,9 @@ void StoreMan::Update(double dt, MessageBoard* mb, float* ingredients, bool* ord
 		break;
 	case S_MOVEORDER: // Go move order
 		UpdateMoveOrder(dt, ingredients);
+		break;
+	case S_RCRUBBISHMAN: // Go take trash for rubbish man
+		UpdateRCRubbishMan(dt, trash);
 		break;
 	}
 
@@ -233,6 +292,17 @@ void StoreMan::UpdateMoveOrder(double dt, float* ingredients)
 	{
 		m_bTaskFinish = true;
 		*ingredients = 100.0f;
+		m_v2Direction.SetZero();
+	}
+}
+
+void StoreMan::UpdateRCRubbishMan(double dt, float* trash)
+{
+	if (UpdatePath(RCRubbishMan, false, dt))
+	{
+		m_bTaskFinish = true;
+		m_bRC_RubbishMan = false;
+		*trash = 0.f;
 		m_v2Direction.SetZero();
 	}
 }
@@ -340,6 +410,12 @@ void StoreMan::UpdateFSM(MessageBoard* mb, bool* orderarrived, bool* waitOrder)
 		m_bTaskFinish = false;
 	}
 	
+	else if (m_bRC_RubbishMan)
+	{
+		currentState = S_RCRUBBISHMAN;
+		m_bTaskFinish = false;
+	}
+
 	else
 	{
 		currentState = S_IDLE;
@@ -351,14 +427,36 @@ void StoreMan::Draw(SceneManager* sceneManager)
 	sceneManager->Render2DMesh(spriteAnim, true, Vector2(50, 50), m_v2CurrentPos);
 }
 
+SpriteAnimation* StoreMan::GetSpriteAnim(void)
+{
+	return spriteAnim;
+}
+
+SpriteAnimation* StoreMan::GetLegendSpriteAnim(void)
+{
+	return spriteAnim_Legend;
+}
+
 
 void StoreMan::SetSpriteAnim(SpriteAnimation* NewSpriteAnim)
 {
 	*(this->spriteAnim) = *NewSpriteAnim;
+	*(this->spriteAnim_Legend) = *NewSpriteAnim;
 	this->spriteAnim->currentAni = WALK_DOWN;
+	this->spriteAnim_Legend->currentAni = WALK_DOWN;
+}
+
+void StoreMan::SetRC_RubbishMan(bool roleChanged)
+{
+	this->m_bRC_RubbishMan = roleChanged;
 }
 
 Vector2 StoreMan::GetPosition()
 {
 	return m_v2CurrentPos;
+}
+
+void StoreMan::SetPosition(Vector2 newPos)
+{
+	this->m_v2CurrentPos = newPos;
 }

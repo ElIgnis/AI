@@ -19,6 +19,7 @@ using std::ostream;
 #define MSG_DELIVERY_READY "Delivery items are ready"
 #define MSG_LOW_INGREDIENTS "Ingredients are running low"
 #define MSG_RUBBISH_FULL "Rubbish bin is full"
+#define RC_TO_RUBBISHMAN "I'm eating help me take out rubbish"
 #define RC_TO_BARISTA "Too many orders/deliveries"
 #define RC_TO_DELIVERYMAN "Too many orders"
 

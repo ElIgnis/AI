@@ -40,6 +40,7 @@ private:
 
 	bool RCtoBarista;
 	bool RCtoDeliveryMan;
+	bool RCtoRubbishMan;
 
 };
 

@@ -86,10 +86,9 @@ private:
 	float m_fMinutes;
 
 	//Role changing
-	GenericAI *GenericAI_One, *GenericAI_Two;
+	GenericAI *GenericAI_One, *GenericAI_Two, *GenericAI_Three;
 	vector<GenericAI*> GenericAI_List;
 
-	StoreMan* storeMan; //Store man handler
 	RubbishMan* rubbishMan;
 
 	int CustomerID;	//Customer's ID
